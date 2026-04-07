@@ -1,0 +1,93 @@
+{
+  "description": "Claude Crew — Mobile Agent Harness for Android & iOS teams",
+  "version": "1.0.0",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-tool-use.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "agents": {
+    "android-reviewer": {
+      "description": "Reviews Android/Kotlin code for quality, correctness, and mobile best practices",
+      "definition": "agents/android-reviewer.md"
+    },
+    "ios-reviewer": {
+      "description": "Reviews Swift/iOS code for quality, correctness, and mobile best practices",
+      "definition": "agents/ios-reviewer.md"
+    },
+    "mobile-architect": {
+      "description": "Advises on mobile architecture patterns and system design",
+      "definition": "agents/mobile-architect.md"
+    },
+    "mobile-performance": {
+      "description": "Analyzes Android/iOS apps for performance issues: ANR, memory, battery, render",
+      "definition": "agents/mobile-performance.md"
+    },
+    "mobile-security": {
+      "description": "Audits mobile code for OWASP Mobile Top 10 and platform-specific security risks",
+      "definition": "agents/mobile-security.md"
+    },
+    "mobile-test-planner": {
+      "description": "Designs comprehensive test strategies for mobile features",
+      "definition": "agents/mobile-test-planner.md"
+    },
+    "release-manager": {
+      "description": "Manages App Store and Play Store release workflows",
+      "definition": "agents/release-manager.md"
+    },
+    "ui-accessibility": {
+      "description": "Audits mobile UI for accessibility and WCAG compliance",
+      "definition": "agents/ui-accessibility.md"
+    }
+  },
+  "skills": {
+    "android-feature": "skills/android-feature.md",
+    "ios-feature": "skills/ios-feature.md",
+    "mobile-code-review": "skills/mobile-code-review.md",
+    "mobile-test": "skills/mobile-test.md",
+    "mobile-release": "skills/mobile-release.md",
+    "accessibility-audit": "skills/accessibility-audit.md",
+    "performance-profile": "skills/performance-profile.md"
+  },
+  "rules": [
+    "rules/kotlin.md",
+    "rules/swift.md",
+    "rules/android-architecture.md",
+    "rules/ios-architecture.md"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(gradle:*)",
+      "Bash(swift:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(fastlane:*)",
+      "Bash(adb:*)",
+      "Bash(pod install)",
+      "Bash(bundle exec fastlane *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)"
+    ]
+  }
+}
