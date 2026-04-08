@@ -328,7 +328,8 @@ echo "    /detect-arch              Auto-detect project architecture
     /detect-jira              Interactive Jira project setup (requires Jira CLI)
     /standup                  Facilitate today's daily standup
     /retro [format]           Run a sprint retrospective
-    /sprint-health            Check sprint burndown and surface risks"
+    /sprint-health            Check sprint burndown and surface risks
+    /security-scan            Full OWASP Mobile Top 10 + secrets audit"
 echo ""
 echo -e "  ${BOLD}Skills (workflows):${RESET}"
 echo "    android-feature           mobile-code-review    performance-profile"

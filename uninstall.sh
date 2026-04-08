@@ -59,7 +59,7 @@ if [[ -d "$TARGET_CLAUDE/agents" ]]; then
 fi
 
 # Remove commands
-CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md detect-jira.md standup.md retro.md sprint-health.md)
+CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md detect-jira.md standup.md retro.md sprint-health.md security-scan.md)
 for cmd in "${CREW_COMMANDS[@]}"; do
   [[ -f "$TARGET_CLAUDE/commands/$cmd" ]] && rm "$TARGET_CLAUDE/commands/$cmd" && info "Removed command: $cmd"
 done
