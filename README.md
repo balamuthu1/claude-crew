@@ -47,6 +47,78 @@ claude-crew/
 
 ---
 
+## How the Harness Works
+
+```
+Your Mobile Project
+│
+├── CLAUDE.md          ← Claude Code reads this AUTOMATICALLY every session
+│                        Sets behavior rules, agent routing, language standards
+│
+├── .claude/
+│   ├── settings.json  ← Claude Code reads this AUTOMATICALLY
+│   │                    Wires hooks, sets permissions
+│   │
+│   ├── hooks/         ← Shell scripts Claude Code EXECUTES at lifecycle events
+│   │   ├── pre-tool-use.sh   (blocks dangerous ops before they run)
+│   │   └── post-tool-use.sh  (reminds to lint/test after edits)
+│   │
+│   └── commands/      ← Claude Code exposes these as /slash-commands
+│       ├── sdlc.md          → /sdlc
+│       ├── android-review.md → /android-review
+│       └── ...
+│
+├── agents/            ← Specialist knowledge bases (loaded on demand)
+│   └── *.md             Invoked via @mention or by CLAUDE.md routing rules
+│
+├── rules/             ← Coding standards loaded by agents and CLAUDE.md
+└── skills/            ← Step-by-step workflow guides used by commands
+```
+
+**What's automated vs manual:**
+
+| Mechanism | When | Trigger |
+|---|---|---|
+| `CLAUDE.md` | Every session | Automatic |
+| `settings.json` | Every session | Automatic |
+| Hooks | On tool use | Automatic |
+| Slash commands | On demand | You type `/sdlc` |
+| Agents | On demand | You type `@android-reviewer` or CLAUDE.md routes |
+| Skills | On demand | Referenced by commands and agents |
+
+---
+
+## SDLC Workflow
+
+Run a full feature lifecycle in one session:
+
+```
+/sdlc Build a user profile editing screen for Android
+```
+
+This runs 7 stages sequentially, each with a human gate:
+
+```
+Stage 1 — PLAN        @mobile-architect   → architecture decision
+Stage 2 — BUILD       /android-feature    → domain → data → VM → UI
+Stage 3 — TEST        @mobile-test-planner → unit + UI + edge cases
+Stage 4 — REVIEW      @android-reviewer   → code quality gate
+Stage 5 — SECURITY    @mobile-security    → OWASP audit
+Stage 6 — A11Y        @ui-accessibility   → WCAG 2.1 AA check
+Stage 7 — RELEASE     @release-manager    → version bump + release notes
+```
+
+You can also run any single stage independently:
+
+```bash
+/android-review          # just review the code
+/mobile-test             # just generate tests
+/mobile-release 2.5.0    # just prep the release
+@mobile-security         # just the security audit
+```
+
+---
+
 ## Quick Start
 
 ### 1. Copy into your mobile project
