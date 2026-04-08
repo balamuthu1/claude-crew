@@ -1,0 +1,20 @@
+{
+  "name": "claude-crew",
+  "owner": {
+    "name": "balamuthu1",
+    "url": "https://github.com/balamuthu1"
+  },
+  "plugins": [
+    {
+      "name": "claude-crew",
+      "source": { "source": "github", "repo": "balamuthu1/claude-crew" },
+      "description": "Mobile agent harness for Android and iOS engineering teams. Specialist agents for feature development, code review, security, accessibility, performance, testing, and release management.",
+      "version": "1.0.0",
+      "author": {
+        "name": "balamuthu1",
+        "url": "https://github.com/balamuthu1"
+      },
+      "keywords": ["android", "ios", "mobile", "kotlin", "swift", "compose", "swiftui", "code-review", "sdlc"]
+    }
+  ]
+}
