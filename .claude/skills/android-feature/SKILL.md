@@ -1,11 +1,3 @@
----
-name: android-feature
-description: >
-  End-to-end workflow for building a new Android feature. Guides through
-  architecture planning, implementation order, test writing, and review checklist.
-  Invoke with /android-feature <feature description>.
----
-
 # Android Feature Development Workflow
 
 When invoked, follow these steps in order:
@@ -62,12 +54,12 @@ feature-name/
    class FeatureViewModel @Inject constructor(
        private val getFeatureData: GetFeatureDataUseCase
    ) : ViewModel() {
-   
+
        private val _uiState = MutableStateFlow<FeatureUiState>(FeatureUiState.Loading)
        val uiState: StateFlow<FeatureUiState> = _uiState.asStateFlow()
-   
+
        init { loadData() }
-   
+
        private fun loadData() {
            viewModelScope.launch {
                _uiState.value = FeatureUiState.Loading
@@ -77,7 +69,7 @@ feature-name/
            }
        }
    }
-   
+
    sealed class FeatureUiState {
        object Loading : FeatureUiState()
        data class Success(val data: FeatureModel) : FeatureUiState()
@@ -90,7 +82,7 @@ feature-name/
    @Composable
    fun FeatureScreen(viewModel: FeatureViewModel = hiltViewModel()) {
        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-   
+
        when (uiState) {
            is FeatureUiState.Loading -> LoadingIndicator()
            is FeatureUiState.Success -> FeatureContent((uiState as FeatureUiState.Success).data)

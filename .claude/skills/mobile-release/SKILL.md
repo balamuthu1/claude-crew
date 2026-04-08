@@ -1,12 +1,3 @@
----
-name: mobile-release
-description: >
-  Mobile release preparation workflow. Walks through the full release checklist for
-  Android (Play Store) and/or iOS (App Store), generates release notes, validates
-  version bumps, and produces a Fastlane command summary.
-  Invoke with /mobile-release <version>.
----
-
 # Mobile Release Preparation Workflow
 
 When invoked, delegate to the `release-manager` agent and execute:
@@ -67,7 +58,7 @@ Format:
 ### New Features
 • [Feature]: [one sentence user benefit]
 
-### Improvements  
+### Improvements
 • [What improved]: [why users care]
 
 ### Bug Fixes

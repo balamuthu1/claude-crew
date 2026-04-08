@@ -1,12 +1,3 @@
----
-name: accessibility-audit
-description: >
-  Full accessibility audit for a mobile screen or feature. Checks WCAG 2.1 AA
-  compliance, TalkBack/VoiceOver usability, color contrast, touch targets, and
-  dynamic text. Delegates to the ui-accessibility agent.
-  Invoke with /accessibility-audit <screen or feature>.
----
-
 # Accessibility Audit Workflow
 
 When invoked, delegate to `ui-accessibility` agent and follow this process:
@@ -17,7 +8,7 @@ Read all View/Composable/ViewController files for the specified screen.
 
 ## Step 2 — Run the Audit
 
-Apply the full WCAG 2.1 AA checklist from `agents/ui-accessibility.md`.
+Apply the full WCAG 2.1 AA checklist from the `ui-accessibility` agent.
 
 Focus areas for mobile:
 1. Every interactive element has a label (content description / accessibility label)

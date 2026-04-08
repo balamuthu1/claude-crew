@@ -1,11 +1,3 @@
----
-name: ios-feature
-description: >
-  End-to-end workflow for building a new iOS feature. Guides through architecture
-  planning, implementation order (domain → data → ViewModel → SwiftUI), test writing,
-  and review checklist. Invoke with /ios-feature <feature description>.
----
-
 # iOS Feature Development Workflow
 
 When invoked, follow these steps in order:
@@ -25,21 +17,21 @@ Produce a module skeleton before writing code:
 ```
 Feature/
   Domain/
-    FeatureModel.swift            ← domain struct/class
+    FeatureModel.swift              ← domain struct/class
     FeatureRepositoryProtocol.swift ← data contract
-    GetFeatureUseCase.swift       ← orchestrates fetch logic
+    GetFeatureUseCase.swift         ← orchestrates fetch logic
   Data/
-    FeatureRepositoryImpl.swift   ← conforms to protocol
-    FeatureDTO.swift              ← Codable network model
-    FeatureMapper.swift           ← DTO → domain model
+    FeatureRepositoryImpl.swift     ← conforms to protocol
+    FeatureDTO.swift                ← Codable network model
+    FeatureMapper.swift             ← DTO → domain model
     local/
-      FeatureStore.swift          ← Core Data / SwiftData store
+      FeatureStore.swift            ← Core Data / SwiftData store
   Presentation/
-    FeatureViewModel.swift        ← @MainActor, @Published state
-    FeatureView.swift             ← SwiftUI view
-    FeatureViewState.swift        ← enum for view states
+    FeatureViewModel.swift          ← @MainActor, @Published state
+    FeatureView.swift               ← SwiftUI view
+    FeatureViewState.swift          ← enum for view states
   DI/
-    FeatureAssembly.swift         ← factory / DI wiring
+    FeatureAssembly.swift           ← factory / DI wiring
 ```
 
 ## Step 3 — Implement in This Order
@@ -61,7 +53,7 @@ protocol FeatureRepository {
 
 struct GetFeatureUseCase {
     let repository: FeatureRepository
-    
+
     func execute(id: String) async throws -> FeatureModel {
         try await repository.fetchFeature(id: id)
     }
@@ -85,11 +77,11 @@ extension FeatureDTO {
 
 final class FeatureRepositoryImpl: FeatureRepository {
     private let apiClient: APIClient
-    
+
     init(apiClient: APIClient) {
         self.apiClient = apiClient
     }
-    
+
     func fetchFeature(id: String) async throws -> FeatureModel {
         let dto: FeatureDTO = try await apiClient.get("/features/\(id)")
         return dto.toDomain()
@@ -110,14 +102,14 @@ enum FeatureViewState: Equatable {
 @MainActor
 final class FeatureViewModel: ObservableObject {
     @Published private(set) var state: FeatureViewState = .idle
-    
+
     private let useCase: GetFeatureUseCase
     private var loadTask: Task<Void, Never>?
-    
+
     init(useCase: GetFeatureUseCase) {
         self.useCase = useCase
     }
-    
+
     func load(id: String) {
         loadTask?.cancel()
         loadTask = Task {
@@ -142,12 +134,12 @@ final class FeatureViewModel: ObservableObject {
 struct FeatureView: View {
     @StateObject private var viewModel: FeatureViewModel
     let featureId: String
-    
+
     init(featureId: String, viewModel: FeatureViewModel) {
         self.featureId = featureId
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     var body: some View {
         Group {
             switch viewModel.state {

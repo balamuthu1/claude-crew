@@ -1,11 +1,3 @@
----
-name: mobile-code-review
-description: >
-  Cross-platform mobile code review workflow. Detects platform (Android/iOS/both)
-  from context and delegates to the appropriate reviewer agent. Produces a unified
-  review report. Invoke with /mobile-code-review.
----
-
 # Mobile Code Review Workflow
 
 When invoked, run this workflow:
@@ -21,7 +13,7 @@ Scan the changed/provided files:
 
 - Android code → invoke `android-reviewer` agent
 - iOS code → invoke `ios-reviewer` agent
-- Both → run both agents, merge findings
+- Both → run both agents in parallel (two Agent tool calls in one message), then merge findings
 
 ## Step 3 — Apply Universal Mobile Standards
 

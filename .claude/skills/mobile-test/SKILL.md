@@ -1,11 +1,3 @@
----
-name: mobile-test
-description: >
-  Mobile test generation workflow. Given a feature or code file, generates a
-  comprehensive test suite for Android (JUnit/MockK/Compose) or iOS (XCTest/SwiftUI).
-  Invoke with /mobile-test <feature or file>.
----
-
 # Mobile Test Generation Workflow
 
 When invoked:
@@ -167,7 +159,7 @@ class FeatureViewModelTests: XCTestCase {
 final class MockFeatureRepository: FeatureRepository {
     var result: Result<FeatureModel, Error> = .failure(NSError(domain: "test", code: 0))
     var delay: TimeInterval = 0
-    
+
     func fetchFeature(id: String) async throws -> FeatureModel {
         if delay > 0 { try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000)) }
         return try result.get()

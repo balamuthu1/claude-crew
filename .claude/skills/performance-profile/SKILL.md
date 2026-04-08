@@ -1,12 +1,3 @@
----
-name: performance-profile
-description: >
-  Mobile performance profiling workflow. Analyzes code for Android/iOS performance
-  anti-patterns, estimates impact, and provides a prioritized optimization plan.
-  Delegates to the mobile-performance agent.
-  Invoke with /performance-profile <file, screen, or symptom>.
----
-
 # Performance Profiling Workflow
 
 When invoked, delegate to `mobile-performance` agent and follow this process:

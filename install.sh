@@ -6,7 +6,6 @@
 #  Usage:
 #    Global install (available in ALL projects):
 #      ./install.sh --global
-#      curl -sSL https://raw.githubusercontent.com/balamuthu1/claude-crew/main/install.sh | bash -s -- --global
 #
 #    Project install (current directory):
 #      ./install.sh
@@ -15,6 +14,9 @@
 #    Dry run (see what would be installed):
 #      ./install.sh --dry-run
 #      ./install.sh --global --dry-run
+#
+#  One-line remote install (clones repo, then runs):
+#    git clone https://github.com/balamuthu1/claude-crew.git && bash claude-crew/install.sh --global
 # ============================================================
 
 set -euo pipefail
@@ -34,7 +36,7 @@ GLOBAL=false
 PROJECT_DIR="$(pwd)"
 DRY_RUN=false
 REPO_URL="https://github.com/balamuthu1/claude-crew"
-REPO_RAW="https://raw.githubusercontent.com/balamuthu1/claude-crew/main"
+REPO_BRANCH="main"
 
 # Source dir: where this script lives (works both locally and in tmp from curl)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd)"
@@ -107,8 +109,8 @@ if $LOCAL_INSTALL; then
   SRC_AGENTS="$SCRIPT_DIR/.claude/agents"
   SRC_COMMANDS="$SCRIPT_DIR/.claude/commands"
   SRC_HOOKS="$SCRIPT_DIR/.claude/hooks"
+  SRC_SKILLS="$SCRIPT_DIR/.claude/skills"
   SRC_RULES="$SCRIPT_DIR/rules"
-  SRC_SKILLS="$SCRIPT_DIR/skills"
   SRC_CLAUDE_MD="$SCRIPT_DIR/CLAUDE.md"
   SRC_SETTINGS="$SCRIPT_DIR/.claude/settings.json"
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
@@ -117,9 +119,10 @@ else
   # Remote install — download to temp dir
   TMP_DIR="$(mktemp -d)"
   trap 'rm -rf "$TMP_DIR"' EXIT
-  info "Downloading claude-crew from GitHub..."
+  info "Downloading claude-crew from GitHub (branch: $REPO_BRANCH)..."
   if command -v git &>/dev/null; then
-    git clone --depth 1 --quiet "$REPO_URL.git" "$TMP_DIR/claude-crew" 2>/dev/null
+    git clone --depth 1 --branch "$REPO_BRANCH" --quiet "$REPO_URL.git" "$TMP_DIR/claude-crew" 2>/dev/null \
+      || { error "Failed to clone $REPO_URL (branch: $REPO_BRANCH). Check your internet connection and that the branch exists."; exit 1; }
     SRC_BASE="$TMP_DIR/claude-crew"
   else
     error "git is required for remote install. Install git and retry."
@@ -128,8 +131,8 @@ else
   SRC_AGENTS="$SRC_BASE/.claude/agents"
   SRC_COMMANDS="$SRC_BASE/.claude/commands"
   SRC_HOOKS="$SRC_BASE/.claude/hooks"
+  SRC_SKILLS="$SRC_BASE/.claude/skills"
   SRC_RULES="$SRC_BASE/rules"
-  SRC_SKILLS="$SRC_BASE/skills"
   SRC_CLAUDE_MD="$SRC_BASE/CLAUDE.md"
   SRC_SETTINGS="$SRC_BASE/.claude/settings.json"
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
@@ -237,6 +240,9 @@ copy_dir "$SRC_AGENTS" "$TARGET_CLAUDE/agents" "specialist agents (8)"
 # Commands → .claude/commands/
 copy_dir "$SRC_COMMANDS" "$TARGET_CLAUDE/commands" "slash commands"
 
+# Skills → .claude/skills/   (each skill lives in its own subfolder with SKILL.md)
+copy_dir "$SRC_SKILLS" "$TARGET_CLAUDE/skills" "workflow skills"
+
 # Hooks → .claude/hooks/
 copy_dir "$SRC_HOOKS" "$TARGET_CLAUDE/hooks" "lifecycle hooks"
 
@@ -249,17 +255,16 @@ fi
 # settings.json — merge carefully
 merge_settings "$SRC_SETTINGS" "$TARGET_CLAUDE/settings.json"
 
-# CLAUDE.md — project install only (global CLAUDE.md goes to ~/.claude/CLAUDE.md)
+# CLAUDE.md + project-only files
 if $GLOBAL; then
   install_claude_md "$SRC_CLAUDE_MD" "$HOME/.claude/CLAUDE.md"
 else
   install_claude_md "$SRC_CLAUDE_MD" "$PROJECT_DIR/CLAUDE.md"
 
-  # Also install rules/ and skills/ into project for agent reference
-  copy_dir "$SRC_RULES"  "$PROJECT_DIR/rules"  "coding rules (Kotlin, Swift, Arch)"
-  copy_dir "$SRC_SKILLS" "$PROJECT_DIR/skills" "workflow skills"
+  # rules/ — reference docs for agents
+  copy_dir "$SRC_RULES" "$PROJECT_DIR/rules" "coding rules (Kotlin, Swift, Arch)"
 
-  # Install claude-crew.config.md template (only if not already present)
+  # claude-crew.config.md template (only if not already present)
   DST_CONFIG="$PROJECT_DIR/claude-crew.config.md"
   if $DRY_RUN; then
     info "[dry-run] Would install claude-crew.config.md → $DST_CONFIG"
@@ -283,17 +288,23 @@ fi
 echo ""
 echo -e "${GREEN}${BOLD}  Claude Crew is installed!${RESET}"
 echo ""
-echo -e "  ${BOLD}Available slash commands:${RESET}"
-echo "    /sdlc <feature>       Full SDLC: plan→build→test→review→security→a11y→release"
-echo "    /android-review       Review Android/Kotlin code"
-echo "    /ios-review           Review Swift/iOS code"
-echo "    /mobile-test          Generate test suite"
-echo "    /mobile-release       Release preparation checklist"
+echo -e "  ${BOLD}Slash commands:${RESET}"
+echo "    /sdlc <feature>           Full SDLC: plan→build→review→security→a11y→release"
+echo "    /android-review           Review Android/Kotlin code"
+echo "    /ios-review               Review Swift/iOS code"
+echo "    /mobile-test              Generate test suite"
+echo "    /mobile-release           Release preparation checklist"
+echo "    /detect-arch              Auto-detect project architecture"
 echo ""
-echo -e "  ${BOLD}Available agents (via Agent tool or @mention):${RESET}"
-echo "    android-reviewer      mobile-architect      mobile-security"
-echo "    ios-reviewer          mobile-performance    mobile-test-planner"
-echo "    ui-accessibility      release-manager"
+echo -e "  ${BOLD}Skills (workflows):${RESET}"
+echo "    android-feature           mobile-code-review    performance-profile"
+echo "    ios-feature               mobile-release        accessibility-audit"
+echo "    mobile-test"
+echo ""
+echo -e "  ${BOLD}Agents (specialist reviewers):${RESET}"
+echo "    android-reviewer          mobile-architect      mobile-security"
+echo "    ios-reviewer              mobile-performance    mobile-test-planner"
+echo "    ui-accessibility          release-manager"
 echo ""
 if $GLOBAL; then
   echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."
