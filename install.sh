@@ -114,6 +114,7 @@ if $LOCAL_INSTALL; then
   SRC_CLAUDE_MD="$SCRIPT_DIR/CLAUDE.md"
   SRC_SETTINGS="$SCRIPT_DIR/settings.json"
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
+  SRC_GITFLOW_MD="$SCRIPT_DIR/git-flow.config.md"
   success "Using local source: $SCRIPT_DIR"
 else
   # Remote install — download to temp dir
@@ -136,6 +137,7 @@ else
   SRC_CLAUDE_MD="$SRC_BASE/CLAUDE.md"
   SRC_SETTINGS="$SRC_BASE/settings.json"
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
+  SRC_GITFLOW_MD="$SRC_BASE/git-flow.config.md"
   success "Downloaded claude-crew source"
 fi
 
@@ -275,6 +277,18 @@ else
     success "Installed claude-crew.config.md → $DST_CONFIG"
     info "Run /detect-arch to auto-fill it, or edit manually to match your project"
   fi
+
+  # git-flow.config.md template (only if not already present)
+  DST_GITFLOW="$PROJECT_DIR/git-flow.config.md"
+  if $DRY_RUN; then
+    info "[dry-run] Would install git-flow.config.md → $DST_GITFLOW"
+  elif [[ -f "$DST_GITFLOW" ]]; then
+    warn "git-flow.config.md already exists — skipping (edit it manually or run /detect-gitflow)"
+  elif [[ -f "$SRC_GITFLOW_MD" ]]; then
+    cp "$SRC_GITFLOW_MD" "$DST_GITFLOW"
+    success "Installed git-flow.config.md → $DST_GITFLOW"
+    info "Run /detect-gitflow to auto-fill it, or edit manually to match your team conventions"
+  fi
 fi
 
 # ── Post-install summary ──────────────────────────────────────────────────────
@@ -294,7 +308,9 @@ echo "    /android-review           Review Android/Kotlin code"
 echo "    /ios-review               Review Swift/iOS code"
 echo "    /mobile-test              Generate test suite"
 echo "    /mobile-release           Release preparation checklist"
-echo "    /detect-arch              Auto-detect project architecture"
+echo "    /detect-arch              Auto-detect project architecture
+    /detect-gitflow           Auto-detect git branching conventions
+    /sprint-start [N]         Kick off a new sprint"
 echo ""
 echo -e "  ${BOLD}Skills (workflows):${RESET}"
 echo "    android-feature           mobile-code-review    performance-profile"
@@ -304,7 +320,7 @@ echo ""
 echo -e "  ${BOLD}Agents (specialist reviewers):${RESET}"
 echo "    android-reviewer          mobile-architect      mobile-security"
 echo "    ios-reviewer              mobile-performance    mobile-test-planner"
-echo "    ui-accessibility          release-manager"
+echo "    ui-accessibility          release-manager       git-flow-advisor"
 echo ""
 if $GLOBAL; then
   echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."

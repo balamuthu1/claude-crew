@@ -58,6 +58,7 @@ runs in an isolated context window.
 | "write tests / test plan" | `mobile-test-planner` | Pass feature + implementation files |
 | "prepare release / release notes" | `release-manager` | Pass version + changelog |
 | "accessibility audit / a11y" | `ui-accessibility` | Pass UI file paths |
+| "branch name / commit message / PR title / sprint start / hotfix / release cut" | `git-flow-advisor` | Pass the question + ticket/context |
 
 **Parallel spawning:** When two independent tasks can run simultaneously (e.g. security
 + accessibility audit), call `Agent` twice in a single response message.
