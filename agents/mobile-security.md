@@ -1,11 +1,8 @@
 ---
 name: mobile-security
-description: >
-  Mobile security auditor. Use when auditing Android or iOS code for security
-  vulnerabilities, OWASP Mobile Top 10 risks, data storage issues, network security,
-  authentication weaknesses, or preparing for a security review / pentest.
+description: Mobile security auditor. Use when auditing Android or iOS code for security vulnerabilities, OWASP Mobile Top 10 risks, data storage issues, network security, authentication weaknesses, or preparing for a security review / pentest.
 tools: Read, Grep, Glob
-model: claude-opus-4-6
+model: opus
 ---
 
 # Mobile Security Reviewer

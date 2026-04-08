@@ -1,11 +1,8 @@
 ---
 name: mobile-architect
-description: >
-  Mobile architecture advisor. Use when designing new features, choosing architecture
-  patterns, planning data flow, deciding on cross-cutting concerns (DI, navigation,
-  state management), or evaluating architectural trade-offs for Android or iOS.
+description: Mobile architecture advisor. Use when designing new features, choosing architecture patterns, planning data flow, deciding on cross-cutting concerns (DI, navigation, state management), or evaluating architectural trade-offs for Android or iOS.
 tools: Read, Grep, Glob
-model: claude-opus-4-6
+model: opus
 ---
 
 # Mobile Architect

@@ -1,11 +1,8 @@
 ---
 name: ui-accessibility
-description: >
-  Mobile accessibility auditor. Use when auditing Android or iOS UI for accessibility
-  compliance, TalkBack/VoiceOver support, color contrast, touch targets, or preparing
-  for WCAG 2.1 / Section 508 compliance review.
+description: Mobile accessibility auditor. Use when auditing Android or iOS UI for accessibility compliance, TalkBack/VoiceOver support, color contrast, touch targets, or preparing for WCAG 2.1 / Section 508 compliance review.
 tools: Read, Grep, Glob
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 # Mobile Accessibility Auditor

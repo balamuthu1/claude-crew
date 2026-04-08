@@ -1,12 +1,8 @@
 ---
 name: android-developer
-description: >
-  Android feature implementer. Use when building a new Android feature, writing
-  Kotlin code, implementing ViewModels, Compose screens, repositories, use cases,
-  Room DAOs, Hilt modules, or wiring navigation. Produces production-ready code
-  that follows the project's declared architecture.
+description: Android feature implementer. Use when building a new Android feature, writing Kotlin code, implementing ViewModels, Compose screens, repositories, use cases, Room DAOs, Hilt modules, or wiring navigation. Produces production-ready code that follows the project's declared architecture.
 tools: Read, Write, Edit, Glob, Grep, Bash
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 # Android Developer
