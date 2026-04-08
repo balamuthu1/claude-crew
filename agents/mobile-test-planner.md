@@ -1,11 +1,8 @@
 ---
 name: mobile-test-planner
-description: >
-  Mobile test strategy planner. Use when writing tests for a new feature, designing
-  a test plan, choosing between unit/integration/UI/snapshot tests, setting up
-  test infrastructure, or improving test coverage on Android or iOS.
+description: Mobile test strategy planner. Use when writing tests for a new feature, designing a test plan, choosing between unit/integration/UI/snapshot tests, setting up test infrastructure, or improving test coverage on Android or iOS.
 tools: Read, Grep, Glob
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 # Mobile Test Planner

@@ -1,11 +1,8 @@
 ---
 name: release-manager
-description: >
-  Mobile release manager. Use when preparing an Android or iOS release, writing
-  release notes, managing version bumps, coordinating App Store / Play Store submissions,
-  setting up Fastlane lanes, or running through a release checklist.
+description: Mobile release manager. Use when preparing an Android or iOS release, writing release notes, managing version bumps, coordinating App Store / Play Store submissions, setting up Fastlane lanes, or running through a release checklist.
 tools: Read, Grep, Glob, Bash
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 # Release Manager

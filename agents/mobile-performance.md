@@ -1,11 +1,8 @@
 ---
 name: mobile-performance
-description: >
-  Mobile performance analyzer. Use when diagnosing ANRs, jank, slow startup,
-  excessive memory usage, battery drain, or large binary size on Android or iOS.
-  Analyzes code for performance anti-patterns and suggests concrete fixes.
+description: Mobile performance analyzer. Use when diagnosing ANRs, jank, slow startup, excessive memory usage, battery drain, or large binary size on Android or iOS. Analyzes code for performance anti-patterns and suggests concrete fixes.
 tools: Read, Grep, Glob
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 # Mobile Performance Analyzer

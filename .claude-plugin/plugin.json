@@ -9,9 +9,5 @@
   "homepage": "https://github.com/balamuthu1/claude-crew",
   "repository": "https://github.com/balamuthu1/claude-crew",
   "license": "MIT",
-  "keywords": ["android", "ios", "mobile", "kotlin", "swift", "jetpack-compose", "swiftui", "code-review", "sdlc"],
-  "agents": "./agents/",
-  "commands": "./commands/",
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["android", "ios", "mobile", "kotlin", "swift", "jetpack-compose", "swiftui", "code-review", "sdlc"]
 }
