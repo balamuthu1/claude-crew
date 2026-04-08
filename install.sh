@@ -106,13 +106,13 @@ fi
 
 # Fetch source files: either local or from GitHub
 if $LOCAL_INSTALL; then
-  SRC_AGENTS="$SCRIPT_DIR/.claude/agents"
-  SRC_COMMANDS="$SCRIPT_DIR/.claude/commands"
-  SRC_HOOKS="$SCRIPT_DIR/.claude/hooks"
-  SRC_SKILLS="$SCRIPT_DIR/.claude/skills"
+  SRC_AGENTS="$SCRIPT_DIR/agents"
+  SRC_COMMANDS="$SCRIPT_DIR/commands"
+  SRC_HOOKS="$SCRIPT_DIR/scripts"
+  SRC_SKILLS="$SCRIPT_DIR/skills"
   SRC_RULES="$SCRIPT_DIR/rules"
   SRC_CLAUDE_MD="$SCRIPT_DIR/CLAUDE.md"
-  SRC_SETTINGS="$SCRIPT_DIR/.claude/settings.json"
+  SRC_SETTINGS="$SCRIPT_DIR/settings.json"
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
   success "Using local source: $SCRIPT_DIR"
 else
@@ -128,13 +128,13 @@ else
     error "git is required for remote install. Install git and retry."
     exit 1
   fi
-  SRC_AGENTS="$SRC_BASE/.claude/agents"
-  SRC_COMMANDS="$SRC_BASE/.claude/commands"
-  SRC_HOOKS="$SRC_BASE/.claude/hooks"
-  SRC_SKILLS="$SRC_BASE/.claude/skills"
+  SRC_AGENTS="$SRC_BASE/agents"
+  SRC_COMMANDS="$SRC_BASE/commands"
+  SRC_HOOKS="$SRC_BASE/scripts"
+  SRC_SKILLS="$SRC_BASE/skills"
   SRC_RULES="$SRC_BASE/rules"
   SRC_CLAUDE_MD="$SRC_BASE/CLAUDE.md"
-  SRC_SETTINGS="$SRC_BASE/.claude/settings.json"
+  SRC_SETTINGS="$SRC_BASE/settings.json"
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
   success "Downloaded claude-crew source"
 fi

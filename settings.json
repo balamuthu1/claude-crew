@@ -1,6 +1,5 @@
 {
   "description": "Claude Crew — Mobile Agent Harness for Android & iOS teams",
-  "version": "2.0.0",
 
   "hooks": {
     "PreToolUse": [

@@ -43,6 +43,7 @@ echo ""
 if [[ -d "$TARGET_CLAUDE/agents" ]]; then
   # Only remove claude-crew agents, not any custom ones
   CREW_AGENTS=(
+    android-developer.md ios-developer.md
     android-reviewer.md ios-reviewer.md mobile-architect.md
     mobile-performance.md mobile-security.md mobile-test-planner.md
     release-manager.md ui-accessibility.md
@@ -55,7 +56,7 @@ if [[ -d "$TARGET_CLAUDE/agents" ]]; then
 fi
 
 # Remove commands
-CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md)
+CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md)
 for cmd in "${CREW_COMMANDS[@]}"; do
   [[ -f "$TARGET_CLAUDE/commands/$cmd" ]] && rm "$TARGET_CLAUDE/commands/$cmd" && info "Removed command: $cmd"
 done
@@ -80,13 +81,18 @@ with open(path, 'w') as f: f.write(cleaned.strip() + '\n')
   success "Removed Claude Crew section from CLAUDE.md"
 fi
 
-# Remove rules/ and skills/ if they were installed by claude-crew
-for dir in "$PROJECT_DIR/rules" "$PROJECT_DIR/skills"; do
-  if [[ -d "$dir" ]]; then
-    read -r -p "  Remove $dir? [y/N] " ans
-    [[ "$ans" =~ ^[Yy]$ ]] && rm -rf "$dir" && success "Removed $dir"
-  fi
+# Remove skills from .claude/skills/
+CREW_SKILLS=(android-feature ios-feature mobile-test mobile-release mobile-code-review accessibility-audit performance-profile)
+for skill in "${CREW_SKILLS[@]}"; do
+  [[ -d "$TARGET_CLAUDE/skills/$skill" ]] && rm -rf "$TARGET_CLAUDE/skills/$skill" && info "Removed skill: $skill"
 done
+[[ -d "$TARGET_CLAUDE/skills" && -z "$(ls -A "$TARGET_CLAUDE/skills" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/skills"
+
+# Remove rules/ if it was installed by claude-crew
+if [[ -d "$PROJECT_DIR/rules" ]]; then
+  read -r -p "  Remove $PROJECT_DIR/rules? [y/N] " ans
+  [[ "$ans" =~ ^[Yy]$ ]] && rm -rf "$PROJECT_DIR/rules" && success "Removed rules/"
+fi
 
 echo ""
 success "Claude Crew uninstalled."
