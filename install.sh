@@ -325,18 +325,22 @@ echo "    /mobile-release           Release preparation checklist"
 echo "    /detect-arch              Auto-detect project architecture
     /detect-gitflow           Auto-detect git branching conventions
     /sprint-start [N]         Kick off a new sprint
-    /detect-jira              Interactive Jira project setup (requires Jira CLI)"
+    /detect-jira              Interactive Jira project setup (requires Jira CLI)
+    /standup                  Facilitate today's daily standup
+    /retro [format]           Run a sprint retrospective
+    /sprint-health            Check sprint burndown and surface risks"
 echo ""
 echo -e "  ${BOLD}Skills (workflows):${RESET}"
 echo "    android-feature           mobile-code-review    performance-profile"
 echo "    ios-feature               mobile-release        accessibility-audit"
-echo "    mobile-test"
+echo "    mobile-test               git-flow              jira-flow"
+echo "    scrum"
 echo ""
 echo -e "  ${BOLD}Agents (specialist reviewers):${RESET}"
 echo "    android-reviewer          mobile-architect      mobile-security"
 echo "    ios-reviewer              mobile-performance    mobile-test-planner"
 echo "    ui-accessibility          release-manager       git-flow-advisor"
-echo "    jira-advisor"
+echo "    jira-advisor              scrum-master"
 echo ""
 if $GLOBAL; then
   echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."

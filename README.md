@@ -1,6 +1,6 @@
 # Claude Crew — Mobile Agent Harness
 
-A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 12 specialist agents, 9 slash commands, 9 workflow skills, lifecycle hooks, and coding rules — all adapting to your project's actual architecture, git conventions, and Jira workflow.
+A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 13 specialist agents, 12 slash commands, 10 workflow skills, lifecycle hooks, and coding rules — all adapting to your project's actual architecture, git conventions, Jira workflow, and Scrum process.
 
 ---
 
@@ -137,6 +137,9 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 | `/detect-gitflow` | Interactive git conventions setup → `git-flow.config.md` |
 | `/sprint-start [N]` | Kick off a sprint: sync branches, create sprint branch, print checklist |
 | `/detect-jira` | Interactive Jira project setup → `jira.config.md` |
+| `/standup` | Facilitate today's daily standup with live Jira board |
+| `/retro [format]` | Run a sprint retrospective (Start/Stop/Continue, Sailboat, 4Ls) |
+| `/sprint-health` | Check burndown, surface at-risk stories, forecast carry-over |
 
 ### Mention agents directly
 
@@ -151,6 +154,7 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 @mobile-performance  Why is this list scrolling janky?
 @git-flow-advisor    Name a branch for PROJ-42 adding dark mode
 @jira-advisor        Show my sprint board / create a story / move PROJ-123 to In Review
+@scrum-master        Run standup / check sprint health / facilitate retro / coach on DoD
 ```
 
 ---
@@ -171,6 +175,7 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 | `release-manager` | App Store / Play Store, versioning, Fastlane | Read, Grep, Glob, Bash |
 | `git-flow-advisor` | Branch names, commit messages, PR titles, sprint/hotfix/release workflow | Read, Bash, Glob, Grep |
 | `jira-advisor` | Sprint board, ticket creation, issue transitions, epic breakdown | Read, Bash, Glob, Grep |
+| `scrum-master` | Sprint planning, standup, retro, health checks, velocity, Agile coaching | Read, Bash, Glob, Grep |
 
 ---
 
@@ -189,6 +194,7 @@ Structured workflows invokable as skills:
 | `performance-profile` | Performance analysis workflow |
 | `git-flow` | Git branching, commit, sprint, hotfix, and release reference |
 | `jira-flow` | Jira CLI quick reference, daily workflow, sprint planning |
+| `scrum` | Ceremonies, DoD/DoR, story points, velocity, anti-patterns quick reference |
 
 ---
 
@@ -212,9 +218,10 @@ claude-crew/
 │   ├── ui-accessibility.md
 │   ├── release-manager.md
 │   ├── git-flow-advisor.md
-│   └── jira-advisor.md
+│   ├── jira-advisor.md
+│   └── scrum-master.md
 │
-├── commands/                ← 9 slash commands
+├── commands/                ← 12 slash commands
 │   ├── sdlc.md
 │   ├── android-review.md
 │   ├── ios-review.md
@@ -223,9 +230,12 @@ claude-crew/
 │   ├── detect-arch.md
 │   ├── detect-gitflow.md
 │   ├── sprint-start.md
-│   └── detect-jira.md
+│   ├── detect-jira.md
+│   ├── standup.md
+│   ├── retro.md
+│   └── sprint-health.md
 │
-├── skills/                  ← 9 skills, each in <name>/SKILL.md
+├── skills/                  ← 10 skills, each in <name>/SKILL.md
 │   ├── android-feature/SKILL.md
 │   ├── ios-feature/SKILL.md
 │   ├── mobile-test/SKILL.md
@@ -234,7 +244,8 @@ claude-crew/
 │   ├── accessibility-audit/SKILL.md
 │   ├── performance-profile/SKILL.md
 │   ├── git-flow/SKILL.md
-│   └── jira-flow/SKILL.md
+│   ├── jira-flow/SKILL.md
+│   └── scrum/SKILL.md
 │
 ├── scripts/                 ← lifecycle hook scripts
 │   ├── pre-tool-use.sh      guards destructive ops, keystores, secrets
@@ -245,11 +256,12 @@ claude-crew/
 │
 ├── settings.json            ← permissions + hooks (for manual install path)
 │
-├── rules/                   ← coding standards (installed to project)
+├── rules/                   ← coding standards and process rules (installed to project)
 │   ├── kotlin.md
 │   ├── swift.md
 │   ├── android-architecture.md
-│   └── ios-architecture.md
+│   ├── ios-architecture.md
+│   └── scrum.md
 │
 ├── claude-crew.config.md    ← project architecture config template
 ├── git-flow.config.md       ← git conventions config template

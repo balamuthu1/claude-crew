@@ -60,6 +60,7 @@ runs in an isolated context window.
 | "accessibility audit / a11y" | `ui-accessibility` | Pass UI file paths |
 | "branch name / commit message / PR title / sprint start / hotfix / release cut" | `git-flow-advisor` | Pass the question + ticket/context |
 | "Jira ticket / sprint board / issue transition / epic breakdown / story points" | `jira-advisor` | Pass the request + Jira ticket or feature description |
+| "sprint planning / standup / retro / sprint health / velocity / blockers / DoD / agile coaching" | `scrum-master` | Pass the ceremony type or question + sprint context |
 
 **Parallel spawning:** When two independent tasks can run simultaneously (e.g. security
 + accessibility audit), call `Agent` twice in a single response message.
