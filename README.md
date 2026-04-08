@@ -1,80 +1,67 @@
 # Claude Crew — Mobile Agent Harness
 
-A Claude Code plugin for **Android & iOS mobile teams**. Installs 8 specialist agents,
-5 slash commands, lifecycle hooks, and coding rules in one script.
-
-Inspired by [everything-claude-code](https://github.com/affaan-m/everything-claude-code).
+A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 10 specialist agents, 6 slash commands, 7 workflow skills, lifecycle hooks, and coding rules — all adapting to your project's actual architecture.
 
 ---
 
-## Install
+## Installation
 
-### Global — agents available in every project
+### Option 1 — Claude Code Plugin (recommended)
 
-```bash
-curl -sSL https://raw.githubusercontent.com/balamuthu1/claude-crew/main/install.sh | bash -s -- --global
+The fastest way. Works directly inside Claude Code without cloning anything.
+
+```
+/plugin marketplace add balamuthu1/claude-crew
+/plugin install claude-crew@claude-crew
 ```
 
-### Project — scoped to one repo
+Then set up your project config:
 
-```bash
-# From your mobile project root:
-curl -sSL https://raw.githubusercontent.com/balamuthu1/claude-crew/main/install.sh | bash
+```
+/detect-arch
 ```
 
-### Local clone
+### Option 2 — Manual script
 
 ```bash
 git clone https://github.com/balamuthu1/claude-crew.git
-cd claude-crew
-
-./install.sh --global            # global install
-./install.sh                     # project install (current dir)
-./install.sh --project ~/MyApp   # project install (specific dir)
-./install.sh --dry-run           # preview without changing anything
+bash claude-crew/install.sh --global           # available in every project
+bash claude-crew/install.sh                    # current project only
+bash claude-crew/install.sh --project ~/MyApp  # specific project
+bash claude-crew/install.sh --dry-run          # preview without changes
 ```
 
 ### Uninstall
 
 ```bash
-./uninstall.sh           # remove from current project
-./uninstall.sh --global  # remove global install
+bash claude-crew/uninstall.sh           # remove from current project
+bash claude-crew/uninstall.sh --global  # remove global install
 ```
 
 ---
 
-## What Gets Installed
+## First-time setup
+
+After installing, run `/detect-arch` inside your mobile project. It reads your build files (`build.gradle.kts`, `libs.versions.toml`, `Package.swift`, `Podfile`) and writes a `claude-crew.config.md` that tells every agent what your project actually uses:
 
 ```
-~/.claude/  (global)  OR  your-project/.claude/  (project)
-│
-├── agents/                  ← 8 specialist agents (auto-discovered by Claude Code)
-│   ├── android-reviewer.md       Kotlin/Compose/Jetpack review
-│   ├── ios-reviewer.md           Swift/SwiftUI/Combine review
-│   ├── mobile-architect.md       Architecture decisions
-│   ├── mobile-performance.md     ANR, memory, battery, jank
-│   ├── mobile-security.md        OWASP Mobile Top 10
-│   ├── mobile-test-planner.md    Test strategy + code gen
-│   ├── release-manager.md        App Store / Play Store
-│   └── ui-accessibility.md       WCAG 2.1 AA audit
-│
-├── commands/                ← Slash commands (/sdlc, /android-review, …)
-│   ├── sdlc.md                   Full 7-stage SDLC orchestrator
-│   ├── android-review.md         /android-review
-│   ├── ios-review.md             /ios-review
-│   ├── mobile-test.md            /mobile-test
-│   └── mobile-release.md         /mobile-release
-│
-├── hooks/                   ← Lifecycle automation
-│   ├── pre-tool-use.sh           Guards destructive ops, keystore files, secrets
-│   └── post-tool-use.sh          Reminds to lint/test after edits
-│
-└── settings.json            ← Merged with any existing config
-
-CLAUDE.md                    ← Appended to project CLAUDE.md (or ~/.claude/CLAUDE.md)
-rules/                       ← Kotlin, Swift, Android arch, iOS arch standards
-skills/                      ← Workflow guides (android-feature, ios-feature, …)
+/detect-arch
 ```
+
+All 10 agents read `claude-crew.config.md` before doing anything — so they review against **your** architecture, not an opinionated default:
+
+```yaml
+platform: android
+pattern: mvvm
+ui: compose
+state: coroutines-flow
+di: hilt
+networking: retrofit
+storage: room
+...
+```
+
+If your project uses Dagger2, the reviewer won't flag it as wrong. If you use RxJava, it won't suggest migrating to Flow. Edit the file manually if the detector misses anything.
 
 ---
 
@@ -86,94 +73,155 @@ skills/                      ← Workflow guides (android-feature, ios-feature, 
 /sdlc Build a user profile editing screen for Android
 ```
 
-Spawns 7 specialist sub-agents — each with an **isolated context window**:
+Spawns 7 specialist sub-agents, each with an **isolated context window**:
 
 ```
-Stage 1 — PLAN         → mobile-architect    architecture decision
-Stage 2 — BUILD        → android/ios agent   domain → data → VM → UI
-Stage 3 — TEST         → test-planner        unit + UI + edge cases
-Stage 4 — REVIEW       → code reviewer       quality gate
-Stage 5 — SECURITY  ┐  → security auditor    OWASP Mobile Top 10   ← parallel
-Stage 6 — A11Y      ┘  → a11y auditor        WCAG 2.1 AA           ← parallel
-Stage 7 — RELEASE      → release manager     version + release notes
+Stage 1 — PLAN         → mobile-architect     architecture decision
+Stage 2 — BUILD        → android-developer    domain → data → VM → UI → DI
+Stage 3 — TEST         → mobile-test-planner  unit + integration + UI tests
+Stage 4 — REVIEW       → android-reviewer     quality gate
+Stage 5 — SECURITY  ┐  → mobile-security      OWASP Mobile Top 10   ← parallel
+Stage 6 — A11Y      ┘  → ui-accessibility     WCAG 2.1 AA           ← parallel
+Stage 7 — RELEASE      → release-manager      version bump + release notes
 ```
 
-Stages 5 & 6 run **in parallel** — two `Agent` tool calls in one message.
+Stages 5 & 6 run **in parallel** — two Agent tool calls in one message.
 
-### Individual commands
+### Slash commands
 
-```
-/android-review      Review Android/Kotlin code
-/ios-review          Review Swift/iOS code
-/mobile-test         Generate test suite for a feature or file
-/mobile-release 2.5  Release preparation checklist
-```
+| Command | What it does |
+|---|---|
+| `/sdlc <feature>` | Full 7-stage SDLC pipeline |
+| `/android-review` | Android/Kotlin code review |
+| `/ios-review` | Swift/iOS code review |
+| `/mobile-test <file>` | Generate test suite |
+| `/mobile-release <version>` | Release preparation checklist |
+| `/detect-arch` | Auto-detect project architecture |
 
 ### Mention agents directly
 
 ```
-@android-reviewer   Review this ViewModel for MVVM correctness
-@ios-reviewer       Check this SwiftUI view for memory leaks
-@mobile-architect   Design offline-first cart sync
-@mobile-security    Audit this API client for cert pinning
-@ui-accessibility   Check touch targets and VoiceOver labels
+@android-developer   Implement a dark mode toggle for Android
+@ios-developer       Build the profile screen in SwiftUI
+@android-reviewer    Review this ViewModel for MVVM correctness
+@ios-reviewer        Check this SwiftUI view for memory leaks
+@mobile-architect    Design offline-first cart sync
+@mobile-security     Audit this API client for cert pinning
+@ui-accessibility    Check touch targets and VoiceOver labels
+@mobile-performance  Why is this list scrolling janky?
 ```
-
----
-
-## How It Works
-
-Claude Code natively supports:
-
-| File/Dir | Loaded | Purpose |
-|---|---|---|
-| `CLAUDE.md` | Every session, automatic | Behavior rules, agent routing |
-| `.claude/settings.json` | Every session, automatic | Hooks, permissions |
-| `.claude/agents/*.md` | On demand via Agent tool | Specialist sub-agents |
-| `.claude/commands/*.md` | On demand via `/command` | Slash commands |
-| `.claude/hooks/*.sh` | On tool use, automatic | Lifecycle scripts |
-
-The `/sdlc` command is a **pure Claude Code orchestrator** — it instructs Claude
-to use the built-in `Agent` tool to spawn isolated sub-agents. No Python, no external
-dependencies. The harness is just markdown files that Claude Code reads natively.
 
 ---
 
 ## Agents
 
-| Agent | Specialty |
-|---|---|
-| `android-reviewer` | Kotlin idioms, Jetpack, Coroutines, Compose |
-| `ios-reviewer` | Swift, SwiftUI, Combine, UIKit, async/await |
-| `mobile-architect` | Clean Architecture, MVVM, MVI, TCA, offline-first |
-| `mobile-performance` | ANR, memory leaks, battery, render jank |
-| `mobile-security` | OWASP Mobile Top 10, cert pinning, data storage |
-| `mobile-test-planner` | Unit, integration, UI, snapshot test strategy |
-| `release-manager` | App Store / Play Store workflows, Fastlane |
-| `ui-accessibility` | WCAG 2.1 AA, TalkBack, VoiceOver, contrast |
-
----
-
-## Platform Support
-
-| Platform | Language | Architecture |
+| Agent | Role | Tools |
 |---|---|---|
-| Android | Kotlin (primary), Java (legacy) | MVVM + Clean Architecture, MVI |
-| iOS | Swift (primary), Obj-C (legacy) | MVVM + Clean Architecture, TCA |
-| Cross-platform | React Native / Flutter | Extensible |
+| `android-developer` | Writes production Kotlin/Compose code end-to-end | Read, Write, Edit, Glob, Grep, Bash |
+| `ios-developer` | Writes production Swift/SwiftUI code end-to-end | Read, Write, Edit, Glob, Grep, Bash |
+| `android-reviewer` | Reviews Kotlin, Jetpack, Coroutines, Compose | Read, Grep, Glob |
+| `ios-reviewer` | Reviews Swift, SwiftUI, Combine, UIKit, async/await | Read, Grep, Glob |
+| `mobile-architect` | Clean Architecture, MVVM, MVI, TCA, offline-first | Read, Grep, Glob |
+| `mobile-security` | OWASP Mobile Top 10, cert pinning, data storage | Read, Grep, Glob |
+| `mobile-performance` | ANR, memory leaks, battery drain, render jank | Read, Grep, Glob |
+| `mobile-test-planner` | Unit, integration, UI, snapshot test generation | Read, Write, Edit, Glob |
+| `ui-accessibility` | WCAG 2.1 AA, TalkBack, VoiceOver, contrast | Read, Grep, Glob |
+| `release-manager` | App Store / Play Store, versioning, Fastlane | Read, Grep, Glob, Bash |
 
 ---
 
-## Optional: CI Orchestrator (Python)
+## Skills
 
-For automated pipelines without Claude Code CLI, the `orchestrate/` directory
-contains a Python script using the `claude-agent-sdk` that runs the same SDLC
-workflow headlessly:
+Structured workflows invokable as skills:
 
-```bash
-pip install -r orchestrate/requirements.txt
-python orchestrate/sdlc_runner.py "feature description" --platform android --no-interactive
+| Skill | Trigger |
+|---|---|
+| `android-feature` | Build a new Android feature end-to-end |
+| `ios-feature` | Build a new iOS feature end-to-end |
+| `mobile-test` | Generate a test suite for a feature or file |
+| `mobile-release` | Walk through the release checklist |
+| `mobile-code-review` | Cross-platform code review workflow |
+| `accessibility-audit` | Full WCAG 2.1 AA audit workflow |
+| `performance-profile` | Performance analysis workflow |
+
+---
+
+## Plugin structure
+
 ```
+claude-crew/
+├── .claude-plugin/
+│   ├── plugin.json          ← plugin manifest
+│   └── marketplace.json     ← self-hosted marketplace definition
+│
+├── agents/                  ← 10 specialist agents
+│   ├── android-developer.md
+│   ├── ios-developer.md
+│   ├── android-reviewer.md
+│   ├── ios-reviewer.md
+│   ├── mobile-architect.md
+│   ├── mobile-security.md
+│   ├── mobile-performance.md
+│   ├── mobile-test-planner.md
+│   ├── ui-accessibility.md
+│   └── release-manager.md
+│
+├── commands/                ← 6 slash commands
+│   ├── sdlc.md
+│   ├── android-review.md
+│   ├── ios-review.md
+│   ├── mobile-test.md
+│   ├── mobile-release.md
+│   └── detect-arch.md
+│
+├── skills/                  ← 7 skills, each in <name>/SKILL.md
+│   ├── android-feature/SKILL.md
+│   ├── ios-feature/SKILL.md
+│   ├── mobile-test/SKILL.md
+│   ├── mobile-release/SKILL.md
+│   ├── mobile-code-review/SKILL.md
+│   ├── accessibility-audit/SKILL.md
+│   └── performance-profile/SKILL.md
+│
+├── scripts/                 ← lifecycle hook scripts
+│   ├── pre-tool-use.sh      guards destructive ops, keystores, secrets
+│   └── post-tool-use.sh     reminds lint/test after edits, scans for secrets
+│
+├── hooks/
+│   └── hooks.json           ← hook config (for plugin install path)
+│
+├── settings.json            ← permissions + hooks (for manual install path)
+│
+├── rules/                   ← coding standards (installed to project)
+│   ├── kotlin.md
+│   ├── swift.md
+│   ├── android-architecture.md
+│   └── ios-architecture.md
+│
+├── claude-crew.config.md    ← project architecture config template
+├── CLAUDE.md                ← orchestration rules and agent dispatch table
+├── install.sh               ← manual installer
+└── uninstall.sh             ← clean uninstaller
+```
+
+---
+
+## How it works
+
+Claude Code natively discovers plugin content from the standard directories. No Python, no external dependencies — just markdown files and bash scripts that Claude Code reads natively.
+
+The `/sdlc` command instructs Claude to use the built-in `Agent` tool to spawn isolated sub-agents. Each agent gets its own context window with a focused system prompt, preventing context bleed between stages.
+
+All agents read `claude-crew.config.md` at the start of every task so they adapt their rules to your project's actual stack — not an assumed default.
+
+---
+
+## Platform support
+
+| Platform | Languages | Patterns |
+|---|---|---|
+| Android | Kotlin, Java (legacy) | MVVM, MVI, Clean Architecture |
+| iOS | Swift, Obj-C (legacy) | MVVM, TCA, Clean Architecture |
 
 ---
 
