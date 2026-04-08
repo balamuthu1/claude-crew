@@ -26,20 +26,28 @@ You are operating inside a Claude Code agent harness built for **Android and iOS
 
 ---
 
-## Agent Dispatch
+## Agent Dispatch (Orchestration via Agent Tool)
 
-When the user's request maps to a specialized domain, delegate using subagents:
+**You are the orchestrator. Use the `Agent` tool to spawn specialist sub-agents.**
+Never handle specialized tasks yourself — delegate to the right agent so each
+runs in an isolated context window.
 
-| Trigger | Agent to use |
-|---|---|
-| "review this Android / Kotlin code" | `android-reviewer` |
-| "review this iOS / Swift code" | `ios-reviewer` |
-| "help me design the architecture" | `mobile-architect` |
-| "app is slow / ANR / jank" | `mobile-performance` |
-| "security audit / pentest" | `mobile-security` |
-| "write tests / test plan" | `mobile-test-planner` |
-| "prepare release / release notes" | `release-manager` |
-| "accessibility audit / a11y" | `ui-accessibility` |
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "review this Android / Kotlin code" | `android-reviewer` | Pass the file paths |
+| "review this iOS / Swift code" | `ios-reviewer` | Pass the file paths |
+| "help me design the architecture" | `mobile-architect` | Pass feature description + platform |
+| "app is slow / ANR / jank" | `mobile-performance` | Pass file or symptom description |
+| "security audit / pentest" | `mobile-security` | Pass files to audit |
+| "write tests / test plan" | `mobile-test-planner` | Pass feature + implementation files |
+| "prepare release / release notes" | `release-manager` | Pass version + changelog |
+| "accessibility audit / a11y" | `ui-accessibility` | Pass UI file paths |
+
+**Parallel spawning:** When two independent tasks can run simultaneously (e.g. security
++ accessibility audit), call `Agent` twice in a single response message.
+
+**Context passing:** Summarize prior stage output (first 3000 chars) and inject it
+into the next agent's prompt. Do not let context grow unbounded across stages.
 
 ---
 
