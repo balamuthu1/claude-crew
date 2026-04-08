@@ -1,6 +1,6 @@
 # Claude Crew — Mobile Agent Harness
 
-A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 10 specialist agents, 6 slash commands, 7 workflow skills, lifecycle hooks, and coding rules — all adapting to your project's actual architecture.
+A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 12 specialist agents, 9 slash commands, 9 workflow skills, lifecycle hooks, and coding rules — all adapting to your project's actual architecture, git conventions, and Jira workflow.
 
 ---
 
@@ -18,7 +18,9 @@ The fastest way. Works directly inside Claude Code without cloning anything.
 Then set up your project config:
 
 ```
-/detect-arch
+/detect-arch       ← auto-detect your mobile stack
+/detect-gitflow    ← auto-detect your git branching conventions
+/detect-jira       ← connect and configure your Jira project
 ```
 
 ### Option 2 — Manual script
@@ -42,13 +44,15 @@ bash claude-crew/uninstall.sh --global  # remove global install
 
 ## First-time setup
 
-After installing, run `/detect-arch` inside your mobile project. It reads your build files (`build.gradle.kts`, `libs.versions.toml`, `Package.swift`, `Podfile`) and writes a `claude-crew.config.md` that tells every agent what your project actually uses:
+### 1. Architecture config
+
+After installing, run `/detect-arch` inside your mobile project. It reads your build files (`build.gradle.kts`, `libs.versions.toml`, `Package.swift`, `Podfile`) and writes `claude-crew.config.md`:
 
 ```
 /detect-arch
 ```
 
-All 10 agents read `claude-crew.config.md` before doing anything — so they review against **your** architecture, not an opinionated default:
+All agents read `claude-crew.config.md` before doing anything — so they review against **your** architecture, not an opinionated default:
 
 ```yaml
 platform: android
@@ -58,10 +62,45 @@ state: coroutines-flow
 di: hilt
 networking: retrofit
 storage: room
-...
 ```
 
-If your project uses Dagger2, the reviewer won't flag it as wrong. If you use RxJava, it won't suggest migrating to Flow. Edit the file manually if the detector misses anything.
+If your project uses Dagger2, the reviewer won't flag it as wrong. If you use RxJava, it won't suggest migrating to Flow.
+
+### 2. Git flow config
+
+Run `/detect-gitflow` to teach Claude your team's branching model, commit style, and sprint workflow:
+
+```
+/detect-gitflow
+```
+
+This starts an interactive Q&A, inspects your git history for defaults, and writes `git-flow.config.md`. After this, the `git-flow-advisor` can:
+
+- Generate correct branch names for any ticket
+- Format commit messages in your team's style
+- Guide sprint starts, hotfix flows, and release cuts
+- Write PR titles and descriptions in your format
+
+### 3. Jira config
+
+Run `/detect-jira` to connect Claude to your Jira board (requires [Jira CLI](https://github.com/ankitpokhrel/jira-cli)):
+
+```bash
+# Install Jira CLI first
+brew install ankitpokhrel/jira-cli/jira-cli
+jira init
+
+# Then in Claude Code:
+/detect-jira
+```
+
+This asks about your project key, board, issue types, workflow statuses, sprint setup, and linking conventions, then writes `jira.config.md`. After this, the `jira-advisor` can:
+
+- Show your current sprint board
+- Create tickets from feature descriptions
+- Transition issues through your workflow
+- Break epics into Android + iOS stories
+- Link branches and PRs to Jira tickets
 
 ---
 
@@ -85,8 +124,6 @@ Stage 6 — A11Y      ┘  → ui-accessibility     WCAG 2.1 AA           ← pa
 Stage 7 — RELEASE      → release-manager      version bump + release notes
 ```
 
-Stages 5 & 6 run **in parallel** — two Agent tool calls in one message.
-
 ### Slash commands
 
 | Command | What it does |
@@ -96,7 +133,10 @@ Stages 5 & 6 run **in parallel** — two Agent tool calls in one message.
 | `/ios-review` | Swift/iOS code review |
 | `/mobile-test <file>` | Generate test suite |
 | `/mobile-release <version>` | Release preparation checklist |
-| `/detect-arch` | Auto-detect project architecture |
+| `/detect-arch` | Auto-detect project architecture → `claude-crew.config.md` |
+| `/detect-gitflow` | Interactive git conventions setup → `git-flow.config.md` |
+| `/sprint-start [N]` | Kick off a sprint: sync branches, create sprint branch, print checklist |
+| `/detect-jira` | Interactive Jira project setup → `jira.config.md` |
 
 ### Mention agents directly
 
@@ -109,6 +149,8 @@ Stages 5 & 6 run **in parallel** — two Agent tool calls in one message.
 @mobile-security     Audit this API client for cert pinning
 @ui-accessibility    Check touch targets and VoiceOver labels
 @mobile-performance  Why is this list scrolling janky?
+@git-flow-advisor    Name a branch for PROJ-42 adding dark mode
+@jira-advisor        Show my sprint board / create a story / move PROJ-123 to In Review
 ```
 
 ---
@@ -127,6 +169,8 @@ Stages 5 & 6 run **in parallel** — two Agent tool calls in one message.
 | `mobile-test-planner` | Unit, integration, UI, snapshot test generation | Read, Write, Edit, Glob |
 | `ui-accessibility` | WCAG 2.1 AA, TalkBack, VoiceOver, contrast | Read, Grep, Glob |
 | `release-manager` | App Store / Play Store, versioning, Fastlane | Read, Grep, Glob, Bash |
+| `git-flow-advisor` | Branch names, commit messages, PR titles, sprint/hotfix/release workflow | Read, Bash, Glob, Grep |
+| `jira-advisor` | Sprint board, ticket creation, issue transitions, epic breakdown | Read, Bash, Glob, Grep |
 
 ---
 
@@ -134,7 +178,7 @@ Stages 5 & 6 run **in parallel** — two Agent tool calls in one message.
 
 Structured workflows invokable as skills:
 
-| Skill | Trigger |
+| Skill | What it covers |
 |---|---|
 | `android-feature` | Build a new Android feature end-to-end |
 | `ios-feature` | Build a new iOS feature end-to-end |
@@ -143,6 +187,8 @@ Structured workflows invokable as skills:
 | `mobile-code-review` | Cross-platform code review workflow |
 | `accessibility-audit` | Full WCAG 2.1 AA audit workflow |
 | `performance-profile` | Performance analysis workflow |
+| `git-flow` | Git branching, commit, sprint, hotfix, and release reference |
+| `jira-flow` | Jira CLI quick reference, daily workflow, sprint planning |
 
 ---
 
@@ -154,7 +200,7 @@ claude-crew/
 │   ├── plugin.json          ← plugin manifest
 │   └── marketplace.json     ← self-hosted marketplace definition
 │
-├── agents/                  ← 10 specialist agents
+├── agents/                  ← 12 specialist agents
 │   ├── android-developer.md
 │   ├── ios-developer.md
 │   ├── android-reviewer.md
@@ -164,24 +210,31 @@ claude-crew/
 │   ├── mobile-performance.md
 │   ├── mobile-test-planner.md
 │   ├── ui-accessibility.md
-│   └── release-manager.md
+│   ├── release-manager.md
+│   ├── git-flow-advisor.md
+│   └── jira-advisor.md
 │
-├── commands/                ← 6 slash commands
+├── commands/                ← 9 slash commands
 │   ├── sdlc.md
 │   ├── android-review.md
 │   ├── ios-review.md
 │   ├── mobile-test.md
 │   ├── mobile-release.md
-│   └── detect-arch.md
+│   ├── detect-arch.md
+│   ├── detect-gitflow.md
+│   ├── sprint-start.md
+│   └── detect-jira.md
 │
-├── skills/                  ← 7 skills, each in <name>/SKILL.md
+├── skills/                  ← 9 skills, each in <name>/SKILL.md
 │   ├── android-feature/SKILL.md
 │   ├── ios-feature/SKILL.md
 │   ├── mobile-test/SKILL.md
 │   ├── mobile-release/SKILL.md
 │   ├── mobile-code-review/SKILL.md
 │   ├── accessibility-audit/SKILL.md
-│   └── performance-profile/SKILL.md
+│   ├── performance-profile/SKILL.md
+│   ├── git-flow/SKILL.md
+│   └── jira-flow/SKILL.md
 │
 ├── scripts/                 ← lifecycle hook scripts
 │   ├── pre-tool-use.sh      guards destructive ops, keystores, secrets
@@ -199,6 +252,8 @@ claude-crew/
 │   └── ios-architecture.md
 │
 ├── claude-crew.config.md    ← project architecture config template
+├── git-flow.config.md       ← git conventions config template
+├── jira.config.md           ← Jira project config template
 ├── CLAUDE.md                ← orchestration rules and agent dispatch table
 ├── install.sh               ← manual installer
 └── uninstall.sh             ← clean uninstaller
@@ -212,7 +267,10 @@ Claude Code natively discovers plugin content from the standard directories. No 
 
 The `/sdlc` command instructs Claude to use the built-in `Agent` tool to spawn isolated sub-agents. Each agent gets its own context window with a focused system prompt, preventing context bleed between stages.
 
-All agents read `claude-crew.config.md` at the start of every task so they adapt their rules to your project's actual stack — not an assumed default.
+All agents read their relevant config files at the start of every task:
+- `claude-crew.config.md` — mobile stack (DI, UI, state, networking)
+- `git-flow.config.md` — branching model, commit style, sprint workflow
+- `jira.config.md` — project key, board, workflow statuses, sprint setup
 
 ---
 

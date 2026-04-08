@@ -115,6 +115,7 @@ if $LOCAL_INSTALL; then
   SRC_SETTINGS="$SCRIPT_DIR/settings.json"
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
   SRC_GITFLOW_MD="$SCRIPT_DIR/git-flow.config.md"
+  SRC_JIRA_MD="$SCRIPT_DIR/jira.config.md"
   success "Using local source: $SCRIPT_DIR"
 else
   # Remote install — download to temp dir
@@ -138,6 +139,7 @@ else
   SRC_SETTINGS="$SRC_BASE/settings.json"
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
   SRC_GITFLOW_MD="$SRC_BASE/git-flow.config.md"
+  SRC_JIRA_MD="$SRC_BASE/jira.config.md"
   success "Downloaded claude-crew source"
 fi
 
@@ -289,6 +291,18 @@ else
     success "Installed git-flow.config.md → $DST_GITFLOW"
     info "Run /detect-gitflow to auto-fill it, or edit manually to match your team conventions"
   fi
+
+  # jira.config.md template (only if not already present)
+  DST_JIRA="$PROJECT_DIR/jira.config.md"
+  if $DRY_RUN; then
+    info "[dry-run] Would install jira.config.md → $DST_JIRA"
+  elif [[ -f "$DST_JIRA" ]]; then
+    warn "jira.config.md already exists — skipping (edit it manually or run /detect-jira)"
+  elif [[ -f "$SRC_JIRA_MD" ]]; then
+    cp "$SRC_JIRA_MD" "$DST_JIRA"
+    success "Installed jira.config.md → $DST_JIRA"
+    info "Run /detect-jira to configure your Jira project (requires Jira CLI)"
+  fi
 fi
 
 # ── Post-install summary ──────────────────────────────────────────────────────
@@ -310,7 +324,8 @@ echo "    /mobile-test              Generate test suite"
 echo "    /mobile-release           Release preparation checklist"
 echo "    /detect-arch              Auto-detect project architecture
     /detect-gitflow           Auto-detect git branching conventions
-    /sprint-start [N]         Kick off a new sprint"
+    /sprint-start [N]         Kick off a new sprint
+    /detect-jira              Interactive Jira project setup (requires Jira CLI)"
 echo ""
 echo -e "  ${BOLD}Skills (workflows):${RESET}"
 echo "    android-feature           mobile-code-review    performance-profile"
@@ -321,6 +336,7 @@ echo -e "  ${BOLD}Agents (specialist reviewers):${RESET}"
 echo "    android-reviewer          mobile-architect      mobile-security"
 echo "    ios-reviewer              mobile-performance    mobile-test-planner"
 echo "    ui-accessibility          release-manager       git-flow-advisor"
+echo "    jira-advisor"
 echo ""
 if $GLOBAL; then
   echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."

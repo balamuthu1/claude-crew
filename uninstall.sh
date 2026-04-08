@@ -48,6 +48,7 @@ if [[ -d "$TARGET_CLAUDE/agents" ]]; then
     mobile-performance.md mobile-security.md mobile-test-planner.md
     release-manager.md ui-accessibility.md
     git-flow-advisor.md
+    jira-advisor.md
   )
   for agent in "${CREW_AGENTS[@]}"; do
     [[ -f "$TARGET_CLAUDE/agents/$agent" ]] && rm "$TARGET_CLAUDE/agents/$agent" && info "Removed agent: $agent"
@@ -57,7 +58,7 @@ if [[ -d "$TARGET_CLAUDE/agents" ]]; then
 fi
 
 # Remove commands
-CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md)
+CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md detect-jira.md)
 for cmd in "${CREW_COMMANDS[@]}"; do
   [[ -f "$TARGET_CLAUDE/commands/$cmd" ]] && rm "$TARGET_CLAUDE/commands/$cmd" && info "Removed command: $cmd"
 done
@@ -83,7 +84,7 @@ with open(path, 'w') as f: f.write(cleaned.strip() + '\n')
 fi
 
 # Remove skills from .claude/skills/
-CREW_SKILLS=(android-feature ios-feature mobile-test mobile-release mobile-code-review accessibility-audit performance-profile git-flow)
+CREW_SKILLS=(android-feature ios-feature mobile-test mobile-release mobile-code-review accessibility-audit performance-profile git-flow jira-flow)
 for skill in "${CREW_SKILLS[@]}"; do
   [[ -d "$TARGET_CLAUDE/skills/$skill" ]] && rm -rf "$TARGET_CLAUDE/skills/$skill" && info "Removed skill: $skill"
 done
