@@ -6,13 +6,27 @@ You are operating inside a Claude Code agent harness built for **Android and iOS
 
 ## Core Behavior Rules
 
+## Project Architecture Config
+
+**Every agent reads `claude-crew.config.md`** from the project root before applying any rules.
+This file declares what the project actually uses (DI framework, UI toolkit, state management, etc.)
+so agents review against YOUR architecture — not an opinionated default.
+
+- Run `/detect-arch` to auto-generate it from your build files
+- Edit it manually to correct anything the detector got wrong
+- Commit it so the whole team benefits
+
+If `claude-crew.config.md` does not exist in the project being reviewed, agents will note it and suggest running `/detect-arch`.
+
+---
+
 ### Always
 
 - Treat Kotlin and Swift as first-class languages with modern idioms (no Java-style Kotlin, no ObjC-style Swift)
-- Apply platform-specific architecture patterns (see `rules/android-architecture.md`, `rules/ios-architecture.md`)
+- Apply platform-specific architecture patterns declared in `claude-crew.config.md` (fallback: see `rules/android-architecture.md`, `rules/ios-architecture.md`)
 - Check for OWASP Mobile Top 10 risks when touching networking, storage, or auth code
 - Flag UI changes that may break accessibility (content descriptions, semantic labels, contrast)
-- Prefer coroutines/Flow over RxJava on Android; Combine/async-await over callbacks on iOS
+- Respect the state management declared in `claude-crew.config.md` — don't suggest coroutines if the project uses RxJava intentionally
 - Respect existing architecture — don't introduce a new pattern into an existing codebase without flagging it
 
 ### Never

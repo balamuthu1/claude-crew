@@ -111,6 +111,7 @@ if $LOCAL_INSTALL; then
   SRC_SKILLS="$SCRIPT_DIR/skills"
   SRC_CLAUDE_MD="$SCRIPT_DIR/CLAUDE.md"
   SRC_SETTINGS="$SCRIPT_DIR/.claude/settings.json"
+  SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
   success "Using local source: $SCRIPT_DIR"
 else
   # Remote install — download to temp dir
@@ -131,6 +132,7 @@ else
   SRC_SKILLS="$SRC_BASE/skills"
   SRC_CLAUDE_MD="$SRC_BASE/CLAUDE.md"
   SRC_SETTINGS="$SRC_BASE/.claude/settings.json"
+  SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
   success "Downloaded claude-crew source"
 fi
 
@@ -256,6 +258,18 @@ else
   # Also install rules/ and skills/ into project for agent reference
   copy_dir "$SRC_RULES"  "$PROJECT_DIR/rules"  "coding rules (Kotlin, Swift, Arch)"
   copy_dir "$SRC_SKILLS" "$PROJECT_DIR/skills" "workflow skills"
+
+  # Install claude-crew.config.md template (only if not already present)
+  DST_CONFIG="$PROJECT_DIR/claude-crew.config.md"
+  if $DRY_RUN; then
+    info "[dry-run] Would install claude-crew.config.md → $DST_CONFIG"
+  elif [[ -f "$DST_CONFIG" ]]; then
+    warn "claude-crew.config.md already exists — skipping (edit it manually or run /detect-arch)"
+  elif [[ -f "$SRC_CONFIG_MD" ]]; then
+    cp "$SRC_CONFIG_MD" "$DST_CONFIG"
+    success "Installed claude-crew.config.md → $DST_CONFIG"
+    info "Run /detect-arch to auto-fill it, or edit manually to match your project"
+  fi
 fi
 
 # ── Post-install summary ──────────────────────────────────────────────────────
@@ -283,11 +297,16 @@ echo "    ui-accessibility      release-manager"
 echo ""
 if $GLOBAL; then
   echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."
+  echo ""
+  echo -e "  ${BOLD}Next step:${RESET} In each project, run /detect-arch to create claude-crew.config.md"
+  echo -e "  so agents review against YOUR architecture."
 else
   echo -e "  ${BOLD}Project install:${RESET} agents + commands active in ${PROJECT_DIR}"
   echo ""
-  echo -e "  Open Claude Code in this project and try:"
-  echo -e "    ${BLUE}/sdlc Build a user profile screen for Android${RESET}"
+  echo -e "  ${BOLD}Next steps:${RESET}"
+  echo -e "    1. Run ${BLUE}/detect-arch${RESET} to auto-detect your project architecture"
+  echo -e "       (or edit claude-crew.config.md manually)"
+  echo -e "    2. Try: ${BLUE}/sdlc Build a user profile screen for Android${RESET}"
 fi
 echo ""
 echo -e "  Docs: ${BLUE}${REPO_URL}${RESET}"
