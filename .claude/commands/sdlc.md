@@ -22,6 +22,8 @@ After all stages complete, print the SDLC Summary Report.
 ## Stage Definitions
 
 ### Stage 1 — PLAN
+Spawn the `mobile-architect` agent.
+
 Agent prompt:
 ```
 You are the mobile-architect agent.
@@ -29,15 +31,14 @@ You are the mobile-architect agent.
 Feature: {{FEATURE}}
 Platform: {{PLATFORM}}
 
-Produce:
-1. Architecture pattern choice (MVVM/MVI/TCA) with rationale
+Read claude-crew.config.md first. Then produce:
+1. Architecture pattern choice (respecting config pattern/ui/di/state) with rationale
 2. File/module structure skeleton (real paths, not pseudocode)
 3. Layer breakdown: Domain → Data → Presentation
 4. DI wiring, navigation approach, offline strategy if relevant
 
-Rules (Android): Hilt DI, Coroutines/Flow, Compose, Clean Architecture
-Rules (iOS): Constructor DI, async/await, SwiftUI, Clean Architecture
-Output must be a complete skeleton a developer can start from immediately.
+Output must be a complete skeleton that the android-developer or ios-developer
+agent can implement from immediately.
 ```
 Tools to allow: Read, Glob
 
@@ -46,39 +47,66 @@ Gate: Print the architecture decision and ask "Proceed to BUILD? [y/N]"
 ---
 
 ### Stage 2 — BUILD
-Agent prompt:
+Spawn `android-developer` for Android, `ios-developer` for iOS, or both in parallel for cross-platform.
+
+Agent prompt (Android):
 ```
-You are the mobile feature builder.
+You are the android-developer agent.
 
 Feature: {{FEATURE}}
-Platform: {{PLATFORM}}
+Platform: Android
 
-Architecture from planning stage:
+Architecture plan from Stage 1:
 {{PLAN_OUTPUT}}
 
-Implement the full feature skeleton in this order:
-1. Domain: models, repository interface, use case
-2. Data: DTO, API service, repository implementation, mapper
-3. ViewModel + UiState sealed class
-4. UI: Compose screen (Android) or SwiftUI view (iOS)
-5. DI module wiring
+Read claude-crew.config.md first, then implement the full feature:
+1. Domain: models, repository interface, use case (pure Kotlin)
+2. Data: DTO, Retrofit service, repository implementation, mapper
+3. ViewModel + UiState sealed class + StateFlow
+4. Compose screen: stateless, state hoisted from ViewModel
+5. Hilt module wiring
 6. Navigation route registration
 
-Write real, compilable code. File by file. No pseudocode.
+Write complete, compilable Kotlin files. No pseudocode. No TODOs.
 ```
-Tools to allow: Read, Write, Edit, Glob
+
+Agent prompt (iOS):
+```
+You are the ios-developer agent.
+
+Feature: {{FEATURE}}
+Platform: iOS
+
+Architecture plan from Stage 1:
+{{PLAN_OUTPUT}}
+
+Read claude-crew.config.md first, then implement the full feature:
+1. Domain: model struct, repository protocol, use case struct (pure Swift)
+2. Data: Codable DTO, repository implementation, mapper extension
+3. @MainActor ViewModel + ViewState enum + @Published state
+4. SwiftUI view: stateless, @StateObject owning the ViewModel
+5. DI assembly / factory wiring
+6. Navigation wiring (NavigationStack or Coordinator)
+
+Write complete, compilable Swift files. No pseudocode. No TODOs.
+```
+Tools to allow: Read, Write, Edit, Glob, Bash
 
 Gate: Show file list created and ask "Proceed to TEST? [y/N]"
 
 ---
 
 ### Stage 3 — TEST
+Spawn the `mobile-test-planner` agent.
+
 Agent prompt:
 ```
-You are the mobile test planner.
+You are the mobile-test-planner agent.
 
 Feature: {{FEATURE}}
 Platform: {{PLATFORM}}
+
+Read claude-crew.config.md first (check test-framework and mocking fields).
 
 Implementation from build stage:
 {{BUILD_OUTPUT}}
@@ -89,8 +117,8 @@ Generate a complete test suite:
 - Repository integration tests: success path, network error → domain error
 - UI test: main happy path
 
-Android: JUnit 4 + MockK + runTest + Turbine for Flow assertions
-iOS: XCTest + @MainActor + async/await + protocol mocks
+Use the test framework and mocking library declared in config (defaults:
+Android: JUnit4 + MockK + runTest + Turbine; iOS: XCTest + async/await + protocol mocks).
 
 Write complete test files with imports and setup/teardown.
 ```

@@ -48,6 +48,8 @@ runs in an isolated context window.
 
 | Trigger | Spawn this agent | Key instruction |
 |---|---|---|
+| "build / implement Android feature" | `android-developer` | Pass feature description + relevant existing files |
+| "build / implement iOS feature" | `ios-developer` | Pass feature description + relevant existing files |
 | "review this Android / Kotlin code" | `android-reviewer` | Pass the file paths |
 | "review this iOS / Swift code" | `ios-reviewer` | Pass the file paths |
 | "help me design the architecture" | `mobile-architect` | Pass feature description + platform |
