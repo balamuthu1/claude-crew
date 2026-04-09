@@ -141,7 +141,7 @@ if [[ -n "$COMMAND" ]]; then
   fi
 
   # ── eval with external input ────────────────────────────────────────────
-  if echo "$COMMAND" | grep -qE "\beval\b.*(\\\$\(|`|\\\$\{)"; then
+  if echo "$COMMAND" | grep -qE "\beval\b.*(\\\$\(|\`|\\\$\{)"; then
     block "Bash" "$COMMAND" "eval with dynamic input is a command injection risk"
   fi
 
