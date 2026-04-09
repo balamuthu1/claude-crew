@@ -1,6 +1,6 @@
 {
   "name": "claude-crew",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Mobile agent harness for Android and iOS engineering teams. Provides specialist agents, SDLC workflows, code review, security, accessibility, and release management.",
   "author": {
     "name": "balamuthu1",
