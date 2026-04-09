@@ -82,7 +82,7 @@ PYEOF
 if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
 
   # Read transcript — handle both JSONL and plain text formats
-  TRANSCRIPT_TEXT=$(python3 - "$TRANSCRIPT_PATH" <<'PYEOF' 2>/dev/null || cat "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
+  TRANSCRIPT_TEXT=$(python3 - "$TRANSCRIPT_PATH" <<'PYEOF' 2>/dev/null
 import json, sys
 path = sys.argv[1]
 lines = []
@@ -109,6 +109,12 @@ except Exception as e:
     pass
 print("\n".join(lines[:2000]))  # cap at ~2000 lines
 PYEOF
+)
+
+  # Fallback to raw file content if Python processing failed
+  if [[ -z "$TRANSCRIPT_TEXT" ]]; then
+    TRANSCRIPT_TEXT=$(cat "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
+  fi
 
   if [[ -n "$TRANSCRIPT_TEXT" ]]; then
 
