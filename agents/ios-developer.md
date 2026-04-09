@@ -1,6 +1,6 @@
 ---
 name: ios-developer
-description: iOS feature implementer. Use when building a new iOS feature, writing Swift code, implementing ViewModels, SwiftUI views, repositories, use cases, Core Data / SwiftData models, or wiring navigation. Produces production-ready Swift code that follows the project's declared architecture.
+description: iOS feature implementer. Use for writing Swift/SwiftUI code, ViewModels, repositories, use cases, Core Data/SwiftData models, and navigation. Produces production-ready code following the project's declared architecture.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 ---

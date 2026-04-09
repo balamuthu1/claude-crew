@@ -1,6 +1,6 @@
 ---
 name: android-reviewer
-description: Specialized Android code reviewer. Use when reviewing Kotlin/Java Android code, Jetpack components, Compose UI, ViewModel/Repository patterns, Gradle build files, or any Android-specific implementation. Produces structured review with severity levels.
+description: Specialized Android code reviewer. Use for reviewing Kotlin/Java code, Jetpack, Compose UI, ViewModel/Repository patterns, and Gradle files. Produces structured review with severity levels.
 tools: Read, Grep, Glob, Write, Edit
 model: sonnet
 ---

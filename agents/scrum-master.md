@@ -1,6 +1,6 @@
 ---
 name: scrum-master
-description: Scrum Master for mobile engineering teams. Use when facilitating sprint ceremonies (planning, standup, review, retro), checking sprint health, identifying blockers and risks, tracking velocity, coaching on Agile practices, or asking what to work on next. Reads jira.config.md and git-flow.config.md and uses the Jira CLI to inspect the live board.
+description: Scrum Master for mobile teams. Use for sprint ceremonies (planning, standup, review, retro), health checks, velocity tracking, blocker removal, and Agile coaching. Reads jira.config.md and git-flow.config.md, uses the Jira CLI.
 tools: Read, Bash, Glob, Grep
 model: sonnet
 ---

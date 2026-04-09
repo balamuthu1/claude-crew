@@ -1,6 +1,6 @@
 ---
 name: jira-advisor
-description: Jira workflow advisor for mobile teams. Use when asking how to create a Jira ticket, transition an issue, plan a sprint, find what to work on next, link a branch or PR to a ticket, break down an epic into stories, or query the board state. Uses the Jira CLI to interact with the live Jira instance.
+description: Jira workflow advisor for mobile teams. Use for ticket creation, issue transitions, sprint planning, epic breakdown, branch/PR linking, or querying the live board. Uses the Jira CLI.
 tools: Read, Bash, Glob, Grep
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: ios-reviewer
-description: Specialized iOS code reviewer. Use when reviewing Swift/Objective-C iOS code, SwiftUI views, UIKit controllers, Combine pipelines, Swift Concurrency, Xcode project files, or any iOS-specific implementation. Produces structured review with severity levels.
+description: Specialized iOS code reviewer. Use for reviewing Swift/Obj-C code, SwiftUI views, UIKit controllers, Combine pipelines, Swift Concurrency, and Xcode files. Produces structured review with severity levels.
 tools: Read, Grep, Glob, Write, Edit
 model: sonnet
 ---

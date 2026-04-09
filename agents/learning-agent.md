@@ -1,6 +1,6 @@
 ---
 name: learning-agent
-description: Project memory manager. Use when explicitly learning something new (/learn), reviewing accumulated memories (/memory-review), or extracting insights from a completed session. Reads and writes .claude/memory/MEMORY.md to make the harness smarter over time.
+description: Project memory manager. Use for /learn (explicit teaching), /memory-review (curate entries), or extracting session insights. Reads and writes memory/MEMORY.md.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 ---
