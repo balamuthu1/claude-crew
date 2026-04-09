@@ -348,6 +348,7 @@ echo "    /detect-arch              Auto-detect project architecture
     /retro [format]           Run a sprint retrospective
     /sprint-health            Check sprint burndown and surface risks
     /security-scan            Full OWASP Mobile Top 10 + secrets audit
+    /commit-push-pr           Stage, commit, push, and open a PR (follows team conventions)
     /learn \"<fact>\"           Teach Claude something about this project
     /memory-review            Curate accumulated project memory"
 echo ""

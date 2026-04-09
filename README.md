@@ -1,6 +1,6 @@
 # Claude Crew — Mobile Agent Harness
 
-A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 14 specialist agents, 15 slash commands, 10 workflow skills, hardened security hooks, coding rules, and a self-learning memory system — all adapting to your project's actual architecture, git conventions, Jira workflow, and Scrum process.
+A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 14 specialist agents, 16 slash commands, 10 workflow skills, hardened security hooks, coding rules, and a self-learning memory system — all adapting to your project's actual architecture, git conventions, Jira workflow, and Scrum process.
 
 ---
 
@@ -203,6 +203,7 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 | `/retro [format]` | Run a sprint retrospective (Start/Stop/Continue, Sailboat, 4Ls) |
 | `/sprint-health` | Check burndown, surface at-risk stories, forecast carry-over |
 | `/security-scan` | Full OWASP Mobile Top 10 audit + hardcoded secrets scan |
+| `/commit-push-pr` | Stage, commit (team conventions), push, and open a PR via `gh` CLI |
 | `/learn "<fact>"` | Explicitly teach Claude a project rule → `.claude/memory/MEMORY.md` (confidence:high) |
 | `/memory-review` | Curate accumulated project memory: promote, delete, or edit entries |
 
@@ -288,7 +289,7 @@ claude-crew/
 │   ├── scrum-master.md
 │   └── learning-agent.md
 │
-├── commands/                ← 15 slash commands
+├── commands/                ← 16 slash commands
 │   ├── sdlc.md
 │   ├── android-review.md
 │   ├── ios-review.md
@@ -302,6 +303,7 @@ claude-crew/
 │   ├── retro.md
 │   ├── sprint-health.md
 │   ├── security-scan.md
+│   ├── commit-push-pr.md
 │   ├── learn.md
 │   └── memory-review.md
 │
