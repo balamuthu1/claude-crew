@@ -50,6 +50,7 @@ if [[ -d "$TARGET_CLAUDE/agents" ]]; then
     git-flow-advisor.md
     jira-advisor.md
     scrum-master.md
+    learning-agent.md
   )
   for agent in "${CREW_AGENTS[@]}"; do
     [[ -f "$TARGET_CLAUDE/agents/$agent" ]] && rm "$TARGET_CLAUDE/agents/$agent" && info "Removed agent: $agent"
@@ -59,15 +60,17 @@ if [[ -d "$TARGET_CLAUDE/agents" ]]; then
 fi
 
 # Remove commands
-CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md detect-jira.md standup.md retro.md sprint-health.md security-scan.md)
+CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md detect-jira.md standup.md retro.md sprint-health.md security-scan.md learn.md memory-review.md)
 for cmd in "${CREW_COMMANDS[@]}"; do
   [[ -f "$TARGET_CLAUDE/commands/$cmd" ]] && rm "$TARGET_CLAUDE/commands/$cmd" && info "Removed command: $cmd"
 done
 [[ -d "$TARGET_CLAUDE/commands" && -z "$(ls -A "$TARGET_CLAUDE/commands" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/commands"
 
 # Remove hooks
-[[ -f "$TARGET_CLAUDE/hooks/pre-tool-use.sh" ]]  && rm "$TARGET_CLAUDE/hooks/pre-tool-use.sh"
-[[ -f "$TARGET_CLAUDE/hooks/post-tool-use.sh" ]] && rm "$TARGET_CLAUDE/hooks/post-tool-use.sh"
+[[ -f "$TARGET_CLAUDE/hooks/pre-tool-use.sh" ]]    && rm "$TARGET_CLAUDE/hooks/pre-tool-use.sh"
+[[ -f "$TARGET_CLAUDE/hooks/post-tool-use.sh" ]]   && rm "$TARGET_CLAUDE/hooks/post-tool-use.sh"
+[[ -f "$TARGET_CLAUDE/hooks/session-start.sh" ]]   && rm "$TARGET_CLAUDE/hooks/session-start.sh"
+[[ -f "$TARGET_CLAUDE/hooks/session-end.sh" ]]     && rm "$TARGET_CLAUDE/hooks/session-end.sh"
 [[ -d "$TARGET_CLAUDE/hooks" && -z "$(ls -A "$TARGET_CLAUDE/hooks" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/hooks"
 success "Removed hooks"
 
@@ -95,6 +98,18 @@ done
 if [[ -d "$PROJECT_DIR/rules" ]]; then
   read -r -p "  Remove $PROJECT_DIR/rules? [y/N] " ans
   [[ "$ans" =~ ^[Yy]$ ]] && rm -rf "$PROJECT_DIR/rules" && success "Removed rules/"
+fi
+
+# Optionally remove memory/MEMORY.md (ask — contains valuable accumulated learnings)
+if [[ -f "$PROJECT_DIR/memory/MEMORY.md" ]]; then
+  read -r -p "  Remove $PROJECT_DIR/memory/MEMORY.md (accumulated project learnings)? [y/N] " ans
+  if [[ "$ans" =~ ^[Yy]$ ]]; then
+    rm -f "$PROJECT_DIR/memory/MEMORY.md"
+    rmdir "$PROJECT_DIR/memory" 2>/dev/null || true
+    success "Removed memory/MEMORY.md"
+  else
+    warn "Keeping memory/MEMORY.md — your project learnings are preserved"
+  fi
 fi
 
 echo ""

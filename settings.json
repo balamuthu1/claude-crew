@@ -1,6 +1,8 @@
 {
   "description": "Claude Crew — Mobile Agent Harness for Android & iOS teams",
 
+  "autoMemoryEnabled": true,
+
   "hooks": {
     "PreToolUse": [
       {
@@ -20,6 +22,26 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use.sh\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh\""
           }
         ]
       }

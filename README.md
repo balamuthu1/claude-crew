@@ -1,6 +1,6 @@
 # Claude Crew — Mobile Agent Harness
 
-A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 13 specialist agents, 13 slash commands, 10 workflow skills, hardened security hooks, and coding rules — all adapting to your project's actual architecture, git conventions, Jira workflow, and Scrum process.
+A **Claude Code plugin** for Android & iOS mobile engineering teams. Installs 14 specialist agents, 15 slash commands, 10 workflow skills, hardened security hooks, coding rules, and a self-learning memory system — all adapting to your project's actual architecture, git conventions, Jira workflow, and Scrum process.
 
 ---
 
@@ -131,6 +131,39 @@ This asks about your project key, board, issue types, workflow statuses, sprint 
 - Break epics into Android + iOS stories
 - Link branches and PRs to Jira tickets
 
+### 4. Self-learning memory
+
+Claude Crew learns from every session automatically. No manual action required.
+
+**How it works:**
+- At session **start**: `memory/MEMORY.md` is injected into Claude's context so every session starts with accumulated project knowledge
+- At session **end**: the `session-end` hook scans the transcript for corrections, architecture decisions, antipatterns, and build commands, then writes `confidence:low` entries automatically
+- After code **reviews**: `android-reviewer`, `ios-reviewer`, and `mobile-security` agents write generalizable findings to memory as `confidence:medium` entries
+
+**Memory commands:**
+
+```
+/learn "We use Koin, not Hilt — we migrated away deliberately"
+  → writes confidence:high entry immediately
+
+/memory-review
+  → shows all entries grouped by confidence level
+  → promotes low → medium → high, or deletes stale entries
+```
+
+**Memory file:** `memory/MEMORY.md` — committed to git so the whole team shares the accumulated knowledge.
+
+```markdown
+[2025-04-09 | confidence:high | source:explicit-learn]
+  DI: Koin. Never suggest Hilt — team migrated away deliberately.
+
+[2025-04-09 | confidence:medium | source:android-reviewer]
+  Composable screens consistently named with "Screen" suffix (LoginScreen, not LoginView).
+
+[2025-04-09 | confidence:low | source:session-end]
+  User corrected: use collectAsStateWithLifecycle() not collectAsState() for Flow.
+```
+
 ---
 
 ## Usage
@@ -170,6 +203,8 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 | `/retro [format]` | Run a sprint retrospective (Start/Stop/Continue, Sailboat, 4Ls) |
 | `/sprint-health` | Check burndown, surface at-risk stories, forecast carry-over |
 | `/security-scan` | Full OWASP Mobile Top 10 audit + hardcoded secrets scan |
+| `/learn "<fact>"` | Explicitly teach Claude a project rule → `memory/MEMORY.md` (confidence:high) |
+| `/memory-review` | Curate accumulated project memory: promote, delete, or edit entries |
 
 ### Mention agents directly
 
@@ -195,10 +230,10 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 |---|---|---|
 | `android-developer` | Writes production Kotlin/Compose code end-to-end | Read, Write, Edit, Glob, Grep, Bash |
 | `ios-developer` | Writes production Swift/SwiftUI code end-to-end | Read, Write, Edit, Glob, Grep, Bash |
-| `android-reviewer` | Reviews Kotlin, Jetpack, Coroutines, Compose | Read, Grep, Glob |
-| `ios-reviewer` | Reviews Swift, SwiftUI, Combine, UIKit, async/await | Read, Grep, Glob |
+| `android-reviewer` | Reviews Kotlin, Jetpack, Coroutines, Compose — writes findings to memory | Read, Grep, Glob, Write, Edit |
+| `ios-reviewer` | Reviews Swift, SwiftUI, Combine, UIKit, async/await — writes findings to memory | Read, Grep, Glob, Write, Edit |
 | `mobile-architect` | Clean Architecture, MVVM, MVI, TCA, offline-first | Read, Grep, Glob |
-| `mobile-security` | OWASP Mobile Top 10, cert pinning, data storage | Read, Grep, Glob |
+| `mobile-security` | OWASP Mobile Top 10, cert pinning, data storage — writes findings to memory | Read, Grep, Glob, Write, Edit |
 | `mobile-performance` | ANR, memory leaks, battery drain, render jank | Read, Grep, Glob |
 | `mobile-test-planner` | Unit, integration, UI, snapshot test generation | Read, Write, Edit, Glob |
 | `ui-accessibility` | WCAG 2.1 AA, TalkBack, VoiceOver, contrast | Read, Grep, Glob |
@@ -206,6 +241,7 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 | `git-flow-advisor` | Branch names, commit messages, PR titles, sprint/hotfix/release workflow | Read, Bash, Glob, Grep |
 | `jira-advisor` | Sprint board, ticket creation, issue transitions, epic breakdown | Read, Bash, Glob, Grep |
 | `scrum-master` | Sprint planning, standup, retro, health checks, velocity, Agile coaching | Read, Bash, Glob, Grep |
+| `learning-agent` | Project memory manager — explicit learn, memory review, session extraction | Read, Write, Edit, Glob, Grep, Bash |
 
 ---
 
@@ -236,7 +272,7 @@ claude-crew/
 │   ├── plugin.json          ← plugin manifest
 │   └── marketplace.json     ← self-hosted marketplace definition
 │
-├── agents/                  ← 12 specialist agents
+├── agents/                  ← 14 specialist agents
 │   ├── android-developer.md
 │   ├── ios-developer.md
 │   ├── android-reviewer.md
@@ -249,9 +285,10 @@ claude-crew/
 │   ├── release-manager.md
 │   ├── git-flow-advisor.md
 │   ├── jira-advisor.md
-│   └── scrum-master.md
+│   ├── scrum-master.md
+│   └── learning-agent.md
 │
-├── commands/                ← 12 slash commands
+├── commands/                ← 15 slash commands
 │   ├── sdlc.md
 │   ├── android-review.md
 │   ├── ios-review.md
@@ -263,7 +300,10 @@ claude-crew/
 │   ├── detect-jira.md
 │   ├── standup.md
 │   ├── retro.md
-│   └── sprint-health.md
+│   ├── sprint-health.md
+│   ├── security-scan.md
+│   ├── learn.md
+│   └── memory-review.md
 │
 ├── skills/                  ← 10 skills, each in <name>/SKILL.md
 │   ├── android-feature/SKILL.md
@@ -279,7 +319,9 @@ claude-crew/
 │
 ├── scripts/                 ← lifecycle hook scripts
 │   ├── pre-tool-use.sh      guards destructive ops, keystores, secrets
-│   └── post-tool-use.sh     reminds lint/test after edits, scans for secrets
+│   ├── post-tool-use.sh     reminds lint/test after edits, scans for secrets
+│   ├── session-start.sh     injects memory/MEMORY.md into Claude context at session start
+│   └── session-end.sh       extracts learnings from transcript → memory/MEMORY.md at session end
 │
 ├── hooks/
 │   └── hooks.json           ← hook config (for plugin install path)
@@ -293,6 +335,9 @@ claude-crew/
 │   ├── ios-architecture.md
 │   ├── scrum.md
 │   └── security-guardrails.md
+│
+├── memory/
+│   └── MEMORY.md            ← accumulated project learnings (committed to git)
 │
 ├── claude-crew.config.md    ← project architecture config template
 ├── git-flow.config.md       ← git conventions config template
@@ -314,6 +359,7 @@ All agents read their relevant config files at the start of every task:
 - `claude-crew.config.md` — mobile stack (DI, UI, state, networking)
 - `git-flow.config.md` — branching model, commit style, sprint workflow
 - `jira.config.md` — project key, board, workflow statuses, sprint setup
+- `memory/MEMORY.md` — injected automatically at session start by the `session-start` hook
 
 ---
 
