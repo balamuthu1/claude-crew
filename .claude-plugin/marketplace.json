@@ -12,7 +12,7 @@
         "repo": "balamuthu1/claude-crew"
       },
       "description": "Mobile agent harness for Android and iOS engineering teams. Specialist agents for feature development, code review, security, accessibility, performance, testing, and release management.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "balamuthu1",
         "url": "https://github.com/balamuthu1"
