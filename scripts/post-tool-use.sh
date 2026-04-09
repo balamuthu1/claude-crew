@@ -7,7 +7,7 @@
 # mobile-specific security issues. Reminds about lint/tests.
 # ============================================================
 
-set -euo pipefail
+set -uo pipefail
 
 # ── Audit log ────────────────────────────────────────────────────────────────
 AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$HOME}/.claude/audit.log"
@@ -111,9 +111,6 @@ scan_mobile_security() {
     grep -nqiE "MODE_WORLD_READABLE|MODE_WORLD_WRITEABLE" "$file" 2>/dev/null && \
       issue "🔴 SECURITY" "World-readable/writable file mode in $file — data accessible to other apps"
 
-    grep -nqiE "getSharedPreferences|SharedPreferences" "$file" 2>/dev/null
-    grep -nqiE "(token|password|secret|key|credential)" "$file" 2>/dev/null && \
-      true  # Check combination
     if grep -qiE "getSharedPreferences|SharedPreferences" "$file" 2>/dev/null && \
        grep -qiE "(token|password|secret|key|credential)" "$file" 2>/dev/null; then
       issue "🟠 SECURITY" "SharedPreferences used with sensitive data in $file — use EncryptedSharedPreferences instead"

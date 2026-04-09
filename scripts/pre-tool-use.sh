@@ -15,7 +15,7 @@
 #   - Data exfiltration via network tools
 # ============================================================
 
-set -euo pipefail
+set -uo pipefail
 
 # ── Audit log ────────────────────────────────────────────────────────────────
 AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$HOME}/.claude/audit.log"
