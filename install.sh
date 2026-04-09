@@ -116,6 +116,7 @@ if $LOCAL_INSTALL; then
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
   SRC_GITFLOW_MD="$SCRIPT_DIR/git-flow.config.md"
   SRC_JIRA_MD="$SCRIPT_DIR/jira.config.md"
+  SRC_MEMORY_MD="$SCRIPT_DIR/memory/MEMORY.md"
   success "Using local source: $SCRIPT_DIR"
 else
   # Remote install — download to temp dir
@@ -140,6 +141,7 @@ else
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
   SRC_GITFLOW_MD="$SRC_BASE/git-flow.config.md"
   SRC_JIRA_MD="$SRC_BASE/jira.config.md"
+  SRC_MEMORY_MD="$SRC_BASE/memory/MEMORY.md"
   success "Downloaded claude-crew source"
 fi
 
@@ -239,7 +241,7 @@ install_claude_md() {
 header "Installing Claude Crew"
 
 # Agents → .claude/agents/
-copy_dir "$SRC_AGENTS" "$TARGET_CLAUDE/agents" "specialist agents (8)"
+copy_dir "$SRC_AGENTS" "$TARGET_CLAUDE/agents" "specialist agents (14)"
 
 # Commands → .claude/commands/
 copy_dir "$SRC_COMMANDS" "$TARGET_CLAUDE/commands" "slash commands"
@@ -303,6 +305,22 @@ else
     success "Installed jira.config.md → $DST_JIRA"
     info "Run /detect-jira to configure your Jira project (requires Jira CLI)"
   fi
+
+  # memory/MEMORY.md — project learning store (only if not already present)
+  DST_MEMORY_DIR="$PROJECT_DIR/memory"
+  DST_MEMORY="$DST_MEMORY_DIR/MEMORY.md"
+  if $DRY_RUN; then
+    info "[dry-run] Would install memory/MEMORY.md → $DST_MEMORY"
+  elif [[ -f "$DST_MEMORY" ]]; then
+    warn "memory/MEMORY.md already exists — skipping (existing learnings preserved)"
+  elif [[ -f "$SRC_MEMORY_MD" ]]; then
+    mkdir -p "$DST_MEMORY_DIR"
+    cp "$SRC_MEMORY_MD" "$DST_MEMORY"
+    success "Installed memory/MEMORY.md → $DST_MEMORY"
+    info "Claude will automatically write learnings here after each session"
+    info "Run /learn \"<fact>\" to teach Claude something explicitly"
+    info "Run /memory-review to curate accumulated entries"
+  fi
 fi
 
 # ── Post-install summary ──────────────────────────────────────────────────────
@@ -329,7 +347,9 @@ echo "    /detect-arch              Auto-detect project architecture
     /standup                  Facilitate today's daily standup
     /retro [format]           Run a sprint retrospective
     /sprint-health            Check sprint burndown and surface risks
-    /security-scan            Full OWASP Mobile Top 10 + secrets audit"
+    /security-scan            Full OWASP Mobile Top 10 + secrets audit
+    /learn \"<fact>\"           Teach Claude something about this project
+    /memory-review            Curate accumulated project memory"
 echo ""
 echo -e "  ${BOLD}Skills (workflows):${RESET}"
 echo "    android-feature           mobile-code-review    performance-profile"
@@ -341,7 +361,7 @@ echo -e "  ${BOLD}Agents (specialist reviewers):${RESET}"
 echo "    android-reviewer          mobile-architect      mobile-security"
 echo "    ios-reviewer              mobile-performance    mobile-test-planner"
 echo "    ui-accessibility          release-manager       git-flow-advisor"
-echo "    jira-advisor              scrum-master"
+echo "    jira-advisor              scrum-master          learning-agent"
 echo ""
 if $GLOBAL; then
   echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."
