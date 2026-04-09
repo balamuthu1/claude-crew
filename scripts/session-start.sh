@@ -3,9 +3,9 @@
 # Claude Crew — SessionStart Hook
 #
 # Fires at the start of every Claude Code session.
-# Reads memory/MEMORY.md and injects a concise context brief
-# into Claude's context so every session starts with accumulated
-# project knowledge from all previous sessions.
+# Reads .claude/memory/MEMORY.md and injects a concise context
+# brief into Claude's context so every session starts with
+# accumulated project knowledge from all previous sessions.
 #
 # Output to stdout is injected into Claude's context.
 # ============================================================
@@ -14,15 +14,15 @@ set -uo pipefail
 
 # ── Find project memory file ──────────────────────────────────────────────────
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-MEMORY_FILE="$PROJECT_DIR/memory/MEMORY.md"
+MEMORY_FILE="$PROJECT_DIR/.claude/memory/MEMORY.md"
 
 # Also check parent directories (monorepo support)
 if [[ ! -f "$MEMORY_FILE" ]]; then
   dir="$PROJECT_DIR"
   for _ in 1 2 3; do
     dir="$(dirname "$dir")"
-    if [[ -f "$dir/memory/MEMORY.md" ]]; then
-      MEMORY_FILE="$dir/memory/MEMORY.md"
+    if [[ -f "$dir/.claude/memory/MEMORY.md" ]]; then
+      MEMORY_FILE="$dir/.claude/memory/MEMORY.md"
       break
     fi
   done

@@ -100,15 +100,15 @@ if [[ -d "$PROJECT_DIR/rules" ]]; then
   [[ "$ans" =~ ^[Yy]$ ]] && rm -rf "$PROJECT_DIR/rules" && success "Removed rules/"
 fi
 
-# Optionally remove memory/MEMORY.md (ask — contains valuable accumulated learnings)
-if [[ -f "$PROJECT_DIR/memory/MEMORY.md" ]]; then
-  read -r -p "  Remove $PROJECT_DIR/memory/MEMORY.md (accumulated project learnings)? [y/N] " ans
+# Optionally remove .claude/memory/MEMORY.md (ask — contains valuable accumulated learnings)
+if [[ -f "$TARGET_CLAUDE/memory/MEMORY.md" ]]; then
+  read -r -p "  Remove $TARGET_CLAUDE/memory/MEMORY.md (accumulated project learnings)? [y/N] " ans
   if [[ "$ans" =~ ^[Yy]$ ]]; then
-    rm -f "$PROJECT_DIR/memory/MEMORY.md"
-    rmdir "$PROJECT_DIR/memory" 2>/dev/null || true
-    success "Removed memory/MEMORY.md"
+    rm -f "$TARGET_CLAUDE/memory/MEMORY.md"
+    rmdir "$TARGET_CLAUDE/memory" 2>/dev/null || true
+    success "Removed .claude/memory/MEMORY.md"
   else
-    warn "Keeping memory/MEMORY.md — your project learnings are preserved"
+    warn "Keeping .claude/memory/MEMORY.md — your project learnings are preserved"
   fi
 fi
 

@@ -14,7 +14,7 @@
 set -uo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-MEMORY_FILE="$PROJECT_DIR/memory/MEMORY.md"
+MEMORY_FILE="$PROJECT_DIR/.claude/memory/MEMORY.md"
 TODAY=$(date +"%Y-%m-%d" 2>/dev/null || echo "unknown")
 
 # ── Parse hook input ──────────────────────────────────────────────────────────

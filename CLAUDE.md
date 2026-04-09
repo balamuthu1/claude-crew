@@ -193,7 +193,7 @@ App/
 
 Claude Crew accumulates project knowledge across sessions automatically. At the start of every session, memory is injected into context. At the end of every session, learnings are extracted automatically.
 
-**Memory file:** `memory/MEMORY.md` — committed to git, shared across the whole team.
+**Memory file:** `.claude/memory/MEMORY.md` — committed to git, shared across the whole team.
 
 ### Confidence levels
 
@@ -224,8 +224,8 @@ Hooks are shell scripts in `scripts/` invoked by Claude Code at lifecycle events
 
 - `pre-tool-use.sh` — runs before any tool execution (guards destructive ops)
 - `post-tool-use.sh` — runs after file edits (scans for secrets, reminds to lint/test)
-- `session-start.sh` — fires at session start; injects `memory/MEMORY.md` into context
-- `session-end.sh` — fires at session end; extracts learnings from transcript → `memory/MEMORY.md`
+- `session-start.sh` — fires at session start; injects `.claude/memory/MEMORY.md` into context
+- `session-end.sh` — fires at session end; extracts learnings from transcript → `.claude/memory/MEMORY.md`
 
 ---
 

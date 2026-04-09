@@ -116,7 +116,7 @@ if $LOCAL_INSTALL; then
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
   SRC_GITFLOW_MD="$SCRIPT_DIR/git-flow.config.md"
   SRC_JIRA_MD="$SCRIPT_DIR/jira.config.md"
-  SRC_MEMORY_MD="$SCRIPT_DIR/memory/MEMORY.md"
+  SRC_MEMORY_MD="$SCRIPT_DIR/.claude/memory/MEMORY.md"
   success "Using local source: $SCRIPT_DIR"
 else
   # Remote install — download to temp dir
@@ -141,7 +141,7 @@ else
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
   SRC_GITFLOW_MD="$SRC_BASE/git-flow.config.md"
   SRC_JIRA_MD="$SRC_BASE/jira.config.md"
-  SRC_MEMORY_MD="$SRC_BASE/memory/MEMORY.md"
+  SRC_MEMORY_MD="$SRC_BASE/.claude/memory/MEMORY.md"
   success "Downloaded claude-crew source"
 fi
 
@@ -306,17 +306,17 @@ else
     info "Run /detect-jira to configure your Jira project (requires Jira CLI)"
   fi
 
-  # memory/MEMORY.md — project learning store (only if not already present)
-  DST_MEMORY_DIR="$PROJECT_DIR/memory"
+  # .claude/memory/MEMORY.md — project learning store (only if not already present)
+  DST_MEMORY_DIR="$TARGET_CLAUDE/memory"
   DST_MEMORY="$DST_MEMORY_DIR/MEMORY.md"
   if $DRY_RUN; then
-    info "[dry-run] Would install memory/MEMORY.md → $DST_MEMORY"
+    info "[dry-run] Would install .claude/memory/MEMORY.md → $DST_MEMORY"
   elif [[ -f "$DST_MEMORY" ]]; then
-    warn "memory/MEMORY.md already exists — skipping (existing learnings preserved)"
+    warn ".claude/memory/MEMORY.md already exists — skipping (existing learnings preserved)"
   elif [[ -f "$SRC_MEMORY_MD" ]]; then
     mkdir -p "$DST_MEMORY_DIR"
     cp "$SRC_MEMORY_MD" "$DST_MEMORY"
-    success "Installed memory/MEMORY.md → $DST_MEMORY"
+    success "Installed .claude/memory/MEMORY.md → $DST_MEMORY"
     info "Claude will automatically write learnings here after each session"
     info "Run /learn \"<fact>\" to teach Claude something explicitly"
     info "Run /memory-review to curate accumulated entries"

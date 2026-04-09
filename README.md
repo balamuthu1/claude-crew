@@ -136,7 +136,7 @@ This asks about your project key, board, issue types, workflow statuses, sprint 
 Claude Crew learns from every session automatically. No manual action required.
 
 **How it works:**
-- At session **start**: `memory/MEMORY.md` is injected into Claude's context so every session starts with accumulated project knowledge
+- At session **start**: `.claude/memory/MEMORY.md` is injected into Claude's context so every session starts with accumulated project knowledge
 - At session **end**: the `session-end` hook scans the transcript for corrections, architecture decisions, antipatterns, and build commands, then writes `confidence:low` entries automatically
 - After code **reviews**: `android-reviewer`, `ios-reviewer`, and `mobile-security` agents write generalizable findings to memory as `confidence:medium` entries
 
@@ -151,7 +151,7 @@ Claude Crew learns from every session automatically. No manual action required.
   → promotes low → medium → high, or deletes stale entries
 ```
 
-**Memory file:** `memory/MEMORY.md` — committed to git so the whole team shares the accumulated knowledge.
+**Memory file:** `.claude/memory/MEMORY.md` — committed to git so the whole team shares the accumulated knowledge.
 
 ```markdown
 [2025-04-09 | confidence:high | source:explicit-learn]
@@ -203,7 +203,7 @@ Stage 7 — RELEASE      → release-manager      version bump + release notes
 | `/retro [format]` | Run a sprint retrospective (Start/Stop/Continue, Sailboat, 4Ls) |
 | `/sprint-health` | Check burndown, surface at-risk stories, forecast carry-over |
 | `/security-scan` | Full OWASP Mobile Top 10 audit + hardcoded secrets scan |
-| `/learn "<fact>"` | Explicitly teach Claude a project rule → `memory/MEMORY.md` (confidence:high) |
+| `/learn "<fact>"` | Explicitly teach Claude a project rule → `.claude/memory/MEMORY.md` (confidence:high) |
 | `/memory-review` | Curate accumulated project memory: promote, delete, or edit entries |
 
 ### Mention agents directly
@@ -320,8 +320,8 @@ claude-crew/
 ├── scripts/                 ← lifecycle hook scripts
 │   ├── pre-tool-use.sh      guards destructive ops, keystores, secrets
 │   ├── post-tool-use.sh     reminds lint/test after edits, scans for secrets
-│   ├── session-start.sh     injects memory/MEMORY.md into Claude context at session start
-│   └── session-end.sh       extracts learnings from transcript → memory/MEMORY.md at session end
+│   ├── session-start.sh     injects .claude/memory/MEMORY.md into Claude context at session start
+│   └── session-end.sh       extracts learnings from transcript → .claude/memory/MEMORY.md at session end
 │
 ├── hooks/
 │   └── hooks.json           ← hook config (for plugin install path)
@@ -359,7 +359,7 @@ All agents read their relevant config files at the start of every task:
 - `claude-crew.config.md` — mobile stack (DI, UI, state, networking)
 - `git-flow.config.md` — branching model, commit style, sprint workflow
 - `jira.config.md` — project key, board, workflow statuses, sprint setup
-- `memory/MEMORY.md` — injected automatically at session start by the `session-start` hook
+- `.claude/memory/MEMORY.md` — injected automatically at session start by the `session-start` hook
 
 ---
 

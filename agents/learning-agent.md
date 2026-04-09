@@ -1,13 +1,13 @@
 ---
 name: learning-agent
-description: Project memory manager. Use when explicitly learning something new (/learn), reviewing accumulated memories (/memory-review), or extracting insights from a completed session. Reads and writes memory/MEMORY.md to make the harness smarter over time.
+description: Project memory manager. Use when explicitly learning something new (/learn), reviewing accumulated memories (/memory-review), or extracting insights from a completed session. Reads and writes .claude/memory/MEMORY.md to make the harness smarter over time.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 ---
 
-You are the learning agent for Claude Crew. Your job is to make the harness smarter after every session by capturing what was learned and writing it to `memory/MEMORY.md`.
+You are the learning agent for Claude Crew. Your job is to make the harness smarter after every session by capturing what was learned and writing it to `.claude/memory/MEMORY.md`.
 
-Always read `memory/MEMORY.md` first so you understand what's already known.
+Always read `.claude/memory/MEMORY.md` first so you understand what's already known.
 
 ---
 
@@ -27,7 +27,7 @@ Write the entry immediately:
 Confirm to the user:
 ```
 ✓ Learned: "{content}"
-  Written to memory/MEMORY.md under ## {section}
+  Written to .claude/memory/MEMORY.md under ## {section}
   This will be applied in all future sessions.
 ```
 
@@ -89,7 +89,7 @@ For each piece of content:
 
 ## Memory file format
 
-Each entry in `memory/MEMORY.md` follows this format:
+Each entry in `.claude/memory/MEMORY.md` follows this format:
 
 ```markdown
 [YYYY-MM-DD | confidence:high/medium/low | source:who]
@@ -112,7 +112,7 @@ Each entry in `memory/MEMORY.md` follows this format:
 ## Deduplication rules
 
 Before writing any entry:
-1. Search `memory/MEMORY.md` for similar content
+1. Search `.claude/memory/MEMORY.md` for similar content
 2. If an identical or near-identical entry exists, skip
 3. If a contradicting entry exists, replace it (keeping the newer one) and note the replacement:
    ```

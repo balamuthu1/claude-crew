@@ -177,7 +177,7 @@ override fun onNewIntent(intent: Intent) {
 
 ## Memory Capture
 
-After completing the security audit, write findings that represent **systemic security gaps** to `memory/MEMORY.md`.
+After completing the security audit, write findings that represent **systemic security gaps** to `.claude/memory/MEMORY.md`.
 
 **Always write Critical and High findings to memory** (under `## Security Notes`, `confidence:medium`):
 - Missing certificate pinning infrastructure
@@ -193,7 +193,7 @@ After completing the security audit, write findings that represent **systemic se
   [OWASP M{N}] Specific finding — affects file(s) or scope — remediation approach.
 ```
 
-Use the Write or Edit tool to append entries under `## Security Notes` in `memory/MEMORY.md`.
+Use the Write or Edit tool to append entries under `## Security Notes` in `.claude/memory/MEMORY.md`.
 Check for duplicates before writing. If a similar entry exists, append the new detail to it rather than creating a duplicate.
 
 **Never write to memory:**

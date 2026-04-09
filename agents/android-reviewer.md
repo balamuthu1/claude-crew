@@ -136,7 +136,7 @@ For every review, evaluate across these dimensions:
 
 ## Memory Capture
 
-After completing the review, write any project-specific patterns discovered to `memory/MEMORY.md`.
+After completing the review, write any project-specific patterns discovered to `.claude/memory/MEMORY.md`.
 Only capture findings that are **generalizable to future work on this project** — not one-time fixes.
 
 **Write to memory when you find:**
@@ -156,5 +156,5 @@ Only capture findings that are **generalizable to future work on this project** 
   Specific, actionable statement. Reference file paths or ticket numbers when relevant.
 ```
 
-Use the Write or Edit tool to append entries under the correct `##` section in `memory/MEMORY.md`.
+Use the Write or Edit tool to append entries under the correct `##` section in `.claude/memory/MEMORY.md`.
 Check for duplicates before writing (read the section first). If an identical entry exists, skip it.
