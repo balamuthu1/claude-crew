@@ -116,7 +116,7 @@ if $LOCAL_INSTALL; then
   SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
   SRC_GITFLOW_MD="$SCRIPT_DIR/git-flow.config.md"
   SRC_JIRA_MD="$SCRIPT_DIR/jira.config.md"
-  SRC_MEMORY_MD="$SCRIPT_DIR/.claude/memory/MEMORY.md"
+  SRC_MEMORY_MD="$SCRIPT_DIR/memory/MEMORY.md"
   success "Using local source: $SCRIPT_DIR"
 else
   # Remote install — download to temp dir
@@ -141,7 +141,7 @@ else
   SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
   SRC_GITFLOW_MD="$SRC_BASE/git-flow.config.md"
   SRC_JIRA_MD="$SRC_BASE/jira.config.md"
-  SRC_MEMORY_MD="$SRC_BASE/.claude/memory/MEMORY.md"
+  SRC_MEMORY_MD="$SRC_BASE/memory/MEMORY.md"
   success "Downloaded claude-crew source"
 fi
 
