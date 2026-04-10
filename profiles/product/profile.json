@@ -1,7 +1,7 @@
 {
   "id": "product",
   "displayName": "Product Management",
-  "description": "PRD authoring, user story writing, and product strategy specialist agents.",
+  "description": "PRD authoring, user story writing, and product strategy specialist agents. Includes jira-integration skill for direct JIRA ticket creation via jira-cli.",
   "version": "2.0.0",
   "agents": [
     "prd-author",
@@ -15,20 +15,24 @@
     "user-story",
     "feature-brief",
     "acceptance-criteria",
-    "metrics-review"
+    "metrics-review",
+    "detect-product-stack"
   ],
   "skills": [
     "product-discovery",
     "prd-writing",
-    "story-mapping"
+    "story-mapping",
+    "jira-integration"
   ],
   "rules": [
     "product-standards.md"
   ],
   "configTemplate": "product.config.md",
-  "detectCommand": null,
+  "detectCommand": "detect-product-stack",
   "permissions": {
-    "allow": [],
+    "allow": [
+      "Bash(jira *)"
+    ],
     "deny": []
   },
   "securityGuardrails": {

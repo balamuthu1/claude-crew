@@ -283,14 +283,31 @@ Produce:
    - Alerting guide: which metric thresholds trigger an alert? How to set them up?
 
 2. **Engineering ticket** for {{TICKET_SYSTEM}}:
-   Title: "Instrument analytics events: {{FEATURE}}"
-   Type: Task | Priority: P1
-   Body:
-     - Links to this doc
-     - SDK setup checklist (from Stage 3)
-     - Instrumentation checklist (one checkbox per event)
-     - Baseline measurement plan
-     - QA acceptance criteria: "Verify N events fire correctly using {{ANALYTICS_PLATFORM}} debugger"
+
+   When {{TICKET_SYSTEM}} is jira:
+     Use the jira-integration skill. Run the pre-flight check first.
+     If pre-flight fails, fall back to printing the ticket template below.
+
+     Create a Task ticket:
+       jira issue create \
+         --project MOBNEW --type Task \
+         --summary "Instrument analytics events: {{FEATURE}}" \
+         --body "[full instrumentation doc: SDK checklist + event checklist + baseline plan + QA AC]" \
+         --priority High \
+         --label android \
+         --no-input --plain
+
+     Capture and print the returned MOBNEW-XXX key.
+
+   When {{TICKET_SYSTEM}} is NOT jira — print this ticket template:
+     Title: "Instrument analytics events: {{FEATURE}}"
+     Type: Task | Priority: P1
+     Body:
+       - Links to this doc
+       - SDK setup checklist (from Stage 3)
+       - Instrumentation checklist (one checkbox per event)
+       - Baseline measurement plan
+       - QA acceptance criteria: "Verify N events fire correctly using {{ANALYTICS_PLATFORM}} debugger"
 
 3. **QA checklist for analytics**:
    - [ ] Open {{ANALYTICS_PLATFORM}} event debugger / live view
@@ -324,7 +341,7 @@ Funnel: [Step 1] → [Step 2] → ... → [Conversion event]
 Baseline measurement needed: N weeks before launch
 
 PII fields requiring anonymisation: [list]
-Tickets to create in {{TICKET_SYSTEM}}: [list]
+Instrumentation ticket: [MOBNEW-XXX if jira | see Stage 4 template if other]
 ```
 
 ---

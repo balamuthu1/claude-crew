@@ -424,18 +424,32 @@ Out: [2-3 explicit exclusions from brief]
 - Design: [link]
 
 [If Jira (epic for roadmap tracking):]
-Create an Epic:
-  Summary: [ROADMAP] {{FEATURE}}
-  Description:
-    Objective: [outcome-focused description]
-    Success metric: [metric]: [current] → [target]
-    Time horizon: [Now/Next/Later]
-  Custom fields:
-    - Objective: [metric and target]
-    - Time horizon: [Now/Next/Later]
-    - Product area: [to fill]
-  Fix version: [target release — to fill]
-  Priority: [High/Medium based on P0 story count]
+
+  Use the jira-integration skill. Run the pre-flight check first.
+  If pre-flight fails, fall back to printing the template below.
+
+  Create a roadmap epic via CLI:
+    jira epic create \
+      --project MOBNEW \
+      --name "[ROADMAP] {{FEATURE}}" \
+      --summary "[outcome-focused one-liner from Stage 1 brief]" \
+      --body "[Objective + success metric + time horizon (Now/Next/Later) + PRD link]" \
+      --no-input --plain
+
+  Capture and print the returned MOBNEW-XXX key.
+
+  If CLI unavailable, print this template to create manually:
+    Summary: [ROADMAP] {{FEATURE}}
+    Description:
+      Objective: [outcome-focused description]
+      Success metric: [metric]: [current] → [target]
+      Time horizon: [Now/Next/Later]
+    Custom fields:
+      - Objective: [metric and target]
+      - Time horizon: [Now/Next/Later]
+      - Product area: [to fill]
+    Fix version: [target release — to fill]
+    Priority: [High/Medium based on P0 story count]
 
 [If Linear:]
 Create a Project:

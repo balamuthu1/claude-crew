@@ -29,6 +29,10 @@ If `product.config.md` or `workflow.config.md` do not exist, use these defaults:
 - `{{TICKET_SYSTEM}}` = `jira`
 - `{{SPRINT_LENGTH}}` = `2 weeks`
 
+If `{{TICKET_SYSTEM}}` is `jira` and `{{FEATURE}}` contains a JIRA key (e.g. `MOBNEW-100`),
+extract it as `{{EPIC_KEY}}` — stories will be linked to this epic after creation.
+Otherwise `{{EPIC_KEY}}` = empty (stories will be created without an epic link).
+
 ---
 
 ## Stage 1 — EPIC DECOMPOSITION
@@ -294,72 +298,124 @@ Docs platform: {{DOCS_PLATFORM}}
 Refined stories from Stage 2:
 {{REFINED_STORIES}}
 
-Your task: produce three outputs — ticket bodies, sprint plan, and grooming invite.
+Your task: create tickets in {{TICKET_SYSTEM}}, produce a sprint plan, and draft a grooming invite.
 
 ---
 
-OUTPUT 1: FULL TICKET BODIES (for every MVP story)
+STEP 1 — TICKET CREATION
 
-For each MVP story, write the complete ticket body ready to copy-paste into
-{{TICKET_SYSTEM}}. Use the platform's preferred formatting:
+When {{TICKET_SYSTEM}} is jira:
 
-[For Jira — use Jira wiki markup:]
-h3. Story
-[story statement]
+  Use the jira-integration skill. Run the pre-flight check first.
+  If the pre-flight fails, fall through to the formatted ticket bodies below.
 
-h4. Context
-[context paragraph]
+  Create tickets in dependency order (foundational stories first).
+  For each MVP story, use jira issue create (Story pattern from the skill):
+    Summary: [story one-line summary — imperative, user-centric]
+    Type: Story
+    Priority: Highest (P0) | High (P1) | Medium (P2)
+    Label: android
+    Body includes:
+      h3. Story
+      [story statement in {{STORY_FORMAT}} format]
 
-h4. Acceptance Criteria
-[AC in {{AC_FORMAT}}]
+      h4. Context
+      [1-2 sentences on why this story exists]
 
-h4. Edge Cases
-[bullet list]
+      h4. Acceptance Criteria
+      [AC from refined story in {{AC_FORMAT}} format]
 
-h4. Out of Scope
-[bullet list]
+      h4. Edge Cases
+      [edge case list from the story]
 
-h4. Dependencies
-[list]
+      h4. Out of Scope
+      [out of scope items from the story]
 
-h4. Definition of Ready
-[x] Story written in {{STORY_FORMAT}} format
-[x] Acceptance criteria cover happy path, errors, edge cases
-[x] Out of scope defined
-[x] Dependencies identified
-[x] Estimate: [N] [{{ESTIMATION_SCALE}}]
-[ ] Design attached (if applicable)
-[ ] API contract defined (if applicable)
-[ ] Open questions resolved
+      h4. Definition of Ready
+      [x] Story written in {{STORY_FORMAT}} format
+      [x] Acceptance criteria cover happy path, errors, edge cases
+      [x] Out of scope defined
+      [x] Dependencies identified
+      [x] Estimate: [N] {{ESTIMATION_SCALE}}
+      [ ] Design attached (if applicable)
+      [ ] API contract defined (if applicable)
+      [ ] Open questions resolved
 
-[For Linear / GitHub / Shortcut — use markdown:]
-## Story
-[story statement]
+  Capture each returned MOBNEW-XXX key. If a story fails, print WARN and continue.
 
-### Context
-[context paragraph]
+  After all stories are created, link blocked stories to their blockers:
+    jira issue link [blocked-key] [blocker-key] "is blocked by"
 
-### Acceptance Criteria
-[AC in {{AC_FORMAT}}]
+  If {{EPIC_KEY}} is provided, add all created tickets to the epic:
+    jira epic add {{EPIC_KEY}} [key1] [key2] [key3] ...
 
-### Edge Cases
-[bullet list]
+  Print a created-tickets summary:
+    | Key        | Story Summary                | Priority | Estimate |
+    |------------|------------------------------|----------|----------|
+    | MOBNEW-XXX | [story one-line summary]     | High     | [N pts]  |
 
-### Out of Scope
-[bullet list]
+When {{TICKET_SYSTEM}} is NOT jira — FORMATTED TICKET BODIES
 
-### Dependencies
-[list]
+  For each MVP story, write the complete ticket body ready to copy-paste.
+  Use the platform's preferred formatting:
 
-### Definition of Ready
-- [x] Story written in {{STORY_FORMAT}} format
-- [x] AC covers happy path, errors, edge cases
-- [x] Out of scope defined
-- [x] Dependencies identified
-- [x] Estimate: [N] [{{ESTIMATION_SCALE}}]
-- [ ] Design attached (if applicable)
-- [ ] API contract defined (if applicable)
-- [ ] Open questions resolved
+  [For Jira (CLI unavailable) — use Jira wiki markup:]
+  h3. Story
+  [story statement]
+
+  h4. Context
+  [context paragraph]
+
+  h4. Acceptance Criteria
+  [AC in {{AC_FORMAT}}]
+
+  h4. Edge Cases
+  [bullet list]
+
+  h4. Out of Scope
+  [bullet list]
+
+  h4. Dependencies
+  [list]
+
+  h4. Definition of Ready
+  [x] Story written in {{STORY_FORMAT}} format
+  [x] Acceptance criteria cover happy path, errors, edge cases
+  [x] Out of scope defined
+  [x] Dependencies identified
+  [x] Estimate: [N] [{{ESTIMATION_SCALE}}]
+  [ ] Design attached (if applicable)
+  [ ] API contract defined (if applicable)
+  [ ] Open questions resolved
+
+  [For Linear / GitHub / Shortcut — use markdown:]
+  ## Story
+  [story statement]
+
+  ### Context
+  [context paragraph]
+
+  ### Acceptance Criteria
+  [AC in {{AC_FORMAT}}]
+
+  ### Edge Cases
+  [bullet list]
+
+  ### Out of Scope
+  [bullet list]
+
+  ### Dependencies
+  [list]
+
+  ### Definition of Ready
+  - [x] Story written in {{STORY_FORMAT}} format
+  - [x] AC covers happy path, errors, edge cases
+  - [x] Out of scope defined
+  - [x] Dependencies identified
+  - [x] Estimate: [N] [{{ESTIMATION_SCALE}}]
+  - [ ] Design attached (if applicable)
+  - [ ] API contract defined (if applicable)
+  - [ ] Open questions resolved
 
 ---
 
@@ -443,9 +499,9 @@ Sprint plan:
   Sprint 3+ ([N stories]): [goal in one sentence]
 
 Next actions:
-  [ ] Create tickets in {{TICKET_SYSTEM}} using Stage 3 ticket bodies
-  [ ] Schedule grooming using Stage 3 email template
-  [ ] Attach design files and PRD links to each ticket
+  [ ] If jira: tickets created — add design files and PRD links to each MOBNEW-XXX key
+  [ ] If other: create tickets using Stage 3 ticket bodies above
+  [ ] Schedule grooming using Stage 3 grooming invite template
   [ ] Confirm sprint assignments with engineering lead
 ════════════════════════════════════════════════════════
 ```
@@ -455,6 +511,7 @@ Next actions:
 ## Variables
 
 - `{{FEATURE}}` = argument passed to this command
+- `{{EPIC_KEY}}` = JIRA epic key extracted from `{{FEATURE}}` if it matches `MOBNEW-\d+`, else empty
 - `{{DECOMPOSITION_OUTPUT}}` = Stage 1 agent output (first 3000 chars)
 - `{{REFINED_STORIES}}` = Stage 2 agent output (first 3000 chars)
 - `{{STORY_FORMAT}}`, `{{AC_FORMAT}}`, `{{ESTIMATION_SCALE}}`, `{{TICKET_SYSTEM}}`,
