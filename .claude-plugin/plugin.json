@@ -22,6 +22,9 @@
     "data",
     "sdlc",
     "code-review",
-    "multi-team"
+    "multi-team",
+    "jira",
+    "jira-cli",
+    "jira-integration"
   ]
 }

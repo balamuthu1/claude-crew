@@ -20,6 +20,7 @@ Read `product.config.md` and `workflow.config.md`. Extract these variables befor
 - `{{PRD_TOOL}}` — `confluence`, `notion`, `google-docs`, `markdown`, or other
 - `{{PRD_APPROVERS}}` — comma-separated list of roles/names who must sign off
 - `{{TICKET_SYSTEM}}` — `jira`, `linear`, `github`, `shortcut`, or other
+- `{{JIRA_PROJECT_KEY}}` — from `product.config.md → jira_project_key` (only used when roadmap_tool or ticket_system is jira)
 - `{{DOCS_PLATFORM}}` — where engineering docs live
 
 If a PRD file path was passed as the argument, read that file and extract:
@@ -424,18 +425,32 @@ Out: [2-3 explicit exclusions from brief]
 - Design: [link]
 
 [If Jira (epic for roadmap tracking):]
-Create an Epic:
-  Summary: [ROADMAP] {{FEATURE}}
-  Description:
-    Objective: [outcome-focused description]
-    Success metric: [metric]: [current] → [target]
-    Time horizon: [Now/Next/Later]
-  Custom fields:
-    - Objective: [metric and target]
-    - Time horizon: [Now/Next/Later]
-    - Product area: [to fill]
-  Fix version: [target release — to fill]
-  Priority: [High/Medium based on P0 story count]
+
+  Use the jira-integration skill. Run the pre-flight check first.
+  If pre-flight fails, fall back to printing the template below.
+
+  Create a roadmap epic via CLI (the pre-flight check populates `$PROJECT` from product.config.md):
+    jira epic create \
+      --project "$PROJECT" \
+      --name "[ROADMAP] {{FEATURE}}" \
+      --summary "[outcome-focused one-liner from Stage 1 brief]" \
+      --body "[Objective + success metric + time horizon (Now/Next/Later) + PRD link]" \
+      --no-input --plain
+
+  Capture and print the returned ticket key (pattern `[A-Z]+-\d+`).
+
+  If CLI unavailable, print this template to create manually:
+    Summary: [ROADMAP] {{FEATURE}}
+    Description:
+      Objective: [outcome-focused description]
+      Success metric: [metric]: [current] → [target]
+      Time horizon: [Now/Next/Later]
+    Custom fields:
+      - Objective: [metric and target]
+      - Time horizon: [Now/Next/Later]
+      - Product area: [to fill]
+    Fix version: [target release — to fill]
+    Priority: [High/Medium based on P0 story count]
 
 [If Linear:]
 Create a Project:
