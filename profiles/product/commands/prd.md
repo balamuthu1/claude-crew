@@ -12,6 +12,7 @@ for each stage. Each gets an isolated context window.
 Read `product.config.md` and `workflow.config.md`. Extract:
 - `{{PRD_TOOL}}` — where PRDs are written (confluence, notion, google-docs, markdown, etc.)
 - `{{TICKET_SYSTEM}}` — for story creation
+- `{{JIRA_PROJECT_KEY}}` — from `product.config.md → jira_project_key` (only used when ticket_system is jira)
 - `{{STORY_FORMAT}}` — user-story or job-story
 - `{{AC_FORMAT}}` — gherkin or checklist
 - `{{ESTIMATION_SCALE}}` — fibonacci, t-shirt, none
@@ -171,23 +172,23 @@ When {{TICKET_SYSTEM}} is jira:
   After writing the PRD, use the jira-integration skill to create the JIRA epic.
   Run the pre-flight check first. If it fails, print WARN and skip epic creation.
 
-  Create the epic:
+  Create the epic (the pre-flight check populates `$PROJECT` from product.config.md):
     jira epic create \
-      --project MOBNEW \
+      --project "$PROJECT" \
       --name "{{FEATURE}}" \
       --summary "[one-line outcome-focused summary from the Problem Statement]" \
       --body "[PRD overview: problem + goals + primary metric + PRD tool link]" \
       --no-input --plain
 
   Capture the returned epic key. Print as the final line of your output:
-    EPIC: MOBNEW-XXX
+    EPIC: {{JIRA_PROJECT_KEY}}-XXX
 ```
 Tools: Read, Write
 
 Gate: Show PRD structure summary. If jira and epic was created, print the epic key.
 Ask "Proceed to STORIES + METRICS in parallel? [y/N]"
 
-Extract `{{EPIC_KEY}}` from Stage 2 output (line matching `EPIC: MOBNEW-\d+`).
+Extract `{{EPIC_KEY}}` from Stage 2 output (line matching `EPIC: [A-Z]+-\d+`).
 Pass `{{EPIC_KEY}}` to Stage 3 user-story-writer prompt.
 
 ---
@@ -249,23 +250,23 @@ When {{TICKET_SYSTEM}} is jira:
   If pre-flight fails, fall back to printing formatted story summaries.
 
   Create tickets in dependency order (foundational stories first).
-  For each MVP story, use jira issue create (Story pattern from the skill):
+  For each MVP story, use jira issue create (Story pattern from the skill,
+  `$PROJECT` is set by the pre-flight check from product.config.md):
     Summary: [story one-line summary]
     Type: Story
     Priority: Highest (P0) | High (P1) | Medium (P2)
-    Label: android
     Body includes: story statement + context + AC + edge cases + DoR checklist
 
-  Capture each returned MOBNEW-XXX key. Link blocked stories to blockers:
+  Capture each returned ticket key (pattern `[A-Z]+-\d+`). Link blocked stories:
     jira issue link [blocked-key] [blocker-key] "is blocked by"
 
   If {{EPIC_KEY}} is set, add all created stories to the epic:
     jira epic add {{EPIC_KEY}} [key1] [key2] [key3] ...
 
   Print created-ticket summary:
-    | Key        | Story Summary                | Priority | Est. |
-    |------------|------------------------------|----------|------|
-    | MOBNEW-XXX | [story one-line summary]     | High     | [N]  |
+    | Key                     | Story Summary                | Priority | Est. |
+    |-------------------------|------------------------------|----------|------|
+    | {{JIRA_PROJECT_KEY}}-N  | [story one-line summary]     | High     | [N]  |
 
 When {{TICKET_SYSTEM}} is NOT jira:
   For each story: "[story number]. [summary] | Priority: [P0/P1/P2] | Points: [N]"
@@ -408,7 +409,7 @@ Pending actions:
 - `{{FEATURE}}` = argument passed to this command
 - `{{DISCOVERY_OUTPUT}}` = Stage 1 output (first 3000 chars)
 - `{{PRD_OUTPUT}}` = Stage 2 output (first 3000 chars)
-- `{{EPIC_KEY}}` = JIRA epic key extracted from Stage 2 output (line "EPIC: MOBNEW-XXX"), else empty
+- `{{EPIC_KEY}}` = JIRA epic key extracted from Stage 2 output (line "EPIC: [A-Z]+-\d+"), else empty
 - `{{STORIES_OUTPUT}}` = Stage 3 output summary
 - `{{PRD_TOOL}}`, `{{TICKET_SYSTEM}}`, `{{STORY_FORMAT}}`, `{{AC_FORMAT}}`,
   `{{ESTIMATION_SCALE}}`, `{{ANALYTICS_PLATFORM}}`, `{{ROADMAP_TOOL}}`,

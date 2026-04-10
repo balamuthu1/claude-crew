@@ -137,11 +137,14 @@ If N, ask which system. Then ask for project/team details specific to that syste
 
 If Jira:
 ```
-  Jira project key for product epics/stories (may differ from engineering project):
+  Jira project key for product epics/stories (may differ from engineering project, e.g. PROD, PM, FEAT):
   Epic issue type name (e.g. Epic, Initiative, Feature):
   Story issue type name (e.g. Story, User Story):
   Does your team use a backlog refinement workflow? [y/N]
 ```
+
+Store the entered project key as `jira_project_key` in `product.config.md`.
+This is the key used by the jira-integration skill for all ticket creation — no hardcoded values.
 
 If Linear:
 ```
@@ -300,7 +303,15 @@ Enter number:
 
 ## Step 9 — Write product.config.md
 
-Write `product.config.md` with all gathered values.
+Write `product.config.md` with all gathered values. If ticket system is Jira, include:
+
+```
+jira_project_key: <key entered in Step 4>
+```
+
+This field is read by the jira-integration skill at runtime — no project key is hardcoded
+anywhere. Agents will create tickets in this project regardless of which JIRA instance or
+organisation is configured.
 
 ---
 
@@ -314,7 +325,7 @@ Product Stack:
   Story format    : <format>
   Acceptance crit.: <format>
   Estimation      : <scale>
-  Ticket system   : <system>
+  Ticket system   : <system> <if jira: (project: <key>)>
   Roadmap tool    : <tool>
   Analytics       : <platform>
   Design tool     : <tool>

@@ -20,6 +20,7 @@ Read `product.config.md` and `workflow.config.md`. Extract these variables befor
 - `{{PRD_TOOL}}` — `confluence`, `notion`, `google-docs`, `markdown`, or other
 - `{{PRD_APPROVERS}}` — comma-separated list of roles/names who must sign off
 - `{{TICKET_SYSTEM}}` — `jira`, `linear`, `github`, `shortcut`, or other
+- `{{JIRA_PROJECT_KEY}}` — from `product.config.md → jira_project_key` (only used when roadmap_tool or ticket_system is jira)
 - `{{DOCS_PLATFORM}}` — where engineering docs live
 
 If a PRD file path was passed as the argument, read that file and extract:
@@ -428,15 +429,15 @@ Out: [2-3 explicit exclusions from brief]
   Use the jira-integration skill. Run the pre-flight check first.
   If pre-flight fails, fall back to printing the template below.
 
-  Create a roadmap epic via CLI:
+  Create a roadmap epic via CLI (the pre-flight check populates `$PROJECT` from product.config.md):
     jira epic create \
-      --project MOBNEW \
+      --project "$PROJECT" \
       --name "[ROADMAP] {{FEATURE}}" \
       --summary "[outcome-focused one-liner from Stage 1 brief]" \
       --body "[Objective + success metric + time horizon (Now/Next/Later) + PRD link]" \
       --no-input --plain
 
-  Capture and print the returned MOBNEW-XXX key.
+  Capture and print the returned ticket key (pattern `[A-Z]+-\d+`).
 
   If CLI unavailable, print this template to create manually:
     Summary: [ROADMAP] {{FEATURE}}

@@ -15,14 +15,15 @@ Read `.claude/memory/MEMORY.md` for product-specific conventions.
 ## JIRA Integration
 
 When `ticket_system` in `product.config.md` is `jira`:
-1. Use the **jira-integration skill** to run the pre-flight check.
+1. Use the **jira-integration skill** to run the pre-flight check. It resolves the project
+   key from `product.config.md → jira_project_key` into `$PROJECT` automatically.
 2. After writing the PRD, create the JIRA epic:
    ```bash
-   jira epic create --project MOBNEW --name "[Feature name]" \
+   jira epic create --project "$PROJECT" --name "[Feature name]" \
      --summary "[one-line summary]" \
      --body "[PRD overview + link to PRD doc]" --no-input
    ```
-3. Print the created epic key (e.g. `MOBNEW-800`) for the user-story-writer to use.
+3. Print the created epic key (e.g. `PROJ-800`) for the user-story-writer to use.
 4. If jira CLI unavailable, fall back to printing the epic template.
 
 ## What you do

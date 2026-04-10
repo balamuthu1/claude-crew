@@ -18,6 +18,7 @@ Read `product.config.md` and `workflow.config.md`. Extract these variables befor
 - `{{AC_FORMAT}}` — `gherkin` (Given/When/Then) or `checklist` (- [ ] observable criterion)
 - `{{ESTIMATION_SCALE}}` — `fibonacci` (1,2,3,5,8,13), `t-shirt` (XS/S/M/L/XL), or `none`
 - `{{TICKET_SYSTEM}}` — `jira`, `linear`, `github`, `shortcut`, or other
+- `{{JIRA_PROJECT_KEY}}` — from `product.config.md → jira_project_key` (only used when ticket_system is jira)
 - `{{SPRINT_LENGTH}}` — e.g. `1 week`, `2 weeks`
 - `{{PRD_APPROVERS}}` — from workflow.config.md (for grooming invite)
 - `{{DOCS_PLATFORM}}` — from workflow.config.md (for sprint plan doc)
@@ -29,8 +30,8 @@ If `product.config.md` or `workflow.config.md` do not exist, use these defaults:
 - `{{TICKET_SYSTEM}}` = `jira`
 - `{{SPRINT_LENGTH}}` = `2 weeks`
 
-If `{{TICKET_SYSTEM}}` is `jira` and `{{FEATURE}}` contains a JIRA key (e.g. `MOBNEW-100`),
-extract it as `{{EPIC_KEY}}` — stories will be linked to this epic after creation.
+If `{{TICKET_SYSTEM}}` is `jira` and `{{FEATURE}}` contains a JIRA ticket key (pattern `[A-Z]+-\d+`,
+e.g. `PROJ-100`), extract it as `{{EPIC_KEY}}` — stories will be linked to this epic after creation.
 Otherwise `{{EPIC_KEY}}` = empty (stories will be created without an epic link).
 
 ---
@@ -341,7 +342,7 @@ When {{TICKET_SYSTEM}} is jira:
       [ ] API contract defined (if applicable)
       [ ] Open questions resolved
 
-  Capture each returned MOBNEW-XXX key. If a story fails, print WARN and continue.
+  Capture each returned {{JIRA_PROJECT_KEY}}-XXX key. If a story fails, print WARN and continue.
 
   After all stories are created, link blocked stories to their blockers:
     jira issue link [blocked-key] [blocker-key] "is blocked by"
@@ -352,7 +353,7 @@ When {{TICKET_SYSTEM}} is jira:
   Print a created-tickets summary:
     | Key        | Story Summary                | Priority | Estimate |
     |------------|------------------------------|----------|----------|
-    | MOBNEW-XXX | [story one-line summary]     | High     | [N pts]  |
+    | {{JIRA_PROJECT_KEY}}-XXX | [story one-line summary]     | High     | [N pts]  |
 
 When {{TICKET_SYSTEM}} is NOT jira — FORMATTED TICKET BODIES
 
@@ -499,7 +500,7 @@ Sprint plan:
   Sprint 3+ ([N stories]): [goal in one sentence]
 
 Next actions:
-  [ ] If jira: tickets created — add design files and PRD links to each MOBNEW-XXX key
+  [ ] If jira: tickets created — add design files and PRD links to each {{JIRA_PROJECT_KEY}}-XXX key
   [ ] If other: create tickets using Stage 3 ticket bodies above
   [ ] Schedule grooming using Stage 3 grooming invite template
   [ ] Confirm sprint assignments with engineering lead
@@ -511,7 +512,7 @@ Next actions:
 ## Variables
 
 - `{{FEATURE}}` = argument passed to this command
-- `{{EPIC_KEY}}` = JIRA epic key extracted from `{{FEATURE}}` if it matches `MOBNEW-\d+`, else empty
+- `{{EPIC_KEY}}` = JIRA epic key extracted from `{{FEATURE}}` if it matches `[A-Z]+-\d+`, else empty
 - `{{DECOMPOSITION_OUTPUT}}` = Stage 1 agent output (first 3000 chars)
 - `{{REFINED_STORIES}}` = Stage 2 agent output (first 3000 chars)
 - `{{STORY_FORMAT}}`, `{{AC_FORMAT}}`, `{{ESTIMATION_SCALE}}`, `{{TICKET_SYSTEM}}`,
