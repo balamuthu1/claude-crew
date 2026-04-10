@@ -12,7 +12,7 @@
         "repo": "balamuthu1/claude-crew"
       },
       "description": "Multi-team agent harness. Install profiles for mobile (Android/iOS), backend (API/DB/DevOps), QA (test strategy/automation), product (PRD/stories), data (pipelines/ML/SQL), or frontend (React/Vue/a11y). Each profile brings specialist agents, SDLC workflows, code review, and security guardrails. Teams share git/Jira/Scrum agents and a self-learning memory system.",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "author": {
         "name": "balamuthu1",
         "url": "https://github.com/balamuthu1"

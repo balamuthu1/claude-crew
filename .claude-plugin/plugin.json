@@ -1,6 +1,6 @@
 {
   "name": "claude-crew",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Multi-team agent harness for engineering teams. Install profiles for mobile, backend, QA, product, data, or frontend \u2014 each with specialist agents, SDLC workflows, code review, security guardrails, and a shared memory system.",
   "author": {
     "name": "balamuthu1",
