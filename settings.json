@@ -1,8 +1,6 @@
 {
-  "description": "Claude Crew — Mobile Agent Harness for Android & iOS teams",
-
+  "description": "Claude Crew — Multi-Team Agent Harness",
   "autoMemoryEnabled": true,
-
   "hooks": {
     "PreToolUse": [
       {
@@ -47,7 +45,6 @@
       }
     ]
   },
-
   "permissions": {
     "allow": [
       "Bash(./gradlew *)",
@@ -98,8 +95,8 @@
       "Bash(curl * | bash*)",
       "Bash(wget * | bash*)",
       "Bash(curl * | sh*)",
-      "Bash(bash <(curl*)",
-      "Bash(sh <(curl*)",
+      "Bash(bash curl*)",
+      "Bash(sh curl*)",
       "Bash(eval *)",
       "Bash(printenv)",
       "Bash(export -p)",

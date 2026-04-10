@@ -1,0 +1,57 @@
+{
+  "id": "frontend",
+  "displayName": "Frontend Engineering",
+  "description": "Web UI, component development, accessibility, and frontend architecture specialist agents.",
+  "version": "2.0.0",
+  "agents": [
+    "frontend-developer",
+    "frontend-reviewer",
+    "ui-engineer",
+    "accessibility-auditor",
+    "frontend-architect"
+  ],
+  "commands": [
+    "frontend-sdlc",
+    "frontend-review",
+    "accessibility-audit",
+    "bundle-analysis",
+    "detect-frontend-stack"
+  ],
+  "skills": [
+    "component-development",
+    "frontend-code-review",
+    "performance-audit"
+  ],
+  "rules": [
+    "typescript.md",
+    "css-standards.md",
+    "accessibility.md",
+    "frontend-security-guardrails.md"
+  ],
+  "configTemplate": "frontend.config.md",
+  "detectCommand": "detect-frontend-stack",
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(npx *)",
+      "Bash(vite *)",
+      "Bash(webpack *)",
+      "Bash(tsc *)",
+      "Bash(eslint *)",
+      "Bash(prettier *)"
+    ],
+    "deny": []
+  },
+  "securityGuardrails": {
+    "additionalSensitiveFilePatterns": [
+      "\\.env\\.local",
+      "\\.env\\.production",
+      "\\.env\\.development"
+    ],
+    "hooksModule": "frontend"
+  },
+  "compatibleWith": ["backend", "qa", "product"],
+  "conflictsWith": []
+}

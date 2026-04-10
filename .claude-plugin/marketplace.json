@@ -11,22 +11,26 @@
         "source": "github",
         "repo": "balamuthu1/claude-crew"
       },
-      "description": "Mobile agent harness for Android and iOS engineering teams. Specialist agents for feature development, code review, security, accessibility, performance, testing, and release management.",
-      "version": "1.0.8",
+      "description": "Multi-team agent harness. Install profiles for mobile (Android/iOS), backend (API/DB/DevOps), QA (test strategy/automation), product (PRD/stories), data (pipelines/ML/SQL), or frontend (React/Vue/a11y). Each profile brings specialist agents, SDLC workflows, code review, and security guardrails. Teams share git/Jira/Scrum agents and a self-learning memory system.",
+      "version": "2.0.0",
       "author": {
         "name": "balamuthu1",
         "url": "https://github.com/balamuthu1"
       },
       "keywords": [
+        "mobile",
         "android",
         "ios",
-        "mobile",
-        "kotlin",
-        "swift",
-        "compose",
-        "swiftui",
+        "backend",
+        "api",
+        "frontend",
+        "qa",
+        "testing",
+        "product",
+        "data",
+        "sdlc",
         "code-review",
-        "sdlc"
+        "multi-team"
       ]
     }
   ]

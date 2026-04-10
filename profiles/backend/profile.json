@@ -1,0 +1,72 @@
+{
+  "id": "backend",
+  "displayName": "Backend Engineering",
+  "description": "API, database, and infrastructure specialist agents for backend development workflows.",
+  "version": "2.0.0",
+  "agents": [
+    "api-developer",
+    "api-reviewer",
+    "backend-architect",
+    "database-specialist",
+    "devops-advisor",
+    "backend-security",
+    "backend-test-planner"
+  ],
+  "commands": [
+    "api-sdlc",
+    "api-review",
+    "db-migration",
+    "openapi-spec",
+    "backend-security-scan",
+    "detect-backend-stack"
+  ],
+  "skills": [
+    "api-feature",
+    "backend-code-review",
+    "service-deployment"
+  ],
+  "rules": [
+    "api-design.md",
+    "database.md",
+    "backend-security-guardrails.md"
+  ],
+  "configTemplate": "backend.config.md",
+  "detectCommand": "detect-backend-stack",
+  "permissions": {
+    "allow": [
+      "Bash(docker *)",
+      "Bash(docker-compose *)",
+      "Bash(kubectl *)",
+      "Bash(helm *)",
+      "Bash(terraform *)",
+      "Bash(mvn *)",
+      "Bash(gradle *)",
+      "Bash(npm run *)",
+      "Bash(pip install *)",
+      "Bash(pytest *)",
+      "Bash(go test *)",
+      "Bash(go build *)",
+      "Bash(cargo test)",
+      "Bash(cargo build)"
+    ],
+    "deny": [
+      "Bash(kubectl delete *)",
+      "Bash(terraform destroy *)",
+      "Bash(DROP TABLE *)",
+      "Bash(DROP DATABASE *)"
+    ]
+  },
+  "securityGuardrails": {
+    "additionalSensitiveFilePatterns": [
+      "kubeconfig",
+      "\\.kube/config",
+      "service-account\\.json",
+      "credentials\\.json",
+      "\\.pgpass",
+      "database\\.yml"
+    ],
+    "hooksModule": "backend"
+  },
+  "compatibleWith": ["qa", "frontend", "product"],
+  "conflictsWith": []
+}

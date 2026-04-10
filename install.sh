@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Claude Crew — Mobile Agent Harness Installer
+#  Claude Crew — Multi-Team Agent Harness Installer
 #  https://github.com/balamuthu1/claude-crew
 #
 #  Usage:
-#    Global install (available in ALL projects):
-#      ./install.sh --global
-#
-#    Project install (current directory):
-#      ./install.sh
-#      ./install.sh --project /path/to/your/mobile-app
-#
-#    Dry run (see what would be installed):
-#      ./install.sh --dry-run
-#      ./install.sh --global --dry-run
-#
-#  One-line remote install (clones repo, then runs):
-#    git clone https://github.com/balamuthu1/claude-crew.git && bash claude-crew/install.sh --global
+#    ./install.sh                              # mobile profile (default, backward compat)
+#    ./install.sh --profile mobile             # explicit mobile profile
+#    ./install.sh --profile mobile,qa          # multiple profiles
+#    ./install.sh --profile all                # every profile
+#    ./install.sh --global                     # global install (~/.claude)
+#    ./install.sh --project ~/MyApp            # specific project
+#    ./install.sh --dry-run                    # preview without changes
+#    ./install.sh --list-profiles              # list available profiles and exit
+#    ./install.sh --upgrade                    # re-run on existing install
 # ============================================================
 
 set -euo pipefail
@@ -31,36 +27,101 @@ warn()    { echo -e "${YELLOW}  ⚠${RESET} $*"; }
 error()   { echo -e "${RED}  ✗${RESET} $*" >&2; }
 header()  { echo -e "\n${BOLD}$*${RESET}"; }
 
+# ── Available profiles ────────────────────────────────────────────────────────
+ALL_PROFILES=(mobile backend qa product data frontend)
+
+# Profile display info (parallel arrays)
+PROFILE_LABELS=(
+  "Mobile Engineering  — Android & iOS developers, reviewers, architect, security, test, a11y"
+  "Backend Engineering — API developer, architect, DB specialist, DevOps, security, test"
+  "QA Engineering      — Test strategist, automation, performance, bug triage, QA lead"
+  "Product Management  — PRD author, user story writer, product manager, metrics, stakeholder"
+  "Data Engineering    — Data engineer, ML engineer, analytics, SQL specialist, reviewer"
+  "Frontend Engineering— Frontend developer, reviewer, UI engineer, accessibility, architect"
+)
+
 # ── Defaults ──────────────────────────────────────────────────────────────────
 GLOBAL=false
 PROJECT_DIR="$(pwd)"
 DRY_RUN=false
+UPGRADE=false
+LIST_PROFILES=false
+SELECTED_PROFILES=("mobile")  # default: mobile (backward compat)
+PROFILES_EXPLICITLY_SET=false
 REPO_URL="https://github.com/balamuthu1/claude-crew"
 REPO_BRANCH="main"
 
-# Source dir: where this script lives (works both locally and in tmp from curl)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd)"
-# If running via curl, SCRIPT_DIR is a temp dir — detect by checking for agents/
 LOCAL_INSTALL=false
-if [[ -d "$SCRIPT_DIR/.claude/agents" || -d "$SCRIPT_DIR/agents" ]]; then
+if [[ -d "$SCRIPT_DIR/profiles" ]]; then
   LOCAL_INSTALL=true
 fi
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --global)     GLOBAL=true; shift ;;
-    --project)    PROJECT_DIR="$2"; shift 2 ;;
-    --dry-run)    DRY_RUN=true; shift ;;
+    --global)         GLOBAL=true; shift ;;
+    --project)        PROJECT_DIR="$2"; shift 2 ;;
+    --dry-run)        DRY_RUN=true; shift ;;
+    --upgrade)        UPGRADE=true; shift ;;
+    --list-profiles)  LIST_PROFILES=true; shift ;;
+    --profile)
+      PROFILES_EXPLICITLY_SET=true
+      IFS=',' read -ra SELECTED_PROFILES <<< "$2"
+      shift 2 ;;
     --help|-h)
-      echo "Usage: install.sh [--global] [--project <dir>] [--dry-run]"
+      echo "Usage: install.sh [OPTIONS]"
       echo ""
-      echo "  --global          Install to ~/.claude/ (available in all projects)"
-      echo "  --project <dir>   Install to <dir>/.claude/ (default: current dir)"
-      echo "  --dry-run         Show what would happen without changing anything"
+      echo "  --profile <name(s)>   Profiles to install (comma-separated, or 'all')"
+      echo "                        Available: mobile, backend, qa, product, data, frontend"
+      echo "                        Default: mobile (backward compatible)"
+      echo "  --global              Install to ~/.claude/ (available in all projects)"
+      echo "  --project <dir>       Install to <dir>/.claude/ (default: current dir)"
+      echo "  --dry-run             Show what would happen without changing anything"
+      echo "  --upgrade             Re-run on existing install, merge new content"
+      echo "  --list-profiles       List available profiles and exit"
+      echo ""
+      echo "Examples:"
+      echo "  ./install.sh                          # mobile only (default)"
+      echo "  ./install.sh --profile mobile,qa      # mobile + QA"
+      echo "  ./install.sh --profile all --global   # everything, global"
       exit 0 ;;
     *) error "Unknown argument: $1"; exit 1 ;;
   esac
+done
+
+# ── List profiles mode ────────────────────────────────────────────────────────
+if $LIST_PROFILES; then
+  echo ""
+  echo -e "${BOLD}Available Claude Crew profiles:${RESET}"
+  echo ""
+  for i in "${!ALL_PROFILES[@]}"; do
+    echo -e "  ${BOLD}${ALL_PROFILES[$i]}${RESET}  —  ${PROFILE_LABELS[$i]}"
+  done
+  echo ""
+  echo -e "Install a profile:  ./install.sh --profile ${ALL_PROFILES[0]}"
+  echo -e "Install multiple:   ./install.sh --profile mobile,qa"
+  echo -e "Install all:        ./install.sh --profile all"
+  echo ""
+  exit 0
+fi
+
+# ── Expand 'all' profile shorthand ───────────────────────────────────────────
+if [[ "${SELECTED_PROFILES[*]}" == "all" ]]; then
+  SELECTED_PROFILES=("${ALL_PROFILES[@]}")
+fi
+
+# ── Validate profile names ────────────────────────────────────────────────────
+for p in "${SELECTED_PROFILES[@]}"; do
+  valid=false
+  for known in "${ALL_PROFILES[@]}"; do
+    [[ "$p" == "$known" ]] && valid=true && break
+  done
+  if ! $valid; then
+    error "Unknown profile: '$p'"
+    echo "  Available: ${ALL_PROFILES[*]}"
+    exit 1
+  fi
 done
 
 # ── Target directory ──────────────────────────────────────────────────────────
@@ -75,21 +136,20 @@ fi
 # ── Banner ────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════════════════╗${RESET}"
-echo -e "${BOLD}║      Claude Crew — Mobile Agent Harness Installer        ║${RESET}"
-echo -e "${BOLD}║      Android & iOS specialist agents for Claude Code     ║${RESET}"
+echo -e "${BOLD}║          Claude Crew — Multi-Team Agent Harness          ║${RESET}"
 echo -e "${BOLD}╚══════════════════════════════════════════════════════════╝${RESET}"
 echo ""
-echo -e "  Install mode : ${BOLD}$(if $GLOBAL; then echo 'GLOBAL'; else echo 'PROJECT'; fi)${RESET}"
-echo -e "  Target       : ${BOLD}$TARGET_DESC${RESET}"
+echo -e "  Install mode  : ${BOLD}$(if $GLOBAL; then echo 'GLOBAL'; else echo 'PROJECT'; fi)${RESET}"
+echo -e "  Target        : ${BOLD}$TARGET_DESC${RESET}"
+echo -e "  Profiles      : ${BOLD}${SELECTED_PROFILES[*]}${RESET}"
 if $DRY_RUN; then
-  echo -e "  Mode         : ${YELLOW}DRY RUN — no files will be changed${RESET}"
+  echo -e "  Mode          : ${YELLOW}DRY RUN — no files will be changed${RESET}"
 fi
 echo ""
 
 # ── Preflight checks ──────────────────────────────────────────────────────────
 header "Preflight checks"
 
-# Claude Code installed?
 if command -v claude &>/dev/null; then
   CLAUDE_VERSION=$(claude --version 2>/dev/null | head -1 || echo "unknown")
   success "Claude Code found: $CLAUDE_VERSION"
@@ -98,54 +158,31 @@ else
   warn "Continuing install — files will be ready when Claude Code is installed."
 fi
 
-# Project dir exists?
 if ! $GLOBAL && [[ ! -d "$PROJECT_DIR" ]]; then
   error "Project directory not found: $PROJECT_DIR"
   exit 1
 fi
 
-# Fetch source files: either local or from GitHub
+# ── Resolve source base ───────────────────────────────────────────────────────
 if $LOCAL_INSTALL; then
-  SRC_AGENTS="$SCRIPT_DIR/agents"
-  SRC_COMMANDS="$SCRIPT_DIR/commands"
-  SRC_HOOKS="$SCRIPT_DIR/scripts"
-  SRC_SKILLS="$SCRIPT_DIR/skills"
-  SRC_RULES="$SCRIPT_DIR/rules"
-  SRC_CLAUDE_MD="$SCRIPT_DIR/CLAUDE.md"
-  SRC_SETTINGS="$SCRIPT_DIR/settings.json"
-  SRC_CONFIG_MD="$SCRIPT_DIR/claude-crew.config.md"
-  SRC_GITFLOW_MD="$SCRIPT_DIR/git-flow.config.md"
-  SRC_JIRA_MD="$SCRIPT_DIR/jira.config.md"
-  SRC_MEMORY_MD="$SCRIPT_DIR/memory/MEMORY.md"
+  SRC_BASE="$SCRIPT_DIR"
   success "Using local source: $SCRIPT_DIR"
 else
-  # Remote install — download to temp dir
   TMP_DIR="$(mktemp -d)"
   trap 'rm -rf "$TMP_DIR"' EXIT
   info "Downloading claude-crew from GitHub (branch: $REPO_BRANCH)..."
   if command -v git &>/dev/null; then
     git clone --depth 1 --branch "$REPO_BRANCH" --quiet "$REPO_URL.git" "$TMP_DIR/claude-crew" 2>/dev/null \
-      || { error "Failed to clone $REPO_URL (branch: $REPO_BRANCH). Check your internet connection and that the branch exists."; exit 1; }
+      || { error "Failed to clone $REPO_URL. Check your internet connection."; exit 1; }
     SRC_BASE="$TMP_DIR/claude-crew"
   else
-    error "git is required for remote install. Install git and retry."
+    error "git is required for remote install."
     exit 1
   fi
-  SRC_AGENTS="$SRC_BASE/agents"
-  SRC_COMMANDS="$SRC_BASE/commands"
-  SRC_HOOKS="$SRC_BASE/scripts"
-  SRC_SKILLS="$SRC_BASE/skills"
-  SRC_RULES="$SRC_BASE/rules"
-  SRC_CLAUDE_MD="$SRC_BASE/CLAUDE.md"
-  SRC_SETTINGS="$SRC_BASE/settings.json"
-  SRC_CONFIG_MD="$SRC_BASE/claude-crew.config.md"
-  SRC_GITFLOW_MD="$SRC_BASE/git-flow.config.md"
-  SRC_JIRA_MD="$SRC_BASE/jira.config.md"
-  SRC_MEMORY_MD="$SRC_BASE/memory/MEMORY.md"
   success "Downloaded claude-crew source"
 fi
 
-# ── Helper: copy directory ─────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
 copy_dir() {
   local src="$1" dst="$2" label="$3"
   if [[ ! -d "$src" ]]; then
@@ -161,7 +198,18 @@ copy_dir() {
   success "Installed $label → $dst"
 }
 
-# ── Helper: merge settings.json ───────────────────────────────────────────────
+copy_file() {
+  local src="$1" dst="$2" label="$3"
+  [[ ! -f "$src" ]] && return
+  if $DRY_RUN; then
+    info "[dry-run] Would copy $src → $dst"
+    return
+  fi
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+  success "Installed $label → $dst"
+}
+
 merge_settings() {
   local src="$1" dst="$2"
   if $DRY_RUN; then
@@ -173,15 +221,12 @@ merge_settings() {
     cp "$src" "$dst"
     success "Installed settings.json → $dst"
   else
-    # Merge: add permissions block if missing, preserve existing hooks
     python3 - "$src" "$dst" <<'PYEOF'
 import json, sys
-
 src_path, dst_path = sys.argv[1], sys.argv[2]
 with open(src_path) as f: src = json.load(f)
 with open(dst_path) as f: dst = json.load(f)
 
-# Merge hooks: append claude-crew hooks without removing existing ones
 for event, matchers in src.get("hooks", {}).items():
     dst.setdefault("hooks", {}).setdefault(event, [])
     existing_cmds = {
@@ -190,14 +235,10 @@ for event, matchers in src.get("hooks", {}).items():
         for h in entry.get("hooks", [])
     }
     for matcher_block in matchers:
-        new_hooks = [
-            h for h in matcher_block.get("hooks", [])
-            if h.get("command","") not in existing_cmds
-        ]
+        new_hooks = [h for h in matcher_block.get("hooks", []) if h.get("command","") not in existing_cmds]
         if new_hooks:
             dst["hooks"][event].append({**matcher_block, "hooks": new_hooks})
 
-# Merge permissions: union allow, union deny
 for key in ("allow", "deny"):
     existing = set(dst.get("permissions", {}).get(key, []))
     incoming = set(src.get("permissions", {}).get(key, []))
@@ -212,7 +253,33 @@ PYEOF
   fi
 }
 
-# ── Helper: append CLAUDE.md ──────────────────────────────────────────────────
+merge_profile_permissions() {
+  local profile_json="$1" settings_dst="$2"
+  [[ ! -f "$profile_json" ]] && return
+  if $DRY_RUN; then
+    info "[dry-run] Would merge $profile_json permissions → $settings_dst"
+    return
+  fi
+  [[ ! -f "$settings_dst" ]] && return
+  python3 - "$profile_json" "$settings_dst" <<'PYEOF'
+import json, sys
+profile_path, dst_path = sys.argv[1], sys.argv[2]
+with open(profile_path) as f: profile = json.load(f)
+with open(dst_path) as f: dst = json.load(f)
+
+perms = profile.get("permissions", {})
+for key in ("allow", "deny"):
+    incoming = set(perms.get(key, []))
+    existing = set(dst.get("permissions", {}).get(key, []))
+    if incoming - existing:
+        dst.setdefault("permissions", {})[key] = sorted(existing | incoming)
+
+with open(dst_path, "w") as f:
+    json.dump(dst, f, indent=2)
+    f.write("\n")
+PYEOF
+}
+
 install_claude_md() {
   local src="$1" dst="$2"
   if $DRY_RUN; then
@@ -223,7 +290,6 @@ install_claude_md() {
     cp "$src" "$dst"
     success "Installed CLAUDE.md → $dst"
   else
-    # Check if already installed
     if grep -q "Claude Crew" "$dst" 2>/dev/null; then
       warn "CLAUDE.md already contains Claude Crew content — skipping"
     else
@@ -237,90 +303,113 @@ install_claude_md() {
   fi
 }
 
-# ── Install ───────────────────────────────────────────────────────────────────
-header "Installing Claude Crew"
+# ── Install shared layer (always) ─────────────────────────────────────────────
+header "Installing shared layer"
 
-# Agents → .claude/agents/
-copy_dir "$SRC_AGENTS" "$TARGET_CLAUDE/agents" "specialist agents (14)"
-
-# Commands → .claude/commands/
-copy_dir "$SRC_COMMANDS" "$TARGET_CLAUDE/commands" "slash commands"
-
-# Skills → .claude/skills/   (each skill lives in its own subfolder with SKILL.md)
-copy_dir "$SRC_SKILLS" "$TARGET_CLAUDE/skills" "workflow skills"
+copy_dir "$SRC_BASE/shared/agents"   "$TARGET_CLAUDE/agents"   "shared agents (git-flow-advisor, jira-advisor, scrum-master, learning-agent)"
+copy_dir "$SRC_BASE/shared/commands" "$TARGET_CLAUDE/commands" "shared commands (commit-push-pr, detect-gitflow, learn, memory-review, standup, retro, ...)"
+copy_dir "$SRC_BASE/shared/skills"   "$TARGET_CLAUDE/skills"   "shared skills (git-flow, jira-flow, scrum)"
 
 # Hooks → .claude/hooks/
-copy_dir "$SRC_HOOKS" "$TARGET_CLAUDE/hooks" "lifecycle hooks"
-
-# Make hooks executable
+copy_dir "$SRC_BASE/shared/scripts"  "$TARGET_CLAUDE/hooks"    "lifecycle hooks"
 if ! $DRY_RUN && [[ -d "$TARGET_CLAUDE/hooks" ]]; then
   chmod +x "$TARGET_CLAUDE/hooks"/*.sh 2>/dev/null || true
   success "Hooks marked executable"
 fi
 
-# settings.json — merge carefully
-merge_settings "$SRC_SETTINGS" "$TARGET_CLAUDE/settings.json"
+# settings.json
+merge_settings "$SRC_BASE/settings.json" "$TARGET_CLAUDE/settings.json"
 
-# CLAUDE.md + project-only files
+# CLAUDE.md
 if $GLOBAL; then
-  install_claude_md "$SRC_CLAUDE_MD" "$HOME/.claude/CLAUDE.md"
+  install_claude_md "$SRC_BASE/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 else
-  install_claude_md "$SRC_CLAUDE_MD" "$PROJECT_DIR/CLAUDE.md"
+  install_claude_md "$SRC_BASE/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md"
+  # Shared rules
+  copy_dir "$SRC_BASE/shared/rules" "$PROJECT_DIR/rules" "shared rules (security-guardrails, scrum)"
+fi
 
-  # rules/ — reference docs for agents
-  copy_dir "$SRC_RULES" "$PROJECT_DIR/rules" "coding rules (Kotlin, Swift, Arch)"
-
-  # claude-crew.config.md template (only if not already present)
-  DST_CONFIG="$PROJECT_DIR/claude-crew.config.md"
+# Memory file
+if ! $GLOBAL; then
+  DST_MEMORY="$TARGET_CLAUDE/memory/MEMORY.md"
   if $DRY_RUN; then
-    info "[dry-run] Would install claude-crew.config.md → $DST_CONFIG"
-  elif [[ -f "$DST_CONFIG" ]]; then
-    warn "claude-crew.config.md already exists — skipping (edit it manually or run /detect-arch)"
-  elif [[ -f "$SRC_CONFIG_MD" ]]; then
-    cp "$SRC_CONFIG_MD" "$DST_CONFIG"
-    success "Installed claude-crew.config.md → $DST_CONFIG"
-    info "Run /detect-arch to auto-fill it, or edit manually to match your project"
+    info "[dry-run] Would install .claude/memory/MEMORY.md"
+  elif [[ ! -f "$DST_MEMORY" ]]; then
+    mkdir -p "$TARGET_CLAUDE/memory"
+    cp "$SRC_BASE/memory/MEMORY.md" "$DST_MEMORY" 2>/dev/null || true
+    [[ -f "$DST_MEMORY" ]] && success "Installed .claude/memory/MEMORY.md"
+  else
+    warn ".claude/memory/MEMORY.md already exists — preserving existing learnings"
+  fi
+fi
+
+# ── Install each selected profile ────────────────────────────────────────────
+for profile in "${SELECTED_PROFILES[@]}"; do
+  header "Installing profile: $profile"
+
+  SRC_PROFILE="$SRC_BASE/profiles/$profile"
+  if [[ ! -d "$SRC_PROFILE" ]]; then
+    error "Profile directory not found: $SRC_PROFILE"
+    continue
   fi
 
-  # git-flow.config.md template (only if not already present)
-  DST_GITFLOW="$PROJECT_DIR/git-flow.config.md"
-  if $DRY_RUN; then
-    info "[dry-run] Would install git-flow.config.md → $DST_GITFLOW"
-  elif [[ -f "$DST_GITFLOW" ]]; then
-    warn "git-flow.config.md already exists — skipping (edit it manually or run /detect-gitflow)"
-  elif [[ -f "$SRC_GITFLOW_MD" ]]; then
-    cp "$SRC_GITFLOW_MD" "$DST_GITFLOW"
-    success "Installed git-flow.config.md → $DST_GITFLOW"
-    info "Run /detect-gitflow to auto-fill it, or edit manually to match your team conventions"
+  # Agents
+  [[ -d "$SRC_PROFILE/agents" ]] && copy_dir "$SRC_PROFILE/agents" "$TARGET_CLAUDE/agents" "$profile agents"
+
+  # Commands
+  [[ -d "$SRC_PROFILE/commands" ]] && copy_dir "$SRC_PROFILE/commands" "$TARGET_CLAUDE/commands" "$profile commands"
+
+  # Skills
+  [[ -d "$SRC_PROFILE/skills" ]] && copy_dir "$SRC_PROFILE/skills" "$TARGET_CLAUDE/skills" "$profile skills"
+
+  # Rules (project install only)
+  if ! $GLOBAL && [[ -d "$SRC_PROFILE/rules" ]]; then
+    copy_dir "$SRC_PROFILE/rules" "$PROJECT_DIR/rules" "$profile rules"
   fi
 
-  # jira.config.md template (only if not already present)
-  DST_JIRA="$PROJECT_DIR/jira.config.md"
-  if $DRY_RUN; then
-    info "[dry-run] Would install jira.config.md → $DST_JIRA"
-  elif [[ -f "$DST_JIRA" ]]; then
-    warn "jira.config.md already exists — skipping (edit it manually or run /detect-jira)"
-  elif [[ -f "$SRC_JIRA_MD" ]]; then
-    cp "$SRC_JIRA_MD" "$DST_JIRA"
-    success "Installed jira.config.md → $DST_JIRA"
-    info "Run /detect-jira to configure your Jira project (requires Jira CLI)"
+  # Merge profile permissions into settings.json
+  merge_profile_permissions "$SRC_PROFILE/profile.json" "$TARGET_CLAUDE/settings.json"
+
+  # Profile-specific config template
+  if ! $GLOBAL; then
+    PROFILE_JSON="$SRC_PROFILE/profile.json"
+    if [[ -f "$PROFILE_JSON" ]]; then
+      CONFIG_TEMPLATE=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get('configTemplate',''))" "$PROFILE_JSON" 2>/dev/null || echo "")
+      if [[ -n "$CONFIG_TEMPLATE" && ! -f "$PROJECT_DIR/$CONFIG_TEMPLATE" && -f "$SRC_BASE/$CONFIG_TEMPLATE" ]]; then
+        copy_file "$SRC_BASE/$CONFIG_TEMPLATE" "$PROJECT_DIR/$CONFIG_TEMPLATE" "$CONFIG_TEMPLATE template"
+      fi
+    fi
   fi
 
-  # .claude/memory/MEMORY.md — project learning store (only if not already present)
-  DST_MEMORY_DIR="$TARGET_CLAUDE/memory"
-  DST_MEMORY="$DST_MEMORY_DIR/MEMORY.md"
-  if $DRY_RUN; then
-    info "[dry-run] Would install .claude/memory/MEMORY.md → $DST_MEMORY"
-  elif [[ -f "$DST_MEMORY" ]]; then
-    warn ".claude/memory/MEMORY.md already exists — skipping (existing learnings preserved)"
-  elif [[ -f "$SRC_MEMORY_MD" ]]; then
-    mkdir -p "$DST_MEMORY_DIR"
-    cp "$SRC_MEMORY_MD" "$DST_MEMORY"
-    success "Installed .claude/memory/MEMORY.md → $DST_MEMORY"
-    info "Claude will automatically write learnings here after each session"
-    info "Run /learn \"<fact>\" to teach Claude something explicitly"
-    info "Run /memory-review to curate accumulated entries"
+done
+
+# ── Write ACTIVE_PROFILES and INSTALLED_PROFILES ──────────────────────────────
+if ! $DRY_RUN; then
+  printf '%s\n' "${SELECTED_PROFILES[@]}" > "$TARGET_CLAUDE/ACTIVE_PROFILES"
+  success "Wrote .claude/ACTIVE_PROFILES: ${SELECTED_PROFILES[*]}"
+
+  # INSTALLED_PROFILES: merge with existing (for upgrade support)
+  INSTALLED_FILE="$TARGET_CLAUDE/INSTALLED_PROFILES"
+  if [[ -f "$INSTALLED_FILE" ]]; then
+    mapfile -t existing_installed < "$INSTALLED_FILE"
+    combined=("${existing_installed[@]}" "${SELECTED_PROFILES[@]}")
+    printf '%s\n' "${combined[@]}" | sort -u > "$INSTALLED_FILE"
+  else
+    printf '%s\n' "${SELECTED_PROFILES[@]}" > "$INSTALLED_FILE"
   fi
+  success "Wrote .claude/INSTALLED_PROFILES"
+fi
+
+# ── Project-specific shared config templates ─────────────────────────────────
+if ! $GLOBAL && ! $DRY_RUN; then
+  for cfg in git-flow.config.md jira.config.md; do
+    DST="$PROJECT_DIR/$cfg"
+    SRC="$SRC_BASE/$cfg"
+    if [[ ! -f "$DST" && -f "$SRC" ]]; then
+      cp "$SRC" "$DST"
+      success "Installed $cfg"
+    fi
+  done
 fi
 
 # ── Post-install summary ──────────────────────────────────────────────────────
@@ -334,50 +423,80 @@ fi
 echo ""
 echo -e "${GREEN}${BOLD}  Claude Crew is installed!${RESET}"
 echo ""
-echo -e "  ${BOLD}Slash commands:${RESET}"
-echo "    /sdlc <feature>           Full SDLC: plan→build→review→security→a11y→release"
-echo "    /android-review           Review Android/Kotlin code"
-echo "    /ios-review               Review Swift/iOS code"
-echo "    /mobile-test              Generate test suite"
-echo "    /mobile-release           Release preparation checklist"
-echo "    /detect-arch              Auto-detect project architecture
-    /detect-gitflow           Auto-detect git branching conventions
-    /sprint-start [N]         Kick off a new sprint
-    /detect-jira              Interactive Jira project setup (requires Jira CLI)
-    /standup                  Facilitate today's daily standup
-    /retro [format]           Run a sprint retrospective
-    /sprint-health            Check sprint burndown and surface risks
-    /security-scan            Full OWASP Mobile Top 10 + secrets audit
-    /commit-push-pr           Stage, commit, push, and open a PR (follows team conventions)
-    /teach-mode [on|off]      Toggle interactive teach mode for the entire session
-    /learn \"<fact>\"           Teach Claude something about this project
-    /memory-review            Curate accumulated project memory"
+echo -e "  Active profiles: ${BOLD}${SELECTED_PROFILES[*]}${RESET}"
 echo ""
-echo -e "  ${BOLD}Skills (workflows):${RESET}"
-echo "    android-feature           mobile-code-review    performance-profile"
-echo "    ios-feature               mobile-release        accessibility-audit"
-echo "    mobile-test               git-flow              jira-flow"
-echo "    scrum"
+echo -e "  ${BOLD}Shared commands (always available):${RESET}"
+echo "    /profile [list|status|add|use|remove]   Manage active team profiles"
+echo "    /commit-push-pr                          Stage, commit, push, open PR"
+echo "    /detect-gitflow                          Auto-detect git conventions"
+echo "    /detect-jira                             Configure Jira project"
+echo "    /standup                                 Daily standup"
+echo "    /retro [format]                          Sprint retrospective"
+echo "    /sprint-start [N]                        Kick off a sprint"
+echo "    /sprint-health                           Sprint burndown and risk"
+echo "    /teach-mode [on|off|status]              Interactive teach mode"
+echo "    /learn \"<fact>\"                          Teach Claude a project rule"
+echo "    /memory-review                           Curate project memory"
 echo ""
-echo -e "  ${BOLD}Agents (specialist reviewers):${RESET}"
-echo "    android-reviewer          mobile-architect      mobile-security"
-echo "    ios-reviewer              mobile-performance    mobile-test-planner"
-echo "    ui-accessibility          release-manager       git-flow-advisor"
-echo "    jira-advisor              scrum-master          learning-agent"
-echo ""
-if $GLOBAL; then
-  echo -e "  ${BOLD}Global install:${RESET} agents + commands active in every Claude Code project."
-  echo ""
-  echo -e "  ${BOLD}Next step:${RESET} In each project, run /detect-arch to create claude-crew.config.md"
-  echo -e "  so agents review against YOUR architecture."
-else
-  echo -e "  ${BOLD}Project install:${RESET} agents + commands active in ${PROJECT_DIR}"
-  echo ""
-  echo -e "  ${BOLD}Next steps:${RESET}"
-  echo -e "    1. Run ${BLUE}/detect-arch${RESET} to auto-detect your project architecture"
-  echo -e "       (or edit claude-crew.config.md manually)"
-  echo -e "    2. Try: ${BLUE}/sdlc Build a user profile screen for Android${RESET}"
-fi
+
+# Profile-specific command hints
+for profile in "${SELECTED_PROFILES[@]}"; do
+  case $profile in
+    mobile)
+      echo -e "  ${BOLD}Mobile commands:${RESET}"
+      echo "    /sdlc <feature>    Full 7-stage SDLC pipeline"
+      echo "    /android-review    Android/Kotlin code review"
+      echo "    /ios-review        Swift/iOS code review"
+      echo "    /security-scan     OWASP Mobile Top 10 audit"
+      echo "    /detect-arch       Auto-detect mobile stack"
+      echo "" ;;
+    backend)
+      echo -e "  ${BOLD}Backend commands:${RESET}"
+      echo "    /api-sdlc <feature>          Full backend SDLC pipeline"
+      echo "    /api-review                  API code review + security"
+      echo "    /db-migration                Generate safe DB migration"
+      echo "    /backend-security-scan       OWASP API Security Top 10"
+      echo "    /detect-backend-stack        Auto-detect backend stack"
+      echo "" ;;
+    qa)
+      echo -e "  ${BOLD}QA commands:${RESET}"
+      echo "    /test-plan <feature>   Risk-based test plan"
+      echo "    /bug-report            Triage and structured bug report"
+      echo "    /regression-suite      Automated regression tests"
+      echo "    /performance-test      Load test script + SLOs"
+      echo "    /qa-review             Release sign-off checklist"
+      echo "" ;;
+    product)
+      echo -e "  ${BOLD}Product commands:${RESET}"
+      echo "    /prd <feature>           Write a PRD"
+      echo "    /user-story <epic>       Break epic into stories"
+      echo "    /feature-brief           Stakeholder feature brief"
+      echo "    /acceptance-criteria     Given/When/Then AC"
+      echo "    /metrics-review          Define KPIs and event schema"
+      echo "" ;;
+    data)
+      echo -e "  ${BOLD}Data commands:${RESET}"
+      echo "    /pipeline-review    Review data pipeline"
+      echo "    /sql-review         Review SQL / dbt models"
+      echo "    /data-model         Design data model"
+      echo "    /ml-experiment      Set up ML experiment"
+      echo "    /dbt-review         Review dbt models"
+      echo "" ;;
+    frontend)
+      echo -e "  ${BOLD}Frontend commands:${RESET}"
+      echo "    /frontend-sdlc <feature>   Full frontend SDLC pipeline"
+      echo "    /frontend-review           Code review + accessibility"
+      echo "    /accessibility-audit       WCAG 2.1 AA audit"
+      echo "    /bundle-analysis           Bundle size optimisation"
+      echo "    /detect-frontend-stack     Auto-detect frontend stack"
+      echo "" ;;
+  esac
+done
+
+echo -e "  ${BOLD}Manage profiles:${RESET}"
+echo "    /profile list                  See all profiles"
+echo "    /profile add qa                Add QA profile at runtime"
+echo "    ./install.sh --profile all     Install all profiles"
 echo ""
 echo -e "  Docs: ${BLUE}${REPO_URL}${RESET}"
 echo ""

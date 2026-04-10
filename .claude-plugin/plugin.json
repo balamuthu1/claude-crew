@@ -1,7 +1,7 @@
 {
   "name": "claude-crew",
-  "version": "1.0.8",
-  "description": "Mobile agent harness for Android and iOS engineering teams. Provides specialist agents, SDLC workflows, code review, security, accessibility, and release management.",
+  "version": "2.0.0",
+  "description": "Multi-team agent harness for engineering teams. Install profiles for mobile, backend, QA, product, data, or frontend — each with specialist agents, SDLC workflows, code review, security guardrails, and a shared memory system.",
   "author": {
     "name": "balamuthu1",
     "url": "https://github.com/balamuthu1"
@@ -10,14 +10,18 @@
   "repository": "https://github.com/balamuthu1/claude-crew",
   "license": "MIT",
   "keywords": [
+    "mobile",
     "android",
     "ios",
-    "mobile",
-    "kotlin",
-    "swift",
-    "jetpack-compose",
-    "swiftui",
+    "backend",
+    "api",
+    "frontend",
+    "qa",
+    "testing",
+    "product",
+    "data",
+    "sdlc",
     "code-review",
-    "sdlc"
+    "multi-team"
   ]
 }

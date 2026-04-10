@@ -1,0 +1,60 @@
+{
+  "id": "data",
+  "displayName": "Data Engineering",
+  "description": "Data pipelines, ML engineering, analytics, and SQL specialist agents.",
+  "version": "2.0.0",
+  "agents": [
+    "data-engineer",
+    "ml-engineer",
+    "analytics-engineer",
+    "sql-specialist",
+    "data-reviewer"
+  ],
+  "commands": [
+    "pipeline-review",
+    "sql-review",
+    "data-model",
+    "ml-experiment",
+    "dbt-review"
+  ],
+  "skills": [
+    "pipeline-development",
+    "data-modeling",
+    "ml-workflow"
+  ],
+  "rules": [
+    "sql-standards.md",
+    "data-engineering.md",
+    "data-security-guardrails.md"
+  ],
+  "configTemplate": "data.config.md",
+  "detectCommand": null,
+  "permissions": {
+    "allow": [
+      "Bash(dbt *)",
+      "Bash(airflow *)",
+      "Bash(spark-submit *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(pytest *)",
+      "Bash(jupyter *)"
+    ],
+    "deny": [
+      "Bash(DROP TABLE *)",
+      "Bash(TRUNCATE *)",
+      "Bash(DELETE FROM *)"
+    ]
+  },
+  "securityGuardrails": {
+    "additionalSensitiveFilePatterns": [
+      "service-account\\.json",
+      "dbt/profiles\\.yml",
+      "\\.dbt/profiles\\.yml",
+      "airflow\\.cfg",
+      "\\.aws/credentials"
+    ],
+    "hooksModule": "data"
+  },
+  "compatibleWith": ["backend", "product"],
+  "conflictsWith": []
+}

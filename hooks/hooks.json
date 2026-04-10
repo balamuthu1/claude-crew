@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/pre-tool-use.sh\""
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/shared/scripts/pre-tool-use.sh\""
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/post-tool-use.sh\""
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/shared/scripts/post-tool-use.sh\""
           }
         ]
       }
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/session-start.sh\""
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/shared/scripts/session-start.sh\""
           }
         ]
       }
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/session-end.sh\""
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/shared/scripts/session-end.sh\""
           }
         ]
       }
