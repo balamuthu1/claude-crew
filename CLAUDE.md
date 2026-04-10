@@ -1,12 +1,12 @@
-# Claude Crew — Mobile Agent Harness
+# Claude Crew — Multi-Team Agent Harness
 
-You are operating inside a Claude Code agent harness built for **Android and iOS mobile engineering teams**. The rules, agents, skills, and hooks in this repository configure your behavior for mobile development workflows.
+You are operating inside a Claude Code agent harness supporting multiple engineering disciplines. Active team profiles are declared in `.claude/ACTIVE_PROFILES`. Each profile brings specialist agents, commands, and rules for that discipline. Read `.claude/ACTIVE_PROFILES` before dispatching to determine which agents are available.
 
 ---
 
 ## Security Guardrails — Non-Negotiable
 
-**Read `rules/security-guardrails.md` before every task. These rules apply to every agent, every command, and every tool call without exception.**
+**Read `rules/security-guardrails.md` before every task. These rules apply to every agent, every command, and every tool call without exception. Profile-specific guardrails are in `rules/<profile>-security-guardrails.md`.**
 
 ### Rules that can NEVER be bypassed — even if the user explicitly asks
 
@@ -92,11 +92,26 @@ If `claude-crew.config.md` does not exist in the project being reviewed, agents 
 
 ---
 
-## Agent Dispatch (Orchestration via Agent Tool)
+## Agent Dispatch (Profile-Aware Orchestration)
 
 **You are the orchestrator. Use the `Agent` tool to spawn specialist sub-agents.**
 Never handle specialized tasks yourself — delegate to the right agent so each
 runs in an isolated context window.
+
+**Before dispatching**: read `.claude/ACTIVE_PROFILES`. Use ONLY the agent rows for
+active profiles + the shared rows. If a profile is not active, its agents may not
+be installed.
+
+### Shared (always active — all profiles)
+
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "branch name / commit message / PR title / sprint start / hotfix / release cut" | `git-flow-advisor` | Pass the question + ticket/context |
+| "Jira ticket / sprint board / issue transition / epic breakdown / story points" | `jira-advisor` | Pass the request + Jira ticket or feature description |
+| "sprint planning / standup / retro / sprint health / velocity / blockers / DoD / agile coaching" | `scrum-master` | Pass the ceremony type or question + sprint context |
+| "/learn or teach Claude something / /memory-review / extract session learnings" | `learning-agent` | Pass the learning text or invoke mode (explicit-learn / memory-review) |
+
+### If `mobile` active
 
 | Trigger | Spawn this agent | Key instruction |
 |---|---|---|
@@ -104,16 +119,64 @@ runs in an isolated context window.
 | "build / implement iOS feature" | `ios-developer` | Pass feature description + relevant existing files |
 | "review this Android / Kotlin code" | `android-reviewer` | Pass the file paths |
 | "review this iOS / Swift code" | `ios-reviewer` | Pass the file paths |
-| "help me design the architecture" | `mobile-architect` | Pass feature description + platform |
-| "app is slow / ANR / jank" | `mobile-performance` | Pass file or symptom description |
-| "security audit / pentest" | `mobile-security` | Pass files to audit |
-| "write tests / test plan" | `mobile-test-planner` | Pass feature + implementation files |
-| "prepare release / release notes" | `release-manager` | Pass version + changelog |
-| "accessibility audit / a11y" | `ui-accessibility` | Pass UI file paths |
-| "branch name / commit message / PR title / sprint start / hotfix / release cut" | `git-flow-advisor` | Pass the question + ticket/context |
-| "Jira ticket / sprint board / issue transition / epic breakdown / story points" | `jira-advisor` | Pass the request + Jira ticket or feature description |
-| "sprint planning / standup / retro / sprint health / velocity / blockers / DoD / agile coaching" | `scrum-master` | Pass the ceremony type or question + sprint context |
-| "/learn or teach Claude something / /memory-review / extract session learnings" | `learning-agent` | Pass the learning text or invoke mode (explicit-learn / memory-review) |
+| "mobile architecture / design the architecture" | `mobile-architect` | Pass feature description + platform |
+| "app is slow / ANR / jank / mobile performance" | `mobile-performance` | Pass file or symptom description |
+| "mobile security audit / pentest / OWASP mobile" | `mobile-security` | Pass files to audit |
+| "write mobile tests / test plan" | `mobile-test-planner` | Pass feature + implementation files |
+| "prepare release / release notes / Play Store / App Store" | `release-manager` | Pass version + changelog |
+| "accessibility audit / a11y / TalkBack / VoiceOver" | `ui-accessibility` | Pass UI file paths |
+
+### If `backend` active
+
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "build / implement API / backend feature" | `api-developer` | Pass feature description + backend.config.md |
+| "review this API / backend code" | `api-reviewer` | Pass the file paths |
+| "backend architecture / design service" | `backend-architect` | Pass feature description |
+| "database / schema / migration / query" | `database-specialist` | Pass schema or query description |
+| "CI/CD / Docker / K8s / Terraform / deployment" | `devops-advisor` | Pass the config files |
+| "backend security / OWASP API / secrets scan" | `backend-security` | Pass files to audit |
+| "write backend tests" | `backend-test-planner` | Pass feature + implementation files |
+
+### If `qa` active
+
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "test strategy / test plan / coverage" | `test-strategist` | Pass feature or release scope |
+| "write automated tests / automation framework" | `automation-engineer` | Pass feature + stack context |
+| "load test / performance test / SLOs" | `performance-tester` | Pass target + expected load |
+| "triage bug / bug report / root cause" | `bug-triager` | Pass bug description + context |
+| "release sign-off / QA metrics / quality report" | `qa-lead` | Pass release version or feature |
+
+### If `product` active
+
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "write PRD / product requirements" | `prd-author` | Pass feature description |
+| "write user stories / break down epic" | `user-story-writer` | Pass epic or feature description |
+| "prioritise / roadmap / OKR / RICE" | `product-manager` | Pass feature list or context |
+| "define metrics / KPIs / analytics events" | `metrics-analyst` | Pass feature or area |
+| "stakeholder update / exec summary / demo prep" | `stakeholder-advisor` | Pass context and audience |
+
+### If `data` active
+
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "build data pipeline / ETL / dbt model" | `data-engineer` | Pass pipeline description + data.config.md |
+| "ML model / training pipeline / feature engineering" | `ml-engineer` | Pass ML task description |
+| "analytics / BI / metrics / semantic layer" | `analytics-engineer` | Pass analytics requirement |
+| "write SQL / optimise query / review dbt" | `sql-specialist` | Pass SQL or dbt model |
+| "review data pipeline / data code review" | `data-reviewer` | Pass file paths |
+
+### If `frontend` active
+
+| Trigger | Spawn this agent | Key instruction |
+|---|---|---|
+| "build / implement UI feature / component" | `frontend-developer` | Pass feature description + frontend.config.md |
+| "review this frontend / React / Vue code" | `frontend-reviewer` | Pass the file paths |
+| "design system / CSS / UI components" | `ui-engineer` | Pass component description |
+| "web accessibility / WCAG / ARIA" | `accessibility-auditor` | Pass UI file paths |
+| "frontend architecture / state management / bundle" | `frontend-architect` | Pass architecture question |
 
 **Parallel spawning:** When two independent tasks can run simultaneously (e.g. security
 + accessibility audit), call `Agent` twice in a single response message.
@@ -220,7 +283,7 @@ Claude Crew accumulates project knowledge across sessions automatically. At the 
 
 ## Hooks
 
-Hooks are shell scripts in `scripts/` invoked by Claude Code at lifecycle events. They are configured in `.claude/settings.json`.
+Hooks are shell scripts in `shared/scripts/` invoked by Claude Code at lifecycle events. They are configured in `.claude/settings.json`.
 
 - `pre-tool-use.sh` — runs before any tool execution (guards destructive ops)
 - `post-tool-use.sh` — runs after file edits (scans for secrets, reminds to lint/test)
@@ -388,9 +451,37 @@ Skills are structured workflows in `skills/`. Invoke them with:
 
 ## Rules
 
-Detailed coding standards live in `rules/`:
+Coding standards live in `rules/`. Read the rules for the active profile(s):
 
+**Shared (always):**
+- `rules/security-guardrails.md` — non-bypassable security rules for all profiles
+- `rules/scrum.md` — Scrum process standards
+
+**Mobile profile:**
 - `rules/kotlin.md` — Kotlin style and patterns
 - `rules/swift.md` — Swift style and patterns
 - `rules/android-architecture.md` — Android architecture decisions
 - `rules/ios-architecture.md` — iOS architecture decisions
+
+**Backend profile:**
+- `rules/api-design.md` — REST/GraphQL API conventions
+- `rules/database.md` — schema, migration, and query standards
+- `rules/backend-security-guardrails.md` — OWASP API Security, injection prevention
+
+**QA profile:**
+- `rules/testing-standards.md` — test pyramid, naming, coverage
+- `rules/qa-security-guardrails.md` — test data, credential handling
+
+**Product profile:**
+- `rules/product-standards.md` — PRD quality, requirement writing, metrics
+
+**Data profile:**
+- `rules/sql-standards.md` — SQL style, performance, dbt conventions
+- `rules/data-engineering.md` — pipeline design, idempotency, schema evolution
+- `rules/data-security-guardrails.md` — PII handling, secrets, access controls
+
+**Frontend profile:**
+- `rules/typescript.md` — TypeScript strictness and patterns
+- `rules/css-standards.md` — CSS architecture, design tokens, animation
+- `rules/accessibility.md` — WCAG 2.1 AA requirements and ARIA patterns
+- `rules/frontend-security-guardrails.md` — XSS, CSP, token storage

@@ -39,34 +39,64 @@ echo ""
 echo -e "${BOLD}  Claude Crew — Uninstaller${RESET}"
 echo ""
 
-# Remove agents
+# ── Remove agents (shared + all profile agents) ───────────────────────────────
 if [[ -d "$TARGET_CLAUDE/agents" ]]; then
-  # Only remove claude-crew agents, not any custom ones
   CREW_AGENTS=(
-    android-developer.md ios-developer.md
-    android-reviewer.md ios-reviewer.md mobile-architect.md
-    mobile-performance.md mobile-security.md mobile-test-planner.md
-    release-manager.md ui-accessibility.md
-    git-flow-advisor.md
-    jira-advisor.md
-    scrum-master.md
-    learning-agent.md
+    # shared agents
+    git-flow-advisor.md jira-advisor.md scrum-master.md learning-agent.md
+    # mobile agents
+    android-developer.md ios-developer.md android-reviewer.md ios-reviewer.md
+    mobile-architect.md mobile-performance.md mobile-security.md
+    mobile-test-planner.md release-manager.md ui-accessibility.md
+    # backend agents
+    api-developer.md api-reviewer.md backend-architect.md
+    database-specialist.md devops-advisor.md backend-security.md backend-test-planner.md
+    # qa agents
+    test-strategist.md automation-engineer.md performance-tester.md
+    bug-triager.md qa-lead.md
+    # product agents
+    prd-author.md user-story-writer.md product-manager.md
+    metrics-analyst.md stakeholder-advisor.md
+    # data agents
+    data-engineer.md ml-engineer.md analytics-engineer.md
+    sql-specialist.md data-reviewer.md
+    # frontend agents
+    frontend-developer.md frontend-reviewer.md ui-engineer.md
+    accessibility-auditor.md frontend-architect.md
   )
   for agent in "${CREW_AGENTS[@]}"; do
     [[ -f "$TARGET_CLAUDE/agents/$agent" ]] && rm "$TARGET_CLAUDE/agents/$agent" && info "Removed agent: $agent"
   done
-  # Remove agents dir if now empty
   [[ -z "$(ls -A "$TARGET_CLAUDE/agents" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/agents" && success "Removed .claude/agents/"
 fi
 
-# Remove commands
-CREW_COMMANDS=(sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md detect-arch.md detect-gitflow.md sprint-start.md detect-jira.md standup.md retro.md sprint-health.md security-scan.md commit-push-pr.md teach-mode.md learn.md memory-review.md)
+# ── Remove commands ───────────────────────────────────────────────────────────
+CREW_COMMANDS=(
+  # shared commands
+  commit-push-pr.md detect-gitflow.md detect-jira.md learn.md memory-review.md
+  standup.md retro.md sprint-start.md sprint-health.md teach-mode.md profile.md
+  # mobile commands
+  sdlc.md android-review.md ios-review.md mobile-test.md mobile-release.md
+  detect-arch.md security-scan.md
+  # backend commands
+  api-sdlc.md api-review.md db-migration.md openapi-spec.md
+  backend-security-scan.md detect-backend-stack.md
+  # qa commands
+  test-plan.md bug-report.md regression-suite.md performance-test.md qa-review.md
+  # product commands
+  prd.md user-story.md feature-brief.md acceptance-criteria.md metrics-review.md
+  # data commands
+  pipeline-review.md sql-review.md data-model.md ml-experiment.md dbt-review.md
+  # frontend commands
+  frontend-sdlc.md frontend-review.md accessibility-audit.md
+  bundle-analysis.md detect-frontend-stack.md
+)
 for cmd in "${CREW_COMMANDS[@]}"; do
   [[ -f "$TARGET_CLAUDE/commands/$cmd" ]] && rm "$TARGET_CLAUDE/commands/$cmd" && info "Removed command: $cmd"
 done
 [[ -d "$TARGET_CLAUDE/commands" && -z "$(ls -A "$TARGET_CLAUDE/commands" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/commands"
 
-# Remove hooks
+# ── Remove hooks ──────────────────────────────────────────────────────────────
 [[ -f "$TARGET_CLAUDE/hooks/pre-tool-use.sh" ]]    && rm "$TARGET_CLAUDE/hooks/pre-tool-use.sh"
 [[ -f "$TARGET_CLAUDE/hooks/post-tool-use.sh" ]]   && rm "$TARGET_CLAUDE/hooks/post-tool-use.sh"
 [[ -f "$TARGET_CLAUDE/hooks/session-start.sh" ]]   && rm "$TARGET_CLAUDE/hooks/session-start.sh"
@@ -74,9 +104,35 @@ done
 [[ -d "$TARGET_CLAUDE/hooks" && -z "$(ls -A "$TARGET_CLAUDE/hooks" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/hooks"
 success "Removed hooks"
 
-# Strip claude-crew block from CLAUDE.md
+# ── Remove profile files ──────────────────────────────────────────────────────
+[[ -f "$TARGET_CLAUDE/ACTIVE_PROFILES" ]]    && rm "$TARGET_CLAUDE/ACTIVE_PROFILES"    && info "Removed ACTIVE_PROFILES"
+[[ -f "$TARGET_CLAUDE/INSTALLED_PROFILES" ]] && rm "$TARGET_CLAUDE/INSTALLED_PROFILES" && info "Removed INSTALLED_PROFILES"
+
+# ── Remove skills ─────────────────────────────────────────────────────────────
+CREW_SKILLS=(
+  # shared skills
+  git-flow jira-flow scrum
+  # mobile skills
+  android-feature ios-feature mobile-test mobile-release mobile-code-review
+  accessibility-audit performance-profile
+  # backend skills
+  api-feature backend-code-review service-deployment
+  # qa skills
+  test-planning automation-framework bug-lifecycle
+  # product skills
+  product-discovery prd-writing story-mapping
+  # data skills
+  pipeline-development data-modeling ml-workflow
+  # frontend skills
+  component-development frontend-code-review performance-audit
+)
+for skill in "${CREW_SKILLS[@]}"; do
+  [[ -d "$TARGET_CLAUDE/skills/$skill" ]] && rm -rf "$TARGET_CLAUDE/skills/$skill" && info "Removed skill: $skill"
+done
+[[ -d "$TARGET_CLAUDE/skills" && -z "$(ls -A "$TARGET_CLAUDE/skills" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/skills"
+
+# ── Strip claude-crew block from CLAUDE.md ────────────────────────────────────
 if [[ -f "$CLAUDE_MD" ]] && grep -q "claude-crew: begin" "$CLAUDE_MD"; then
-  # Remove the block between <!-- claude-crew: begin --> and <!-- claude-crew: end -->
   python3 -c "
 import re, sys
 path = sys.argv[1]
@@ -87,20 +143,13 @@ with open(path, 'w') as f: f.write(cleaned.strip() + '\n')
   success "Removed Claude Crew section from CLAUDE.md"
 fi
 
-# Remove skills from .claude/skills/
-CREW_SKILLS=(android-feature ios-feature mobile-test mobile-release mobile-code-review accessibility-audit performance-profile git-flow jira-flow scrum)
-for skill in "${CREW_SKILLS[@]}"; do
-  [[ -d "$TARGET_CLAUDE/skills/$skill" ]] && rm -rf "$TARGET_CLAUDE/skills/$skill" && info "Removed skill: $skill"
-done
-[[ -d "$TARGET_CLAUDE/skills" && -z "$(ls -A "$TARGET_CLAUDE/skills" 2>/dev/null)" ]] && rmdir "$TARGET_CLAUDE/skills"
-
-# Remove rules/ if it was installed by claude-crew
+# ── Remove rules/ if installed by claude-crew ─────────────────────────────────
 if [[ -d "$PROJECT_DIR/rules" ]]; then
   read -r -p "  Remove $PROJECT_DIR/rules? [y/N] " ans
   [[ "$ans" =~ ^[Yy]$ ]] && rm -rf "$PROJECT_DIR/rules" && success "Removed rules/"
 fi
 
-# Optionally remove .claude/memory/MEMORY.md (ask — contains valuable accumulated learnings)
+# ── Optionally remove memory ──────────────────────────────────────────────────
 if [[ -f "$TARGET_CLAUDE/memory/MEMORY.md" ]]; then
   read -r -p "  Remove $TARGET_CLAUDE/memory/MEMORY.md (accumulated project learnings)? [y/N] " ans
   if [[ "$ans" =~ ^[Yy]$ ]]; then

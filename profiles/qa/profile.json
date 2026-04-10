@@ -1,0 +1,56 @@
+{
+  "id": "qa",
+  "displayName": "QA Engineering",
+  "description": "Test strategy, automation, and quality assurance specialist agents.",
+  "version": "2.0.0",
+  "agents": [
+    "test-strategist",
+    "automation-engineer",
+    "performance-tester",
+    "bug-triager",
+    "qa-lead"
+  ],
+  "commands": [
+    "test-plan",
+    "bug-report",
+    "regression-suite",
+    "performance-test",
+    "qa-review"
+  ],
+  "skills": [
+    "test-planning",
+    "automation-framework",
+    "bug-lifecycle"
+  ],
+  "rules": [
+    "testing-standards.md",
+    "qa-security-guardrails.md"
+  ],
+  "configTemplate": "qa.config.md",
+  "detectCommand": null,
+  "permissions": {
+    "allow": [
+      "Bash(pytest *)",
+      "Bash(jest *)",
+      "Bash(cypress *)",
+      "Bash(playwright *)",
+      "Bash(k6 *)",
+      "Bash(jmeter *)",
+      "Bash(npm test)",
+      "Bash(yarn test)",
+      "Bash(./gradlew test)",
+      "Bash(xcodebuild test *)"
+    ],
+    "deny": []
+  },
+  "securityGuardrails": {
+    "additionalSensitiveFilePatterns": [
+      "cypress\\.env\\.json",
+      "\\.env\\.test",
+      "\\.env\\.staging"
+    ],
+    "hooksModule": "qa"
+  },
+  "compatibleWith": ["mobile", "backend", "frontend", "product"],
+  "conflictsWith": []
+}

@@ -1,0 +1,40 @@
+{
+  "id": "product",
+  "displayName": "Product Management",
+  "description": "PRD authoring, user story writing, and product strategy specialist agents.",
+  "version": "2.0.0",
+  "agents": [
+    "prd-author",
+    "user-story-writer",
+    "product-manager",
+    "metrics-analyst",
+    "stakeholder-advisor"
+  ],
+  "commands": [
+    "prd",
+    "user-story",
+    "feature-brief",
+    "acceptance-criteria",
+    "metrics-review"
+  ],
+  "skills": [
+    "product-discovery",
+    "prd-writing",
+    "story-mapping"
+  ],
+  "rules": [
+    "product-standards.md"
+  ],
+  "configTemplate": "product.config.md",
+  "detectCommand": null,
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+  "securityGuardrails": {
+    "additionalSensitiveFilePatterns": [],
+    "hooksModule": "product"
+  },
+  "compatibleWith": ["mobile", "backend", "frontend", "qa", "data"],
+  "conflictsWith": []
+}

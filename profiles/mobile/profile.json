@@ -1,0 +1,75 @@
+{
+  "id": "mobile",
+  "displayName": "Mobile Engineering",
+  "description": "Android and iOS specialist agents for mobile development workflows.",
+  "version": "2.0.0",
+  "agents": [
+    "android-developer",
+    "ios-developer",
+    "android-reviewer",
+    "ios-reviewer",
+    "mobile-architect",
+    "mobile-performance",
+    "mobile-security",
+    "mobile-test-planner",
+    "release-manager",
+    "ui-accessibility"
+  ],
+  "commands": [
+    "sdlc",
+    "android-review",
+    "ios-review",
+    "mobile-test",
+    "mobile-release",
+    "detect-arch",
+    "security-scan"
+  ],
+  "skills": [
+    "android-feature",
+    "ios-feature",
+    "mobile-test",
+    "mobile-release",
+    "mobile-code-review",
+    "accessibility-audit",
+    "performance-profile"
+  ],
+  "rules": [
+    "kotlin.md",
+    "swift.md",
+    "android-architecture.md",
+    "ios-architecture.md"
+  ],
+  "configTemplate": "claude-crew.config.md",
+  "detectCommand": "detect-arch",
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(./gradlew.bat *)",
+      "Bash(xcodebuild *)",
+      "Bash(fastlane *)",
+      "Bash(pod install)",
+      "Bash(pod update *)",
+      "Bash(swift build)",
+      "Bash(swift test)",
+      "Bash(adb *)",
+      "Bash(kotlin *)",
+      "Bash(ktlint *)",
+      "Bash(swiftlint *)",
+      "Bash(bundle exec *)"
+    ],
+    "deny": []
+  },
+  "securityGuardrails": {
+    "additionalSensitiveFilePatterns": [
+      "\\.jks",
+      "\\.keystore",
+      "\\.p12",
+      "\\.mobileprovision",
+      "GoogleService-Info\\.plist",
+      "google-services\\.json"
+    ],
+    "hooksModule": "mobile"
+  },
+  "compatibleWith": ["qa", "product"],
+  "conflictsWith": []
+}
