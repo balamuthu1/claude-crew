@@ -39,6 +39,6 @@
     "additionalSensitiveFilePatterns": [],
     "hooksModule": "product"
   },
-  "compatibleWith": ["mobile", "backend", "frontend", "qa", "data"],
+  "compatibleWith": ["mobile", "backend", "frontend", "qa"],
   "conflictsWith": []
 }
