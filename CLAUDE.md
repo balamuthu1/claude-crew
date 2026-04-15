@@ -158,16 +158,6 @@ be installed.
 | "define metrics / KPIs / analytics events" | `metrics-analyst` | Pass feature or area |
 | "stakeholder update / exec summary / demo prep" | `stakeholder-advisor` | Pass context and audience |
 
-### If `data` active
-
-| Trigger | Spawn this agent | Key instruction |
-|---|---|---|
-| "build data pipeline / ETL / dbt model" | `data-engineer` | Pass pipeline description + data.config.md |
-| "ML model / training pipeline / feature engineering" | `ml-engineer` | Pass ML task description |
-| "analytics / BI / metrics / semantic layer" | `analytics-engineer` | Pass analytics requirement |
-| "write SQL / optimise query / review dbt" | `sql-specialist` | Pass SQL or dbt model |
-| "review data pipeline / data code review" | `data-reviewer` | Pass file paths |
-
 ### If `frontend` active
 
 | Trigger | Spawn this agent | Key instruction |
@@ -474,11 +464,6 @@ Coding standards live in `rules/`. Read the rules for the active profile(s):
 
 **Product profile:**
 - `rules/product-standards.md` — PRD quality, requirement writing, metrics
-
-**Data profile:**
-- `rules/sql-standards.md` — SQL style, performance, dbt conventions
-- `rules/data-engineering.md` — pipeline design, idempotency, schema evolution
-- `rules/data-security-guardrails.md` — PII handling, secrets, access controls
 
 **Frontend profile:**
 - `rules/typescript.md` — TypeScript strictness and patterns
