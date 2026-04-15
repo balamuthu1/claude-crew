@@ -102,6 +102,39 @@ runs in an isolated context window.
 active profiles + the shared rows. If a profile is not active, its agents may not
 be installed.
 
+---
+
+### Subconscious Layer (always active — runs before every dispatch)
+
+The subconscious is a silent background observer. It watches what happens in this
+session and whispers relevant context to every agent you spawn.
+
+**Before spawning ANY working agent, do the following once per dispatch:**
+
+1. **Check staleness** of `.claude/subconscious/WHISPER.md`:
+   - Absent → stale
+   - `event_count` − `whisper_event_count` ≥ 10 → stale (read both from `.claude/subconscious/`)
+
+2. **If stale**: spawn `subconscious-agent` with `run_in_background=true`.
+   Pass a one-sentence summary of what the user is working on.
+   **Do NOT wait for it** — proceed with your dispatch immediately.
+
+3. **If WHISPER.md exists**: read it and prepend up to 500 characters to the
+   working agent's prompt under this heading:
+
+   ```
+   Subconscious context (background priming — not hard rules):
+   [paste WHISPER.md content here, truncated to 500 chars]
+   ```
+
+   Working agents treat whispers as background priming — they colour judgment
+   but do not override the task or the user's instructions.
+
+4. **At session start** (your very first action): spawn `subconscious-agent` once
+   in background to establish initial context even before the first dispatch.
+
+---
+
 ### Shared (always active — all profiles)
 
 | Trigger | Spawn this agent | Key instruction |

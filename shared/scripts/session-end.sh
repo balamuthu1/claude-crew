@@ -193,4 +193,24 @@ if command -v git &>/dev/null && git -C "$PROJECT_DIR" rev-parse --git-dir &>/de
   fi
 fi
 
+# ── Subconscious: promote high-signal whispers into MEMORY.md ─────────────────
+# [PATTERN] and [WARN] lines from the whisper are worth recording at confidence:low.
+# [MEMORY] is skipped — already in MEMORY.md. [OBJECTIVE]/[ZONE] are session-specific.
+SC_DIR="$PROJECT_DIR/.claude/subconscious"
+WHISPER_FILE="$SC_DIR/WHISPER.md"
+
+if [[ -f "$WHISPER_FILE" && -f "$MEMORY_FILE" ]]; then
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    if echo "$line" | grep -qE '^\[PATTERN\]'; then
+      content=$(echo "$line" | sed 's/^\[PATTERN\] //' | cut -c1-200)
+      append_learning "Patterns & Best Practices" "low" "subconscious" "$content"
+    fi
+    if echo "$line" | grep -qE '^\[WARN\]'; then
+      content=$(echo "$line" | sed 's/^\[WARN\] //' | cut -c1-200)
+      append_learning "Antipatterns & Known Issues" "low" "subconscious" "$content"
+    fi
+  done < "$WHISPER_FILE"
+fi
+
 exit 0

@@ -188,4 +188,34 @@ if [[ $FOUND_ISSUES -gt 0 ]]; then
   echo "   Review rules/security-guardrails.md for remediation guidance." >&2
 fi
 
+# ── Subconscious — event logging + hot-file micro-whisper ────────────────────
+# stdout is injected into Claude's context — we use it for real-time signals.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+SC_DIR="$PROJECT_DIR/.claude/subconscious"
+mkdir -p "$SC_DIR" 2>/dev/null || true
+
+SC_LOG="$SC_DIR/session.jsonl"
+SC_COUNTER="$SC_DIR/event_count"
+
+# Log this file-write event
+TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
+EXT="${FILE_PATH##*.}"
+echo "{\"ts\":\"$TS\",\"file\":\"$FILE_PATH\",\"ext\":\".$EXT\"}" >> "$SC_LOG" 2>/dev/null || true
+
+# Increment event counter
+COUNT=0
+[[ -f "$SC_COUNTER" ]] && COUNT=$(cat "$SC_COUNTER" 2>/dev/null || echo "0")
+COUNT=$((COUNT + 1))
+echo "$COUNT" > "$SC_COUNTER" 2>/dev/null || true
+
+# Micro-whisper: same file edited for the 3rd time — genuinely useful signal
+if [[ -n "$FILE_PATH" && -f "$SC_LOG" ]]; then
+  FILE_EDIT_COUNT=$(grep -cF "\"file\":\"$FILE_PATH\"" "$SC_LOG" 2>/dev/null || echo "0")
+  if [[ "$FILE_EDIT_COUNT" -eq 3 ]]; then
+    BASENAME=$(basename "$FILE_PATH")
+    echo ""
+    echo "[subconscious] Hot file: \`$BASENAME\` edited 3 times this session."
+  fi
+fi
+
 exit 0
