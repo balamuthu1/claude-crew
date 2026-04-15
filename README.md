@@ -1,6 +1,6 @@
 # Claude Crew — Multi-Team Agent Harness
 
-A **Claude Code plugin** for engineering teams. Install one or more team profiles — each bringing specialist agents, slash commands, workflow skills, security guardrails, and coding rules. All profiles share a common layer (git, Jira, Scrum, memory, teach-mode).
+A **Claude Code agent harness** for engineering teams. Install one or more team profiles — each bringing specialist agents, slash commands, workflow skills, security guardrails, and coding rules. All profiles share a common layer (git, Jira, Scrum, memory, teach-mode).
 
 ---
 
@@ -12,30 +12,11 @@ A **Claude Code plugin** for engineering teams. Install one or more team profile
 | `backend` | API developer, architect, DB specialist, DevOps, security, test | `/api-sdlc`, `/api-review`, `/db-migration`, `/backend-security-scan`, ... |
 | `qa` | Test strategist, automation engineer, performance tester, bug triager, QA lead | `/test-plan`, `/bug-report`, `/regression-suite`, `/performance-test`, ... |
 | `product` | PRD author, user story writer, product manager, metrics analyst, stakeholder advisor | `/prd`, `/user-story`, `/feature-brief`, `/metrics-review`, ... |
-| `data` | Data engineer, ML engineer, analytics engineer, SQL specialist, reviewer | `/pipeline-review`, `/sql-review`, `/data-model`, `/ml-experiment`, ... |
 | `frontend` | Frontend developer, reviewer, UI engineer, accessibility auditor, architect | `/frontend-sdlc`, `/frontend-review`, `/accessibility-audit`, ... |
 
 ---
 
 ## Installation
-
-### Option 1 — Claude Code Plugin (recommended)
-
-```
-/plugin marketplace add balamuthu1/claude-crew
-/plugin install claude-crew@claude-crew
-```
-
-Then run your profile's detect command:
-```
-/detect-arch          ← mobile: auto-detect Android/iOS stack
-/detect-backend-stack ← backend: auto-detect server stack
-/detect-frontend-stack← frontend: auto-detect web stack
-/detect-gitflow       ← auto-detect git branching conventions
-/detect-jira          ← connect and configure your Jira project
-```
-
-### Option 2 — Manual script
 
 ```bash
 git clone https://github.com/balamuthu1/claude-crew.git
@@ -209,14 +190,6 @@ Stage 6 — DEPLOY    → devops-advisor       ← parallel
 /metrics-review onboarding funnel
 ```
 
-### Data team
-
-```
-/pipeline-review dags/orders_pipeline.py
-/sql-review models/marts/fct_orders.sql
-/ml-experiment Predict user churn 30 days in advance
-```
-
 ---
 
 ## Shared slash commands (all profiles)
@@ -271,7 +244,6 @@ claude-crew/
 │   ├── backend/             ← profile.json + agents/ + commands/ + skills/ + rules/
 │   ├── qa/                  ← profile.json + agents/ + commands/ + skills/ + rules/
 │   ├── product/             ← profile.json + agents/ + commands/ + skills/ + rules/
-│   ├── data/                ← profile.json + agents/ + commands/ + skills/ + rules/
 │   └── frontend/            ← profile.json + agents/ + commands/ + skills/ + rules/
 │
 ├── hooks/
@@ -308,7 +280,6 @@ claude-crew/
 | Backend | Node.js, Python, Go, Java, Rust, Ruby |
 | QA | Cypress, Playwright, k6, JMeter, pytest, Espresso, XCUITest |
 | Product | Framework-agnostic (PRDs, stories, metrics) |
-| Data | Python, SQL, dbt, Airflow, Spark, BigQuery, Snowflake, Redshift |
 | Frontend | React, Vue, Angular, TypeScript, CSS, Next.js, Vite |
 
 ---
