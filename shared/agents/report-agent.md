@@ -13,10 +13,11 @@ leadership-ready report showing how Claude is being used and where it delivers v
 ## Input
 
 You will receive:
-- `KPI events file` path (`.claude/kpi/events.jsonl`)
+- `KPI events directory` path (`.claude/kpi/`)
 - `Memory file` path (`.claude/memory/MEMORY.md`)
 - `Audit log` path (`.claude/audit.log`)
 - `Days to include` (integer or "all")
+- `Team mode` (true/false) — true aggregates all `events-*.jsonl` files
 - `Save to file` (true/false)
 
 ---
@@ -26,26 +27,52 @@ You will receive:
 Use Bash with this Python script to parse and aggregate the data:
 
 ```python
-import json, sys, re
+import json, sys, re, glob, os
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict, Counter
 
-events_path = sys.argv[1]
-days = sys.argv[2]  # integer string or "all"
-memory_path = sys.argv[3]
-audit_path  = sys.argv[4]
+kpi_dir    = sys.argv[1]   # .claude/kpi/
+days       = sys.argv[2]   # integer string or "all"
+memory_path= sys.argv[3]
+team_mode  = sys.argv[4] == "true"
+
+# ── Discover event files ──────────────────────────────────────────────────────
+# Per-user files: events-<name>.jsonl (current format)
+# Fallback:       events.jsonl        (legacy single-file format)
+user_files = sorted(glob.glob(os.path.join(kpi_dir, "events-*.jsonl")))
+legacy     = os.path.join(kpi_dir, "events.jsonl")
+if not team_mode:
+    # Individual mode: use own file only (most recently modified, or legacy)
+    if user_files:
+        # Pick the file written by the current user (newest mtime as proxy)
+        own_file = max(user_files, key=os.path.getmtime)
+        all_files = [own_file]
+    elif os.path.exists(legacy):
+        all_files = [legacy]
+    else:
+        all_files = []
+else:
+    all_files = user_files
+    if not all_files and os.path.exists(legacy):
+        all_files = [legacy]
 
 # ── Load events ──────────────────────────────────────────────────────────────
 events = []
-try:
-    with open(events_path) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                try: events.append(json.loads(line))
-                except: pass
-except FileNotFoundError:
-    pass
+file_user_map = {}  # event_index → username (for per-user breakdown)
+for fpath in all_files:
+    uname = os.path.basename(fpath).replace("events-","").replace(".jsonl","")
+    try:
+        with open(fpath) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        e = json.loads(line)
+                        e.setdefault("user", uname)  # tag with filename if missing
+                        events.append(e)
+                    except: pass
+    except FileNotFoundError:
+        pass
 
 # ── Date filter ──────────────────────────────────────────────────────────────
 if days != "all":
@@ -120,8 +147,26 @@ else:
     if len(users) > 0:
         insights.append(f"✓  {len(users)} developer(s) actively using Claude Crew")
 
+# ── Per-user breakdown (team mode) ───────────────────────────────────────────
+per_user = {}
+if team_mode:
+    for u in sorted(users):
+        u_starts = [e for e in starts if e.get("user") == u]
+        u_ends   = [e for e in ends   if e.get("user") == u]
+        u_natural= sum(1 for e in u_ends if e.get("stop_reason","") not in ("error","cancelled"))
+        u_rate   = round(u_natural / len(u_ends) * 100, 0) if u_ends else 0
+        u_files  = sum(e.get("files_written",0) for e in u_ends)
+        per_user[u] = {
+            "sessions":   len(u_starts),
+            "success_pct": int(u_rate),
+            "files":      u_files,
+            "teach":      sum(1 for e in u_starts if e.get("teach_mode")),
+        }
+
 # ── Output structured data for formatting ─────────────────────────────────────
 out = {
+    "team_mode": team_mode,
+    "files_read": [os.path.basename(f) for f in all_files],
     "total_sessions": total_sessions,
     "users": sorted(users),
     "active_days": len(active_days),
@@ -141,6 +186,7 @@ out = {
     "mem_low": mem_low,
     "mem_total": mem_total,
     "mem_growth": mem_growth,
+    "per_user": per_user,
     "insights": insights,
 }
 print(json.dumps(out, indent=2))
@@ -149,10 +195,10 @@ print(json.dumps(out, indent=2))
 Call it as:
 ```bash
 python3 - \
-  .claude/kpi/events.jsonl \
+  .claude/kpi/ \
   <days_or_all> \
   .claude/memory/MEMORY.md \
-  .claude/audit.log <<'PYEOF'
+  <true_or_false_team_mode> <<'PYEOF'
 <paste script above>
 PYEOF
 ```
@@ -252,8 +298,8 @@ Using the parsed JSON from Steps 1 and 2, produce this exact output format:
 
 ```
 ══════════════════════════════════════════════════════════════
-🤖 CLAUDE CREW — ADOPTION & KPI REPORT
-   Generated: <today>  ·  Period: last <N> days
+🤖 CLAUDE CREW — <TEAM ADOPTION | YOUR> KPI REPORT
+   Generated: <today>  ·  Period: last <N> days<  ·  <N> developer(s) in team_mode>
 ══════════════════════════════════════════════════════════════
 
 ADOPTION
@@ -296,6 +342,13 @@ KNOWLEDGE GROWTH
 LEARNING ENGAGEMENT
 ────────────────────────────────────────────────────────────
   Teach mode sessions: <N>  (<pct>% of sessions)
+
+PER DEVELOPER  (team mode only — omit for individual reports)
+────────────────────────────────────────────────────────────
+  <username>    <N> sessions  ·  <pct>% success  ·  <N> files  ·  <N> teach
+  <username>    <N> sessions  ·  <pct>% success  ·  <N> files  ·  0 teach
+  ...
+  Source files: <list of events-*.jsonl files read>
 
 WHAT THIS MEANS
 ────────────────────────────────────────────────────────────

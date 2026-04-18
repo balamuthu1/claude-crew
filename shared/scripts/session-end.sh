@@ -139,8 +139,14 @@ if [[ -f "$WHISPER_FILE" && -f "$MEMORY_FILE" ]]; then
 fi
 
 # ── KPI: log session_end and memory_snapshot events ──────────────────────────
-KPI_FILE="$PROJECT_DIR/.claude/kpi/events.jsonl"
-mkdir -p "$(dirname "$KPI_FILE")" 2>/dev/null || true
+KPI_DIR="$PROJECT_DIR/.claude/kpi"
+KPI_USER=$(cat "$KPI_DIR/.current-user" 2>/dev/null || \
+  git -C "$PROJECT_DIR" config user.name 2>/dev/null | \
+  tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-_' | cut -c1-30 || \
+  echo "user")
+[[ -z "$KPI_USER" ]] && KPI_USER="user"
+KPI_FILE="$KPI_DIR/events-${KPI_USER}.jsonl"
+mkdir -p "$KPI_DIR" 2>/dev/null || true
 KPI_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
 
 # Files written this session (from subconscious event counter)

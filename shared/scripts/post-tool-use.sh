@@ -111,12 +111,15 @@ issue() {
   audit_warn "$FILE_PATH" "$msg"
   FOUND_ISSUES=$((FOUND_ISSUES + 1))
   # KPI: log security finding so /report can surface security value
-  local kpi_file="$PROJECT_DIR/.claude/kpi/events.jsonl"
+  local kpi_dir="$PROJECT_DIR/.claude/kpi"
+  local kpi_user; kpi_user=$(cat "$kpi_dir/.current-user" 2>/dev/null || echo "user")
+  [[ -z "$kpi_user" ]] && kpi_user="user"
+  local kpi_file="$kpi_dir/events-${kpi_user}.jsonl"
   local kpi_ts; kpi_ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
   local kpi_sev="orange"
   echo "$severity" | grep -q "🔴" && kpi_sev="red"
   local kpi_ext="${FILE_PATH##*.}"
-  mkdir -p "$(dirname "$kpi_file")" 2>/dev/null || true
+  mkdir -p "$kpi_dir" 2>/dev/null || true
   echo "{\"ts\":\"$kpi_ts\",\"type\":\"security_finding\",\"severity\":\"$kpi_sev\",\"ext\":\".$kpi_ext\",\"reason\":\"$(echo "$msg" | cut -c1-80 | tr '"' "'")\"}"\
     >> "$kpi_file" 2>/dev/null || true
 }

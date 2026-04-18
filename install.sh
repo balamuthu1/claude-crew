@@ -405,6 +405,27 @@ if ! $GLOBAL; then
   fi
 fi
 
+# KPI directory + gitignore exceptions
+# Each developer writes to events-<username>.jsonl (no merge conflicts).
+# Committing .claude/kpi/ enables team-wide /report --team aggregation.
+if ! $GLOBAL; then
+  KPI_DIR="$TARGET_CLAUDE/kpi"
+  if $DRY_RUN; then
+    info "[dry-run] Would create .claude/kpi/ and add gitignore exceptions"
+  else
+    mkdir -p "$KPI_DIR" 2>/dev/null || true
+    success "Created .claude/kpi/ (KPI event store)"
+    # Add gitignore exceptions so team events can be committed and shared
+    GITIGNORE_FILE="$PROJECT_DIR/.gitignore"
+    if [[ -f "$GITIGNORE_FILE" ]] && ! grep -q "\.claude/kpi" "$GITIGNORE_FILE" 2>/dev/null; then
+      printf '\n# Claude Crew KPI — commit to enable /report --team across the whole team\n' >> "$GITIGNORE_FILE"
+      printf '!.claude/kpi/\n' >> "$GITIGNORE_FILE"
+      printf '!.claude/kpi/events-*.jsonl\n' >> "$GITIGNORE_FILE"
+      success "Added .claude/kpi/ gitignore exceptions (team reporting)"
+    fi
+  fi
+fi
+
 # ── Install each selected profile ────────────────────────────────────────────
 for profile in "${SELECTED_PROFILES[@]}"; do
   header "Installing profile: $profile"

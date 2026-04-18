@@ -73,13 +73,23 @@ if [[ -f "$TEACH_MODE_FILE" ]] && grep -q "status: active" "$TEACH_MODE_FILE" 2>
 fi
 
 # ── KPI: log session_start event ─────────────────────────────────────────────
-KPI_FILE="$PROJECT_DIR/.claude/kpi/events.jsonl"
-mkdir -p "$(dirname "$KPI_FILE")" 2>/dev/null || true
-
+# Per-user files (events-<username>.jsonl) avoid git merge conflicts when the
+# team commits .claude/kpi/ for shared reporting via /report --team.
 KPI_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
-KPI_USER=$(git -C "$PROJECT_DIR" config user.name 2>/dev/null \
+KPI_USER_RAW=$(git -C "$PROJECT_DIR" config user.name 2>/dev/null \
   || git -C "$PROJECT_DIR" config user.email 2>/dev/null \
-  || echo "unknown")
+  || echo "user")
+KPI_USER=$(echo "$KPI_USER_RAW" \
+  | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-_' | cut -c1-30)
+[[ -z "$KPI_USER" ]] && KPI_USER="user"
+
+KPI_DIR="$PROJECT_DIR/.claude/kpi"
+KPI_FILE="$KPI_DIR/events-${KPI_USER}.jsonl"
+mkdir -p "$KPI_DIR" 2>/dev/null || true
+# Cache username so post-tool-use.sh and session-end.sh can reuse it without
+# re-running git config on every file write.
+echo "$KPI_USER" > "$KPI_DIR/.current-user" 2>/dev/null || true
+
 KPI_PROFILES="[]"
 PROFILES_FILE="$PROJECT_DIR/.claude/ACTIVE_PROFILES"
 if [[ -f "$PROFILES_FILE" ]]; then

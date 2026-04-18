@@ -14,10 +14,12 @@ adoption could improve.
 
 ## Step 1 — Parse arguments
 
-- No argument → report last **30 days**
-- Numeric argument (e.g. `/report 7`) → report last N days
-- `--save` flag → also write report to `reports/claude-kpi-<date>.md`
-- `all` → report all time (no date filter)
+- No argument → individual report, last **30 days**
+- Numeric argument (e.g. `/report 7`) → individual report, last N days
+- `--team` → aggregate all developers' event files (`events-*.jsonl`)
+- `--team 7` → team report scoped to last 7 days
+- `--save` → also write report to `reports/claude-kpi-<date>.md`
+- `all` → no date filter (all time)
 
 ---
 
@@ -27,28 +29,36 @@ Spawn `report-agent` with:
 
 ```
 Generate a Claude Crew KPI report.
-KPI events file: .claude/kpi/events.jsonl
-Memory file:     .claude/memory/MEMORY.md
-Audit log:       .claude/audit.log
-Days to include: <N>  (or "all")
-Save to file:    <true/false>
+KPI events directory: .claude/kpi/
+Memory file:          .claude/memory/MEMORY.md
+Audit log:            .claude/audit.log
+Days to include:      <N>  (or "all")
+Team mode:            <true/false>
+Save to file:         <true/false>
 ```
 
 Wait for the report output and display it directly.
 
 ---
 
-## Step 3 — Team sharing notice
+## Step 3 — Team sharing notice (individual mode only)
 
-After displaying the report, if `.claude/kpi/events.jsonl` exists but is gitignored, show:
+After displaying an individual report, check whether other developers' event files
+exist in `.claude/kpi/`. If they do and `--team` was not used, show:
 
 ```
 ──────────────────────────────────────────────────────────
-ℹ  For team-wide reporting: commit .claude/kpi/ to git so
-   all developers' sessions contribute to the same report.
+ℹ  <N> other developer(s) have KPI data in .claude/kpi/
+   Run /report --team for the full team view.
+──────────────────────────────────────────────────────────
+```
 
-   Add to .gitignore:
-     !.claude/kpi/
-     !.claude/kpi/events.jsonl
+If no `events-*.jsonl` files exist at all (fresh install), show:
+
+```
+──────────────────────────────────────────────────────────
+ℹ  For team-wide reporting, each developer must commit
+   their .claude/kpi/events-<name>.jsonl file to git.
+   install.sh already added the gitignore exceptions.
 ──────────────────────────────────────────────────────────
 ```
