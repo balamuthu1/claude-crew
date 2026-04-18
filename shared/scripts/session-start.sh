@@ -30,6 +30,13 @@ if [[ ! -f "$MEMORY_FILE" ]]; then
   done
 fi
 
+# ── Subconscious: initialise session event log (always runs, even with no memory) ─
+SC_DIR="$PROJECT_DIR/.claude/subconscious"
+mkdir -p "$SC_DIR" 2>/dev/null || true
+: > "$SC_DIR/session.jsonl" 2>/dev/null || true
+echo "0" > "$SC_DIR/event_count" 2>/dev/null || true
+echo "0" > "$SC_DIR/whisper_event_count" 2>/dev/null || true
+
 if [[ ! -f "$MEMORY_FILE" ]]; then
   exit 0  # No memory file yet — silent exit, don't inject anything
 fi
@@ -81,10 +88,3 @@ Run /memory-review to curate. Run /learn to add an explicit learning.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 
-# ── Subconscious: initialise session event log ────────────────────────────────
-SC_DIR="$PROJECT_DIR/.claude/subconscious"
-mkdir -p "$SC_DIR" 2>/dev/null || true
-# Clear the previous session's event log so this session starts clean
-: > "$SC_DIR/session.jsonl" 2>/dev/null || true
-echo "0" > "$SC_DIR/event_count" 2>/dev/null || true
-echo "0" > "$SC_DIR/whisper_event_count" 2>/dev/null || true
