@@ -10,7 +10,7 @@
 set -uo pipefail
 
 # ── Audit log ────────────────────────────────────────────────────────────────
-AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$HOME}/.claude/audit.log"
+AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$(pwd)}/.claude/audit.log"
 mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
 
 audit_warn() {
@@ -132,8 +132,9 @@ scan_mobile_security() {
     grep -nqiE "UserDefaults.*password|UserDefaults.*token|UserDefaults.*secret" "$file" 2>/dev/null && \
       issue "🟠 SECURITY" "Sensitive data stored in UserDefaults in $file — use Keychain instead"
 
-    grep -nqiE "!{1}" "$file" 2>/dev/null | grep -vqiE "!=" && \
+    if grep -nE '[a-zA-Z0-9_\])]!' "$file" 2>/dev/null | grep -qvE '(".*!".*|//.*!|!=|!!)'; then
       issue "⚠️  QUALITY" "Force unwrap (!) detected in $file — prefer guard let or if let to avoid crashes"
+    fi
   fi
 
   # Both — network security config

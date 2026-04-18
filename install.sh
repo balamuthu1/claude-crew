@@ -28,7 +28,7 @@ error()   { echo -e "${RED}  ✗${RESET} $*" >&2; }
 header()  { echo -e "\n${BOLD}$*${RESET}"; }
 
 # ── Available profiles ────────────────────────────────────────────────────────
-ALL_PROFILES=(mobile backend qa product data frontend)
+ALL_PROFILES=(mobile backend qa product frontend)
 
 # Profile display info (parallel arrays)
 PROFILE_LABELS=(
@@ -36,7 +36,6 @@ PROFILE_LABELS=(
   "Backend Engineering — API developer, architect, DB specialist, DevOps, security, test"
   "QA Engineering      — Test strategist, automation, performance, bug triage, QA lead"
   "Product Management  — PRD author, user story writer, product manager, metrics, stakeholder"
-  "Data Engineering    — Data engineer, ML engineer, analytics, SQL specialist, reviewer"
   "Frontend Engineering— Frontend developer, reviewer, UI engineer, accessibility, architect"
 )
 
@@ -479,14 +478,6 @@ for profile in "${SELECTED_PROFILES[@]}"; do
       echo "    /feature-brief           Stakeholder feature brief"
       echo "    /acceptance-criteria     Given/When/Then AC"
       echo "    /metrics-review          Define KPIs and event schema"
-      echo "" ;;
-    data)
-      echo -e "  ${BOLD}Data commands:${RESET}"
-      echo "    /pipeline-review    Review data pipeline"
-      echo "    /sql-review         Review SQL / dbt models"
-      echo "    /data-model         Design data model"
-      echo "    /ml-experiment      Set up ML experiment"
-      echo "    /dbt-review         Review dbt models"
       echo "" ;;
     frontend)
       echo -e "  ${BOLD}Frontend commands:${RESET}"

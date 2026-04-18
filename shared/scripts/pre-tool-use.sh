@@ -4,7 +4,7 @@
 #
 # Runs before EVERY tool execution (Bash, Read, Write, Edit).
 # Receives tool input as JSON on stdin.
-# Exit 1  → block the call, surface message to Claude.
+# Exit 2  → block the call, surface stderr to Claude.
 # Exit 0  → allow the call.
 #
 # Threat model:
@@ -18,7 +18,7 @@
 set -uo pipefail
 
 # ── Audit log ────────────────────────────────────────────────────────────────
-AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$HOME}/.claude/audit.log"
+AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$(pwd)}/.claude/audit.log"
 mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
 
 audit() {
@@ -34,8 +34,8 @@ block() {
   audit "$tool" "BLOCK" "$detail" "$reason"
   echo "BLOCKED [$tool]: $reason" >&2
   echo "Detail: $detail" >&2
-  echo "See rules/security-guardrails.md for the full security policy." >&2
-  exit 1
+  echo "See .claude/rules/security-guardrails-detail.md for the full security policy." >&2
+  exit 2
 }
 
 warn_audit() {
@@ -130,8 +130,8 @@ if [[ -n "$COMMAND" ]]; then
     block "Bash" "$COMMAND" "Suspected data exfiltration to external service"
   fi
 
-  # Pipe of sensitive data to network tool
-  if echo "$COMMAND" | grep -qiE "(cat|env|printenv|echo \\\$).*(curl|wget|nc)\s"; then
+  # Pipe of sensitive data to network tool (catches $VAR, $(...), `...`, and plain cat/env)
+  if echo "$COMMAND" | grep -qiE "(cat|env|printenv|echo).*(curl|wget|nc)"; then
     block "Bash" "$COMMAND" "Piping environment/file data to a network tool is not allowed"
   fi
 

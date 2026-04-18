@@ -87,7 +87,7 @@ Configured in `.claude/settings.json`, scripts in `.claude/hooks/`:
 ## Teach Mode
 
 Check `.claude/TEACH_MODE.md` at the start of every workflow. If `status: active`, apply the
-full protocol in `rules/teach-mode-protocol.md` to every phase. If inactive or absent, proceed normally.
+full protocol in `.claude/rules/teach-mode-protocol.md` to every phase. If inactive or absent, proceed normally.
 
 ---
 
@@ -111,6 +111,6 @@ Mobile (`.kt`, `.swift`): `mobile-rules.md` | Backend (`.py`, `.go`, `.java`, `.
 Frontend (`.ts`, `.tsx`, `.js`): `frontend-rules.md` | QA (`*Test*`, `test/**`): `qa-rules.md`
 Product (`*PRD*`, `docs/**`): `product-rules.md`
 
-Full detail: `rules/security-guardrails.md`, `rules/kotlin.md`, `rules/swift.md`,
-`rules/android-architecture.md`, `rules/ios-architecture.md`, `rules/api-design.md`,
-`rules/database.md`, `rules/testing-standards.md`, `rules/product-standards.md`
+Full detail: `.claude/rules/security-guardrails.md`, `.claude/rules/kotlin.md`, `.claude/rules/swift.md`,
+`.claude/rules/android-architecture.md`, `.claude/rules/ios-architecture.md`, `.claude/rules/api-design.md`,
+`.claude/rules/database.md`, `.claude/rules/testing-standards.md`, `.claude/rules/product-standards.md`
