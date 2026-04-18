@@ -79,6 +79,13 @@ if [[ -n "$COMMAND" && "$TOOL_NAME" == "Bash" ]]; then
     TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
     CMD_SHORT=$(echo "$COMMAND" | head -c 120 | tr '"\\' "' ")
     _sc_log_event "{\"ts\":\"$TS\",\"type\":\"cmd\",\"cmd\":\"$CMD_SHORT\"}"
+    # Emit staleness signal after logging
+    COUNT=$(cat "$SC_COUNTER" 2>/dev/null || echo "0")
+    WHISPER_COUNT=$(cat "$SC_DIR/whisper_event_count" 2>/dev/null || echo "0")
+    if [[ $((COUNT - WHISPER_COUNT)) -ge 10 ]]; then
+      echo ""
+      echo "[subconscious] Whisper stale ($((COUNT - WHISPER_COUNT)) new events). Spawn subconscious-agent in background now."
+    fi
   fi
   exit 0
 fi
@@ -254,8 +261,20 @@ TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
 EXT="${FILE_PATH##*.}"
 _sc_log_event "{\"ts\":\"$TS\",\"type\":\"file\",\"file\":\"$FILE_PATH\",\"ext\":\".$EXT\"}"
 
+# ── Staleness signal — injected into orchestrator context via stdout ──────────
+# Claude Code injects stdout into Claude's context after every tool call.
+# We use this to mechanically trigger subconscious refresh without relying on
+# the orchestrator remembering to check counters before each agent dispatch.
+COUNT=$(cat "$SC_COUNTER" 2>/dev/null || echo "0")
+WHISPER_COUNT=$(cat "$SC_DIR/whisper_event_count" 2>/dev/null || echo "0")
+DIFF=$((COUNT - WHISPER_COUNT))
+
+if [[ $DIFF -ge 10 ]]; then
+  echo ""
+  echo "[subconscious] Whisper stale ($DIFF new events since last synthesis). Spawn subconscious-agent in background now."
+fi
+
 # Micro-whisper: same file edited for the 3rd time — genuinely useful signal
-# stdout is injected into Claude's context
 if [[ -f "$SC_LOG" ]]; then
   FILE_EDIT_COUNT=$(grep -cF "\"file\":\"$FILE_PATH\"" "$SC_LOG" 2>/dev/null || echo "0")
   if [[ "$FILE_EDIT_COUNT" -eq 3 ]]; then
