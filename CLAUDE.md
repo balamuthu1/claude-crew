@@ -86,8 +86,9 @@ Configured in `.claude/settings.json`, scripts in `.claude/hooks/`:
 
 ## Teach Mode
 
-Check `.claude/TEACH_MODE.md` at the start of every workflow. If `status: active`, apply the
-full protocol in `.claude/rules/teach-mode-protocol.md` to every phase. If inactive or absent, proceed normally.
+Check `.claude/TEACH_MODE.md` after any working agent completes a code change. If `status: active`,
+apply `.claude/rules/teach-mode-protocol.md` — explain the code patterns used, quiz on the actual
+code (not workflow phases), calibrate to the developer's level. Never quiz on planning or process.
 
 ---
 

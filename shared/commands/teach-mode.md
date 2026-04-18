@@ -1,122 +1,118 @@
 ---
-description: Toggle teach mode on/off for the session. When active, every workflow explains each phase, quizzes you, and generates a final learning report. Usage: /teach-mode [on|off|status]
+description: Toggle coding teach mode on/off. When active, every code change becomes a learning moment — explains patterns and architecture decisions, quizzes on the actual code written, and builds a session learning report. Designed for junior and mid-level developers learning alongside Claude.
 ---
 
 Run directly — do not spawn a sub-agent.
 
 ## What teach mode does
 
-When active, **every command you run** (`/sdlc`, `/android-review`, `/security-scan`, etc.) becomes an interactive learning session:
+When active, **after every significant code change**, Claude pauses to teach from the real code:
 
-- Before each phase executes → Claude explains the phase (what it is, why it matters, how it works)
-- After the explanation → 2–3 quiz questions tailored to that specific phase and context
-- After your answers → scoring + feedback + running total
-- After all phases → full session report: per-phase scores, weak spots, recommended next steps
+- **Code Insight** — explains what pattern or idiom was just used, why it was chosen, what trade-off was made, and what could go wrong
+- **Targeted quiz** — 3 questions about the actual code written (not workflow theory), calibrated to your level based on your answers
+- **Session report** — lists every concept covered, your strong areas, gaps to revisit, and what to try next
 
-Questions are generated dynamically from the actual context — if you're reviewing a `UserViewModel`, the quiz will be about ViewModel patterns, not generic theory.
+Questions are about the **code in front of you**, not about process or planning:
+> "Why is `_authState` private but `authState` public?" → not → "What does this workflow phase do?"
+
+Works seamlessly alongside any coding command: `/sdlc`, `/android-review`, `/security-scan`, or plain coding requests.
 
 ---
 
 ## Step 1 — Detect action
 
-Check the user's argument:
-- `on` or no argument → **enable** teach mode (go to Step 2a)
-- `off` → **disable** teach mode (go to Step 2b)
-- `status` → **show** current state (go to Step 2c)
-- `report` → **show** accumulated session scores from `.claude/TEACH_MODE.md` (go to Step 2d)
+- `on` or no argument → **enable** (Step 2a)
+- `off` → **disable** (Step 2b)
+- `status` → **show current state** (Step 2c)
+- `report` → **show session scores** (Step 2d)
 
 ---
 
-## Step 2a — Enable teach mode
+## Step 2a — Enable
 
-Write `.claude/TEACH_MODE.md` using the Write tool:
+Write `.claude/TEACH_MODE.md`:
 
 ```markdown
 # Claude Crew — Teach Mode
 
 status: active
 enabled_at: <current datetime>
+level: auto  <!-- calibrated from your answers — starts neutral -->
 
 ---
 
 ## Session Log
 
-(Phase scores will be appended here as you run workflows)
-
-| Timestamp | Workflow | Phase | Score | Total |
-|-----------|----------|-------|-------|-------|
+| Timestamp | Concept | Files | Score | Total |
+|-----------|---------|-------|-------|-------|
 ```
 
-Then confirm to the user:
+Confirm to the user:
 
 ```
-✓ Teach mode is ON
+✓ Teach mode is ON — coding education mode active
 
-Every workflow you run will now pause before each phase to:
-  1. Explain what the phase does and why it matters
-  2. Quiz you with 2–3 contextual questions
-  3. Score and give feedback on your answers
-  4. Then execute the phase as normal
-  5. Generate a full learning report at the end
+After every significant code change I'll:
+  1. Explain the key pattern or architecture decision in plain terms
+  2. Ask you 3 questions about the actual code (not workflow theory)
+  3. Score your answers and give feedback referencing specific lines
+  4. Calibrate difficulty to your level as we go
 
-Try it now — run any command:
-  /sdlc Build a user profile screen
+At the end of the session I'll generate a report: concepts covered,
+strong areas, gaps to revisit, and what to practice next.
+
+Start coding — try any of these:
+  /sdlc Build a login screen with token refresh
   /android-review
-  /security-scan
+  Or just describe what you want to build
 
-Turn off anytime: /teach-mode off
-Check scores:     /teach-mode report
+Turn off: /teach-mode off   ·   View report: /teach-mode report
 ```
 
 ---
 
-## Step 2b — Disable teach mode
+## Step 2b — Disable
 
-Overwrite `.claude/TEACH_MODE.md` with:
-
-```markdown
-# Claude Crew — Teach Mode
-
-status: inactive
-disabled_at: <current datetime>
-```
-
-Confirm:
+Write `status: inactive` to `.claude/TEACH_MODE.md`. Confirm:
 
 ```
-✓ Teach mode is OFF — all workflows running normally.
+✓ Teach mode is OFF
 
-Your session scores are still in .claude/TEACH_MODE.md if you want to review them.
+Your session log is still in .claude/TEACH_MODE.md — run /teach-mode report to review it.
 ```
 
 ---
 
 ## Step 2c — Status
 
-Read `.claude/TEACH_MODE.md`. Then:
+Read `.claude/TEACH_MODE.md`.
 
-**If file doesn't exist or status is `inactive`:**
+**If inactive or absent:**
 ```
   Teach mode: OFF
-  Enable with: /teach-mode on
+  Enable: /teach-mode on
 ```
 
-**If status is `active`:**
+**If active:**
 ```
-  Teach mode: ON (enabled at <time>)
-  All workflows are running in teach mode.
-  Turn off:     /teach-mode off
-  View scores:  /teach-mode report
+  Teach mode: ON  (since <time>)
+  Level calibrated to: <junior / mid / auto>
+
+  Recent concepts covered:
+  <last 3 entries from Session Log, or "none yet">
+
+  Turn off: /teach-mode off  ·  Full report: /teach-mode report
 ```
 
 ---
 
 ## Step 2d — Report
 
-Read `.claude/TEACH_MODE.md` and display the session log table. If it's empty:
+Read `.claude/TEACH_MODE.md`. Display the session log table.
 
-```
-  No scores recorded yet. Run a workflow in teach mode to start.
-```
+If empty: `No concepts logged yet — run a coding workflow with teach mode on.`
 
-Otherwise, show the table and compute an overall average score.
+Otherwise show the table and compute:
+- Overall score average
+- Most frequently seen concept categories
+- Suggested next learning focus

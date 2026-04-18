@@ -1,141 +1,188 @@
-# Teach Mode Protocol
+# Teach Mode Protocol — Code Learning Edition
 
-## Activation
+## Activation check
 
-At the very start of executing ANY workflow, slash command, or multi-phase task:
+At the start of any workflow, and after any working agent (android-developer, ios-developer,
+api-developer, frontend-developer, etc.) completes its work:
 
-1. Use the Read tool to check if `.claude/TEACH_MODE.md` exists and contains `status: active`.
-2. If teach mode is **active**, apply this protocol to every phase/step before executing it.
-3. If teach mode is **inactive or absent**, proceed normally — no change in behaviour.
+1. Read `.claude/TEACH_MODE.md` — check for `status: active`.
+2. If **inactive or absent** → proceed normally, no change.
+3. If **active** → apply the code teaching protocol below.
 
-## Apply this wrapper around each distinct phase or step
+---
 
-### Before the phase executes — TEACH
+## What to teach — and what NOT to teach
 
-Display a teaching block:
+**Teach these (developer skills):**
+- Why a specific architecture pattern was chosen (MVVM, Repository, Clean Architecture, BLoC, etc.)
+- What a design pattern does in this context (Factory, Observer, Strategy, etc.)
+- Language idioms and why they are idiomatic (Kotlin coroutines, Swift concurrency, TypeScript generics, etc.)
+- Why error handling or null-safety was done this specific way
+- What the tests are actually verifying and why that matters
+- Security implications of code decisions (auth flows, storage choices, network calls)
+- Performance considerations visible in the code (coroutine scope, memory, lazy loading)
+- Tradeoffs made — what alternatives were rejected and why
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎓 TEACH MODE  ·  Phase <N>: <Phase Name>
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Never quiz on these (not developer skills):**
+- What workflow phase Claude is about to execute
+- Sprint planning, PRDs, Jira, release notes, business decisions
+- Generic "what does this command do" meta-questions about the tool
+- Anything not expressed as actual code in this session
 
-📖 What this phase does:
-<2–3 sentences explaining the purpose of this phase in the workflow>
+---
 
-💡 Why it matters:
-<1–2 sentences on the business or technical value>
+## When to apply the teaching wrapper
 
-🔍 What's about to happen:
-<Concrete description of what Claude will do in this specific invocation — mention actual file names, feature names, or context from the user's request>
-```
+Apply **after** a working agent completes a significant code change — not before.
+The code must exist before you can teach from it.
 
-### Quiz — 2–3 contextual questions
+Good trigger points:
+- After `android-developer`, `ios-developer`, `api-developer`, `frontend-developer` finishes a feature
+- After a code review agent surfaces findings
+- After a security scan finds issues in code
+- When `post-tool-use.sh` emits a hot-file signal (same file edited 3+ times)
+- After any session where 3+ code files were written or edited
 
-Generate 2–3 questions **specific to this phase and the current context**. Mix types:
-- At least one conceptual question ("Why does...?", "What is the purpose of...?")
-- At least one practical question ("In this project, where would you...?", "What's wrong with...?")
-- Optionally one multiple-choice for precision
+---
 
-Format:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 Quick Quiz — Phase <N>
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## The teaching format
 
-Q1: <question>
-
-Q2: <question>
-  a) ...
-  b) ...
-  c) ...
-  d) ...
-
-Q3: <question>
-
-Answer all three — take your time. Type "skip" to skip this quiz, "hint" for a clue.
-```
-
-**Wait for the user's reply before proceeding.**
-
-### After the user answers — SCORE
-
-Evaluate each answer. Award: **1pt** correct, **0.5pt** partial, **0pt** incorrect.
+After the agent finishes, identify **2–3 of the most instructive code decisions** from
+what was just written. For each, produce a Code Insight block:
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Phase <N> Results
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎓 Code Insight · <FileName.kt / FileName.swift / etc.>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Q1 → ✓ Correct   / ✗ Incorrect / ◐ Partial
-     <One sentence: what was right, what was missing, correct answer if wrong>
+**What was written:** <1–2 sentences — describe the specific code added, not the feature>
 
-Q2 → ✓ / ✗ / ◐
-     <feedback>
+**Why this approach:** <2–3 sentences — the technical reason this pattern/idiom was chosen.
+Name the pattern. Explain what problem it solves.>
 
-Q3 → ✓ / ✗ / ◐
-     <feedback>
+**The trade-off:** <1 sentence — what was given up or what alternative was rejected and why>
 
-Phase score: <X> / 3   Running total: <X> / <Y>
+**What could go wrong:** <1 sentence — the most likely mistake a junior would make here>
 ```
 
-If the user typed "hint": give a clue but cap that question at 0.5pt max.
-If the user typed "skip": record phase as skipped (not penalised), proceed immediately.
-
-Then **execute the phase** and proceed to the next one.
-
-### After all phases — FINAL REPORT
+Then a targeted quiz, **directly about that code**:
 
 ```
-══════════════════════════════════════════════════════
-🎓 TEACH MODE — SESSION REPORT
-   Workflow: <workflow name>   Date: <today>
-══════════════════════════════════════════════════════
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 Your turn — <short topic label>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-OVERALL SCORE: <X> / <total> (<pct>%)
+Q1 (conceptual): <Why / What happens when / What problem does...>
 
-  ≥ 90%  🏆 Excellent — strong mastery of this workflow
-  75–89% 👍 Good — a few gaps worth revisiting
-  60–74% 📚 Fair — review weak phases before using in production
-  < 60%  🔄 Needs work — go through the weak phases again
+Q2 (practical): <If you changed X to Y, what would break and why? / Where else in this
+codebase would you apply this pattern?>
 
-──────────────────────────────────────────────────────
-PHASE BREAKDOWN
-──────────────────────────────────────────────────────
-  <phase name> ............ <X>/3  (<pct>%)  [Strong / Review / Redo / Skipped]
+Q3 (tradeoff): <What's the downside of this approach? / When would you NOT use this?>
+
+Answer when ready — or type "show me" to see the answer, "hint" for a clue, "skip" to move on.
+```
+
+**Wait for the user's response before continuing.**
+
+---
+
+## Scoring each answer
+
+| Answer quality | Points |
+|---|---|
+| Correct + explains the why | 2 |
+| Correct but incomplete | 1 |
+| Partially right | 0.5 |
+| Wrong or "show me" | 0 |
+| "hint" used | max 1 |
+| "skip" | not penalised — mark as skipped |
+
+After scoring:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Insight Results
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q1 → ✓ / ✗ / ◐
+     <What was right or missing. If wrong: correct answer in 1–2 sentences with the
+     specific line of code as an anchor, e.g. "See line 42 — the `asStateFlow()` call
+     makes the property read-only from outside the ViewModel.">
+
+Q2 → ...
+Q3 → ...
+
+Insight score: <X>/6    Running total: <X>/<Y>
+```
+
+If user typed "show me": give the full answer, then continue — 0pts for that question.
+If user typed "explain more": give a deeper explanation, then re-ask for full credit.
+
+---
+
+## After all insights — Session Learning Report
+
+At natural session end (user signals done, or Stop hook fires with teach mode active):
+
+```
+══════════════════════════════════════════════════════════════
+🎓 LEARNING REPORT  ·  <date>
+══════════════════════════════════════════════════════════════
+
+CONCEPTS COVERED THIS SESSION
+──────────────────────────────────────────────────────────────
+<List each pattern/idiom/concept that came up. One line each:>
+  ✓ Repository pattern — <file it appeared in>
+  ✓ StateFlow vs LiveData — <file>
+  ✓ Coroutine scoping — <file>
   ...
 
-──────────────────────────────────────────────────────
-TOPICS TO REVISIT
-──────────────────────────────────────────────────────
-<List only phases scored < 70%. For each:>
-  ▸ <Phase> — <one-sentence summary of the gap>
-    Tip: <specific reading or follow-up command>
+YOUR SCORE: <X> / <total> (<pct>%)
 
-<If all phases ≥ 70%:>
-  🎉 No weak spots. You're ready to use this workflow confidently.
+STRONG AREAS  (answered correctly)
+  ▸ <concept> — solid understanding
 
-──────────────────────────────────────────────────────
-NEXT STEPS
-──────────────────────────────────────────────────────
-  1. Try it for real: <suggest a concrete next command>
-  2. <Targeted tip based on lowest-scoring phase>
-  3. Run another workflow in teach mode: /teach-mode status
+GAPS TO REVISIT  (wrong or skipped)
+  ▸ <concept> — <one sentence: what to read or practice>
+    → Suggested: <specific resource type e.g. "Android docs: StateFlow", "try writing a test for this">
 
-══════════════════════════════════════════════════════
+WHAT TO TRY NEXT
+  1. <Concrete coding exercise using what was built today>
+  2. <One concept to read up on before the next session>
+  3. <A question to ask your senior dev or in the next code review>
+══════════════════════════════════════════════════════════════
 ```
 
-Then append a row to `.claude/TEACH_MODE.md`'s Session Log table:
+Append to `.claude/TEACH_MODE.md`:
 ```
-| <timestamp> | <workflow> | all phases | <X>/<total> | <pct>% |
+| <timestamp> | <main concept> | <files touched> | <X>/<total> | <pct>% |
 ```
+
+---
+
+## Tone and level calibration
+
+Read the user's answers to calibrate:
+- **Mostly wrong / short answers** → junior level. Use more analogies. Reference specific lines.
+  Example: "Think of the Repository as the only door into the database — the ViewModel
+  never knocks directly."
+- **Partially right** → mid level. Skip analogies, go straight to the technical reason.
+  Reference official docs or named patterns: "This is the single-source-of-truth principle
+  from the Android Architecture Guide."
+- **Fully correct** → senior-leaning. Skip the explanation, just confirm and add one nuance
+  they may not have considered.
+
+Recalibrate after every 3 answers.
+
+---
 
 ## Edge cases
 
 | Situation | Behaviour |
 |---|---|
-| User types "skip" | Skip the quiz for this phase — not penalised |
-| User types "hint" | Give a hint, cap that question at 0.5pt |
-| User types "explain more" after wrong answer | Deeper explanation, offer to re-ask for full credit |
-| User types "stop teach mode" | Immediately disable: overwrite `.claude/TEACH_MODE.md` with `status: inactive` |
-| Single-step command (no distinct phases) | Treat the whole command as one phase |
-| Sub-agent spawned by workflow | The sub-agent does NOT run teach mode — only the orchestrating conversation does |
+| No code was written (only planning/discussion) | Don't trigger teach mode — nothing to teach from |
+| Sub-agent wrote code but output is not shown | Ask the sub-agent to summarise the 2 most important decisions it made, then teach from those |
+| User asks "why did you do X?" outside teach mode | Answer normally — teach mode is not required to explain code |
+| User types "stop teach mode" | Immediately write `status: inactive` to `.claude/TEACH_MODE.md` |
+| Single-file change (e.g. bug fix) | One insight block is enough — don't force 3 if the change is small |
+| Architecture decision with no obvious right answer | Frame Q3 as a tradeoff discussion, not a right/wrong quiz |
