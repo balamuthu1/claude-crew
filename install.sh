@@ -325,9 +325,12 @@ if $GLOBAL; then
   install_claude_md "$SRC_BASE/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 else
   install_claude_md "$SRC_BASE/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md"
-  # Shared rules
+  # Shared rules → legacy rules/ dir
   copy_dir "$SRC_BASE/shared/rules" "$PROJECT_DIR/rules" "shared rules (security-guardrails, scrum)"
 fi
+
+# Shared rules → native .claude/rules/ (always, both install modes)
+copy_dir "$SRC_BASE/shared/rules" "$TARGET_CLAUDE/rules" "shared rules (native .claude/rules/)"
 
 # Memory file
 if ! $GLOBAL; then
@@ -362,9 +365,12 @@ for profile in "${SELECTED_PROFILES[@]}"; do
   # Skills
   [[ -d "$SRC_PROFILE/skills" ]] && copy_dir "$SRC_PROFILE/skills" "$TARGET_CLAUDE/skills" "$profile skills"
 
-  # Rules (project install only)
-  if ! $GLOBAL && [[ -d "$SRC_PROFILE/rules" ]]; then
-    copy_dir "$SRC_PROFILE/rules" "$PROJECT_DIR/rules" "$profile rules"
+  # Rules → both legacy rules/ dir and native .claude/rules/ for path-scoped loading
+  if [[ -d "$SRC_PROFILE/rules" ]]; then
+    if ! $GLOBAL; then
+      copy_dir "$SRC_PROFILE/rules" "$PROJECT_DIR/rules" "$profile rules (reference)"
+    fi
+    copy_dir "$SRC_PROFILE/rules" "$TARGET_CLAUDE/rules" "$profile rules (native .claude/rules/)"
   fi
 
   # Merge profile permissions into settings.json
