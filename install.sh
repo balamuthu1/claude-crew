@@ -279,10 +279,11 @@ with open(dst_path, "w") as f:
 PYEOF
 }
 
-install_claude_md() {
+install_claude_md_global() {
+  # Global install: write full content to ~/.claude/CLAUDE.md
   local src="$1" dst="$2"
   if $DRY_RUN; then
-    info "[dry-run] Would install/append CLAUDE.md → $dst"
+    info "[dry-run] Would install CLAUDE.md → $dst"
     return
   fi
   if [[ ! -f "$dst" ]]; then
@@ -290,15 +291,41 @@ install_claude_md() {
     success "Installed CLAUDE.md → $dst"
   else
     if grep -q "Claude Crew" "$dst" 2>/dev/null; then
-      warn "CLAUDE.md already contains Claude Crew content — skipping"
+      warn "~/.claude/CLAUDE.md already contains Claude Crew content — skipping"
     else
       echo "" >> "$dst"
-      echo "---" >> "$dst"
       echo "<!-- claude-crew: begin -->" >> "$dst"
       cat "$src" >> "$dst"
       echo "<!-- claude-crew: end -->" >> "$dst"
-      success "Appended Claude Crew section to existing CLAUDE.md"
+      success "Appended Claude Crew section to ~/.claude/CLAUDE.md"
     fi
+  fi
+}
+
+install_claude_md_project() {
+  # Project install: copy crew instructions to .claude/crew.md and add a
+  # single @import line to the project CLAUDE.md — keeps project CLAUDE.md small.
+  local src="$1" crew_dst="$2" project_claude="$3"
+  if $DRY_RUN; then
+    info "[dry-run] Would install .claude/crew.md and add @import to CLAUDE.md"
+    return
+  fi
+
+  # 1. Write full crew instructions to .claude/crew.md
+  mkdir -p "$(dirname "$crew_dst")"
+  cp "$src" "$crew_dst"
+  success "Installed crew instructions → $crew_dst"
+
+  # 2. Add @import line to project CLAUDE.md (create minimal file if absent)
+  if [[ ! -f "$project_claude" ]]; then
+    echo "@.claude/crew.md" > "$project_claude"
+    success "Created CLAUDE.md with @.claude/crew.md import"
+  elif grep -q "claude/crew.md\|Claude Crew" "$project_claude" 2>/dev/null; then
+    warn "CLAUDE.md already references Claude Crew — skipping import line"
+  else
+    echo "" >> "$project_claude"
+    echo "@.claude/crew.md" >> "$project_claude"
+    success "Added @.claude/crew.md import to existing CLAUDE.md"
   fi
 }
 
@@ -329,9 +356,9 @@ fi
 
 # CLAUDE.md
 if $GLOBAL; then
-  install_claude_md "$SRC_BASE/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+  install_claude_md_global "$SRC_BASE/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 else
-  install_claude_md "$SRC_BASE/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md"
+  install_claude_md_project "$SRC_BASE/CLAUDE.md" "$PROJECT_DIR/.claude/crew.md" "$PROJECT_DIR/CLAUDE.md"
   # Shared rules → legacy rules/ dir
   copy_dir "$SRC_BASE/shared/rules" "$PROJECT_DIR/rules" "shared rules (security-guardrails, scrum)"
 fi
