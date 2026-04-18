@@ -1,6 +1,3 @@
-# Claude Crew — runtime-generated files (never commit)
-.claude/audit.log
-.claude/subconscious/session.jsonl
-.claude/subconscious/event_count
-.claude/subconscious/whisper_event_count
-.claude/subconscious/WHISPER.md
+# The .claude/ directory is only ever test/runtime artifacts in this plugin repo.
+# Real content lives in shared/ and profiles/ and gets installed to users' projects.
+.claude/
