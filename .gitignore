@@ -1,0 +1,6 @@
+# Claude Crew — runtime-generated files (never commit)
+.claude/audit.log
+.claude/subconscious/session.jsonl
+.claude/subconscious/event_count
+.claude/subconscious/whisper_event_count
+.claude/subconscious/WHISPER.md
