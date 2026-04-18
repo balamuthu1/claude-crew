@@ -110,6 +110,15 @@ issue() {
   echo "$severity  $msg" >&2
   audit_warn "$FILE_PATH" "$msg"
   FOUND_ISSUES=$((FOUND_ISSUES + 1))
+  # KPI: log security finding so /report can surface security value
+  local kpi_file="$PROJECT_DIR/.claude/kpi/events.jsonl"
+  local kpi_ts; kpi_ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
+  local kpi_sev="orange"
+  echo "$severity" | grep -q "🔴" && kpi_sev="red"
+  local kpi_ext="${FILE_PATH##*.}"
+  mkdir -p "$(dirname "$kpi_file")" 2>/dev/null || true
+  echo "{\"ts\":\"$kpi_ts\",\"type\":\"security_finding\",\"severity\":\"$kpi_sev\",\"ext\":\".$kpi_ext\",\"reason\":\"$(echo "$msg" | cut -c1-80 | tr '"' "'")\"}"\
+    >> "$kpi_file" 2>/dev/null || true
 }
 
 # ── 1. Secret / credential patterns ──────────────────────────────────────────

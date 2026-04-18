@@ -101,6 +101,7 @@ Skills in `.claude/skills/`, commands in `.claude/commands/`. Key entry points:
 - `/mobile-release` — mobile release checklist
 - `/commit-push-pr` — stage, commit, push, open PR
 - `/profile list` — manage active profiles
+- `/report` — adoption & KPI report for leadership (add `7` or `30` for day range, `--save` to export)
 
 ---
 

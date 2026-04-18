@@ -72,6 +72,32 @@ if [[ -f "$TEACH_MODE_FILE" ]] && grep -q "status: active" "$TEACH_MODE_FILE" 2>
   echo ""
 fi
 
+# ── KPI: log session_start event ─────────────────────────────────────────────
+KPI_FILE="$PROJECT_DIR/.claude/kpi/events.jsonl"
+mkdir -p "$(dirname "$KPI_FILE")" 2>/dev/null || true
+
+KPI_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
+KPI_USER=$(git -C "$PROJECT_DIR" config user.name 2>/dev/null \
+  || git -C "$PROJECT_DIR" config user.email 2>/dev/null \
+  || echo "unknown")
+KPI_PROFILES="[]"
+PROFILES_FILE="$PROJECT_DIR/.claude/ACTIVE_PROFILES"
+if [[ -f "$PROFILES_FILE" ]]; then
+  KPI_PROFILES=$(python3 -c "
+import sys
+lines = open('$PROFILES_FILE').read().strip().splitlines()
+profiles = [l.strip() for l in lines if l.strip()]
+import json; print(json.dumps(profiles))
+" 2>/dev/null || echo "[]")
+fi
+KPI_HAS_MEMORY="false"
+[[ -f "$MEMORY_FILE" ]] && KPI_HAS_MEMORY="true"
+KPI_TEACH="false"
+[[ -f "$TEACH_MODE_FILE" ]] && grep -q "status: active" "$TEACH_MODE_FILE" 2>/dev/null && KPI_TEACH="true"
+
+echo "{\"ts\":\"$KPI_TS\",\"type\":\"session_start\",\"user\":\"$KPI_USER\",\"profiles\":$KPI_PROFILES,\"has_memory\":$KPI_HAS_MEMORY,\"teach_mode\":$KPI_TEACH}" \
+  >> "$KPI_FILE" 2>/dev/null || true
+
 # ── Pending learning: queue LLM extraction of previous session transcript ─────
 # session-end.sh writes this file instead of doing fragile regex extraction.
 # We emit it here so Claude can spawn learning-agent (which has proper LLM

@@ -138,4 +138,36 @@ if [[ -f "$WHISPER_FILE" && -f "$MEMORY_FILE" ]]; then
   done < "$WHISPER_FILE"
 fi
 
+# ── KPI: log session_end and memory_snapshot events ──────────────────────────
+KPI_FILE="$PROJECT_DIR/.claude/kpi/events.jsonl"
+mkdir -p "$(dirname "$KPI_FILE")" 2>/dev/null || true
+KPI_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
+
+# Files written this session (from subconscious event counter)
+KPI_FILES=$(cat "$PROJECT_DIR/.claude/subconscious/event_count" 2>/dev/null || echo "0")
+
+# Commands run: count cmd-type events in session.jsonl
+KPI_CMDS=$(grep -c '"type":"cmd"' "$PROJECT_DIR/.claude/subconscious/session.jsonl" 2>/dev/null || echo "0")
+
+KPI_REASON="${STOP_REASON:-natural}"
+[[ -z "$KPI_REASON" ]] && KPI_REASON="natural"
+
+echo "{\"ts\":\"$KPI_TS\",\"type\":\"session_end\",\"stop_reason\":\"$KPI_REASON\",\"files_written\":$KPI_FILES,\"cmds_run\":$KPI_CMDS}" \
+  >> "$KPI_FILE" 2>/dev/null || true
+
+# Memory snapshot — counts by confidence level
+if [[ -f "$MEMORY_FILE" ]]; then
+  python3 - "$MEMORY_FILE" "$KPI_FILE" "$KPI_TS" <<'PYEOF' 2>/dev/null || true
+import json, sys, re
+mem_path, kpi_path, ts = sys.argv[1], sys.argv[2], sys.argv[3]
+text = open(mem_path).read()
+high   = len(re.findall(r'confidence:high',   text))
+medium = len(re.findall(r'confidence:medium', text))
+low    = len(re.findall(r'confidence:low',    text))
+event  = {"ts": ts, "type": "memory_snapshot", "high": high, "medium": medium, "low": low}
+with open(kpi_path, "a") as f:
+    f.write(json.dumps(event) + "\n")
+PYEOF
+fi
+
 exit 0
