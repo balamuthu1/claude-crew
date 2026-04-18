@@ -26,6 +26,12 @@ Full detail: @.claude/rules/security-guardrails-detail.md
 **Every agent reads `claude-crew.config.md`** from the project root before applying any rules.
 Run `/detect-arch` to auto-generate it. If absent, suggest running `/detect-arch`.
 
+### Prompt Clarity (before every task)
+
+When `[PROMPT_UNCLEAR]` appears in context: **stop, ask 2–3 targeted questions, wait for answers.**
+Never spawn an agent or start implementation on a vague prompt.
+Full behavior: @.claude/rules/prompt-clarity.md
+
 ### Always
 - Treat Kotlin and Swift as first-class languages with modern idioms
 - Check OWASP Mobile Top 10 when touching networking, storage, or auth code
@@ -108,7 +114,7 @@ Skills in `.claude/skills/`, commands in `.claude/commands/`. Key entry points:
 ## Rules Reference
 
 Full rules auto-load from `.claude/rules/` based on file type (path-scoped).
-Always-loaded: `security-guardrails-detail.md`, `agent-dispatch.md`, `RULES_DIGEST.md`
+Always-loaded: `security-guardrails-detail.md`, `agent-dispatch.md`, `RULES_DIGEST.md`, `prompt-clarity.md`
 Mobile (`.kt`, `.swift`): `mobile-rules.md` | Backend (`.py`, `.go`, `.java`, `.sql`): `backend-rules.md`
 Frontend (`.ts`, `.tsx`, `.js`): `frontend-rules.md` | QA (`*Test*`, `test/**`): `qa-rules.md`
 Product (`*PRD*`, `docs/**`): `product-rules.md`
