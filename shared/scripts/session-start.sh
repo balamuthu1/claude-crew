@@ -55,6 +55,23 @@ fi
 echo "0" > "$SC_DIR/event_count" 2>/dev/null || true
 echo "0" > "$SC_DIR/whisper_event_count" 2>/dev/null || true
 
+# ── Teach mode: restore state across sessions ─────────────────────────────────
+# Emit teach mode status to stdout so Claude Code injects it into context.
+# Without this, teach mode silently expires on every session restart.
+TEACH_MODE_FILE="$PROJECT_DIR/.claude/TEACH_MODE.md"
+if [[ -f "$TEACH_MODE_FILE" ]] && grep -q "status: active" "$TEACH_MODE_FILE" 2>/dev/null; then
+  ENABLED_AT=$(grep "enabled_at:" "$TEACH_MODE_FILE" 2>/dev/null | sed 's/enabled_at: //' || echo "unknown")
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo " TEACH MODE IS ACTIVE (enabled: $ENABLED_AT)"
+  echo " After every code change: apply teach-mode-protocol.md"
+  echo " Explain patterns used, quiz on the actual code, calibrate to level."
+  echo " Never quiz on planning, PRDs, or workflow phases."
+  echo " Turn off: /teach-mode off"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+fi
+
 if [[ ! -f "$MEMORY_FILE" ]]; then
   exit 0  # No memory file yet — silent exit, don't inject anything
 fi

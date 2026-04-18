@@ -2,12 +2,11 @@
 
 ## Activation check
 
-At the start of any workflow, and after any working agent (android-developer, ios-developer,
-api-developer, frontend-developer, etc.) completes its work:
+`session-start.sh` mechanically injects teach mode status into context at the start of
+every session — you do not need to read `.claude/TEACH_MODE.md` manually.
 
-1. Read `.claude/TEACH_MODE.md` — check for `status: active`.
-2. If **inactive or absent** → proceed normally, no change.
-3. If **active** → apply the code teaching protocol below.
+If the session-start output contains `TEACH MODE IS ACTIVE`, apply this full protocol
+after every working agent completes a code change. If that line is absent, proceed normally.
 
 ---
 
