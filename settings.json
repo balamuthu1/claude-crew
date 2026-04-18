@@ -1,6 +1,4 @@
 {
-  "description": "Claude Crew — Multi-Team Agent Harness",
-  "autoMemoryEnabled": true,
   "hooks": {
     "PreToolUse": [
       {

@@ -316,8 +316,16 @@ if ! $DRY_RUN && [[ -d "$TARGET_CLAUDE/hooks" ]]; then
   success "Hooks marked executable"
 fi
 
-# settings.json
-merge_settings "$SRC_BASE/settings.json" "$TARGET_CLAUDE/settings.json"
+# settings.json — for global install, patch hook paths to use $HOME/.claude/hooks/
+# (project install uses $CLAUDE_PROJECT_DIR/.claude/hooks/ which is correct)
+if $GLOBAL && ! $DRY_RUN; then
+  PATCHED_SETTINGS=$(mktemp)
+  sed 's|\$CLAUDE_PROJECT_DIR/\.claude/hooks/|\$HOME/.claude/hooks/|g' "$SRC_BASE/settings.json" > "$PATCHED_SETTINGS"
+  merge_settings "$PATCHED_SETTINGS" "$TARGET_CLAUDE/settings.json"
+  rm -f "$PATCHED_SETTINGS"
+else
+  merge_settings "$SRC_BASE/settings.json" "$TARGET_CLAUDE/settings.json"
+fi
 
 # CLAUDE.md
 if $GLOBAL; then

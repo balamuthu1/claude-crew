@@ -1,3 +1,7 @@
+---
+description: Run a deep accessibility audit against WCAG 2.1 Level AA for the path or component named in the argument.
+---
+
 Run a deep standalone accessibility audit against WCAG 2.1 Level AA. Argument is a file path, directory, or component name.
 
 You are the **orchestrator**. Do NOT audit components yourself — spawn dedicated sub-agents.

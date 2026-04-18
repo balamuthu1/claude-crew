@@ -1,3 +1,7 @@
+---
+description: Facilitate a sprint retrospective.
+---
+
 Facilitate a sprint retrospective for the mobile engineering team.
 
 Accepts an optional format argument: `/retro` (default: Start/Stop/Continue) or `/retro sailboat` or `/retro 4ls`.

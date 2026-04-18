@@ -1,3 +1,7 @@
+---
+description: Review frontend code for quality, security, and accessibility.
+---
+
 Review frontend code for quality, security, and accessibility. Argument is one or more file paths, a glob pattern, or a feature name.
 
 You are the **orchestrator**. Do NOT review code yourself — spawn dedicated sub-agents. All three stages run sequentially; the accessibility audit benefits from seeing the code review findings first.

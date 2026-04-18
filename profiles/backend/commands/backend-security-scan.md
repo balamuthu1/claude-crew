@@ -1,3 +1,7 @@
+---
+description: Run a security scan of backend code for secrets, vulnerabilities, and OWASP issues.
+---
+
 Run a dedicated security scan of backend code: secret detection, vulnerability analysis, and a remediation report with CWE/OWASP references and ticket instructions. Argument is a directory path or `full` for the entire codebase.
 
 You are the **orchestrator**. Do NOT scan code yourself — spawn dedicated sub-agents for each stage using the `Agent` tool. Each sub-agent gets an isolated context window.

@@ -1,3 +1,7 @@
+---
+description: Run a full database migration workflow for the schema change described in the argument.
+---
+
 Run a full database migration workflow for the schema change described in the argument.
 
 You are the **orchestrator**. Do NOT write migrations yourself — spawn dedicated sub-agents.

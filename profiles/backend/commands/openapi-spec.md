@@ -1,3 +1,7 @@
+---
+description: Generate or update the OpenAPI 3.0 specification for the API described in the argument.
+---
+
 Generate or update the OpenAPI 3.0 specification for the API described in the argument.
 If no argument is given, generate a spec for the entire project.
 

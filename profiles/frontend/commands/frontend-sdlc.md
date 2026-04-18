@@ -1,3 +1,7 @@
+---
+description: Run a full frontend SDLC pipeline for the UI feature described in the argument.
+---
+
 Run a full frontend SDLC pipeline for the UI feature described in the argument.
 
 You are the **orchestrator**. Do NOT implement features yourself — spawn dedicated

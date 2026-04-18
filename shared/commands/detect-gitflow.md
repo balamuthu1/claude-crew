@@ -1,3 +1,7 @@
+---
+description: Detect team git conventions and write git-flow.config.md.
+---
+
 Detect the team's git conventions by asking key questions and inspecting the repository, then write `git-flow.config.md`.
 
 Run the following steps directly — do not spawn a sub-agent.

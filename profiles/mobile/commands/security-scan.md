@@ -1,3 +1,7 @@
+---
+description: Run a comprehensive security audit of the mobile project.
+---
+
 Run a comprehensive security audit of the mobile project. Delegates to the `mobile-security` agent.
 
 Spawn the `mobile-security` agent with this task:

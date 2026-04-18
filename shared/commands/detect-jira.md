@@ -1,3 +1,7 @@
+---
+description: Set up team Jira configuration and write jira.config.md.
+---
+
 Set up the team's Jira configuration by asking key questions and inspecting the live Jira instance, then write `jira.config.md`.
 
 Run the following steps directly — do not spawn a sub-agent.

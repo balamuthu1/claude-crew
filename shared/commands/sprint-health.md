@@ -1,3 +1,7 @@
+---
+description: Check current sprint health: burndown, risks, blockers, and carry-over forecast.
+---
+
 Check the current sprint's health: burndown, risks, blockers, and carry-over forecast.
 
 Run the following steps directly — do not spawn a sub-agent.

@@ -1,3 +1,7 @@
+---
+description: Run a full PRD development workflow for the feature described in the argument.
+---
+
 Run a full PRD development workflow for the feature described in the argument.
 
 You are the **orchestrator**. Do NOT write the PRD yourself — spawn dedicated sub-agents

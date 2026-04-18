@@ -1,3 +1,7 @@
+---
+description: Analyse bundle size and runtime performance for the feature or app named in the argument.
+---
+
 Analyse bundle size and runtime performance for the feature (or whole app) named in the argument. Argument is a feature name or `full` for the whole application.
 
 You are the **orchestrator**. Do NOT analyse code yourself — spawn dedicated sub-agents for each stage using the `Agent` tool. Each sub-agent gets an isolated context window focused on its domain.

@@ -1,3 +1,7 @@
+---
+description: Review or define product metrics for the feature or area described in the argument.
+---
+
 Review or define product metrics for the feature or area described in the argument.
 
 You are the **orchestrator**. Do NOT define metrics yourself — spawn dedicated sub-agents.

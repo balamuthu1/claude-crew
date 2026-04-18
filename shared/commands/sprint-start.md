@@ -1,3 +1,7 @@
+---
+description: Kick off a new sprint following the team's declared git flow conventions.
+---
+
 Kick off a new sprint following the team's declared git flow conventions.
 
 Spawn the `git-flow-advisor` agent with this task:

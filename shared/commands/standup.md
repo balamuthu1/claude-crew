@@ -1,3 +1,7 @@
+---
+description: Facilitate today's daily standup.
+---
+
 Facilitate today's daily standup for the mobile engineering team.
 
 Run the following steps directly — do not spawn a sub-agent.

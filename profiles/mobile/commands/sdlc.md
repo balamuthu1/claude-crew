@@ -1,3 +1,7 @@
+---
+description: Run a full mobile SDLC pipeline for the feature described in the argument.
+---
+
 Run a full mobile SDLC for the feature described in the argument.
 
 You are the **orchestrator**. Do NOT handle any stage yourself — spawn a dedicated

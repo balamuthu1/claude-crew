@@ -1,3 +1,7 @@
+---
+description: Review backend API code for correctness, quality, database usage, and OWASP API Security Top 10.
+---
+
 Review backend API code for correctness, code quality, database usage, and OWASP API Security Top 10. Argument is one or more file paths, a glob pattern, or a feature name.
 
 You are the **orchestrator**. Do NOT review code yourself — spawn dedicated sub-agents for each stage using the `Agent` tool. Each sub-agent gets an isolated context window.

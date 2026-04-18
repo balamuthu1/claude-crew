@@ -132,7 +132,7 @@ scan_mobile_security() {
     grep -nqiE "UserDefaults.*password|UserDefaults.*token|UserDefaults.*secret" "$file" 2>/dev/null && \
       issue "🟠 SECURITY" "Sensitive data stored in UserDefaults in $file — use Keychain instead"
 
-    if grep -nE '[a-zA-Z0-9_\])]!' "$file" 2>/dev/null | grep -qvE '(".*!".*|//.*!|!=|!!)'; then
+    if grep -nE '[a-zA-Z0-9_)]!' "$file" 2>/dev/null | grep -qvE '(".*!".*|//.*!|!=|!!)'; then
       issue "⚠️  QUALITY" "Force unwrap (!) detected in $file — prefer guard let or if let to avoid crashes"
     fi
   fi
@@ -186,7 +186,7 @@ lint_reminder   "$FILE_PATH"
 if [[ $FOUND_ISSUES -gt 0 ]]; then
   echo "" >&2
   echo "── $FOUND_ISSUES security issue(s) found in $FILE_PATH ──" >&2
-  echo "   Review rules/security-guardrails.md for remediation guidance." >&2
+  echo "   Review .claude/rules/security-guardrails-detail.md for remediation guidance." >&2
 fi
 
 # ── Subconscious — event logging + hot-file micro-whisper ────────────────────

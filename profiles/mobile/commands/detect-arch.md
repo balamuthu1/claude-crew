@@ -1,3 +1,7 @@
+---
+description: Detect project architecture from build files and write claude-crew.config.md.
+---
+
 Read the project's build files to detect the actual architecture, then write
 a `claude-crew.config.md` in the project root.
 

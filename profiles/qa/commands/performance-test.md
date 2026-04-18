@@ -1,3 +1,7 @@
+---
+description: Generate a complete performance test suite for the endpoint or feature described in the argument.
+---
+
 Generate a complete performance test suite for the endpoint or feature described in the argument.
 
 You are the **orchestrator**. Do NOT write tests yourself — spawn dedicated sub-agents.

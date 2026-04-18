@@ -1,3 +1,7 @@
+---
+description: Run a full backend SDLC pipeline for the API feature described in the argument.
+---
+
 Run a full backend SDLC pipeline for the API feature described in the argument.
 
 You are the **orchestrator**. Do NOT implement any stage yourself — spawn a dedicated
