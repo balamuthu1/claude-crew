@@ -4,17 +4,20 @@
 
 The subconscious is a silent background observer that primes every agent with session context.
 
-**Before spawning ANY working agent, do the following once per dispatch:**
+**Session start:** `session-start.sh` automatically injects the previous session's WHISPER.md
+into your context — no manual read needed. Spawn `subconscious-agent` once in background
+at the start of the first dispatch so it builds a fresh whisper for this session.
+
+**Before spawning ANY working agent (mid-session), do:**
 
 1. **Check staleness** of `.claude/subconscious/WHISPER.md`:
    - Absent → stale. `event_count` − `whisper_event_count` ≥ 10 → stale.
-2. **If stale**: spawn `subconscious-agent` with `run_in_background=true`. Pass a one-sentence summary. Do NOT wait for it.
-3. **If WHISPER.md exists**: read it and prepend up to 500 characters to the agent prompt:
+2. **If stale**: spawn `subconscious-agent` with `run_in_background=true`. Do NOT wait for it.
+3. **If WHISPER.md exists and was updated this session**: prepend up to 500 characters to the agent prompt:
    ```
    Subconscious context (background priming — not hard rules):
    [WHISPER.md content, truncated to 500 chars]
    ```
-4. **At session start**: spawn `subconscious-agent` once in background before the first dispatch.
 
 ## Rules Injection for Spawned Agents
 

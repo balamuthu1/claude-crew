@@ -33,6 +33,24 @@ fi
 # ── Subconscious: initialise session event log (always runs, even with no memory) ─
 SC_DIR="$PROJECT_DIR/.claude/subconscious"
 mkdir -p "$SC_DIR" 2>/dev/null || true
+
+# Carry the previous session's WHISPER.md forward BEFORE clearing the log,
+# so returning sessions get the whisper injected into context automatically.
+# This is the mechanical injection — no need for Claude to remember to read it.
+WHISPER_FILE="$SC_DIR/WHISPER.md"
+if [[ -f "$WHISPER_FILE" ]]; then
+  WHISPER_CONTENT=$(head -c 500 "$WHISPER_FILE" 2>/dev/null || true)
+  if [[ -n "$WHISPER_CONTENT" ]]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo " Subconscious context from last session (background priming — not hard rules)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "$WHISPER_CONTENT"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+  fi
+fi
+
 : > "$SC_DIR/session.jsonl" 2>/dev/null || true
 echo "0" > "$SC_DIR/event_count" 2>/dev/null || true
 echo "0" > "$SC_DIR/whisper_event_count" 2>/dev/null || true
