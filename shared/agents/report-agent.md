@@ -159,9 +159,89 @@ PYEOF
 
 ---
 
-## Step 2 — Format the report
+## Step 2 — Compute code contribution from git
 
-Using the parsed JSON, produce this exact output format (fill in real values):
+Run this Bash block to measure how much of the codebase was written with Claude's help.
+The detection method: commits whose message contains `claude.ai/code/` (the session URL
+injected automatically by the `/commit-push-pr` workflow).
+
+```bash
+python3 - <<'PYEOF'
+import subprocess, json, re
+
+def run(cmd):
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return r.stdout.strip()
+    except:
+        return ""
+
+# ── Claude-assisted commits ───────────────────────────────────────────────────
+# Insertions from commits that contain a Claude session URL
+claude_numstat = run(["git", "log", "--grep=claude.ai/code/",
+                      "--pretty=tformat:", "--numstat"])
+claude_added = claude_deleted = claude_commits = 0
+for line in claude_numstat.splitlines():
+    parts = line.split("\t")
+    if len(parts) == 3:
+        try: claude_added += int(parts[0]); claude_deleted += int(parts[1])
+        except: pass
+claude_commits = len([l for l in run(
+    ["git", "log", "--grep=claude.ai/code/", "--oneline"]
+).splitlines() if l.strip()])
+
+# ── All commits ───────────────────────────────────────────────────────────────
+all_numstat = run(["git", "log", "--pretty=tformat:", "--numstat"])
+all_added = 0
+for line in all_numstat.splitlines():
+    parts = line.split("\t")
+    if len(parts) == 3:
+        try: all_added += int(parts[0])
+        except: pass
+all_commits = len([l for l in run(
+    ["git", "log", "--oneline"]).splitlines() if l.strip()])
+
+# ── Current codebase lines (source files only) ────────────────────────────────
+# Count lines in tracked source files, excluding generated/vendor directories
+tracked = run(["git", "ls-files"]).splitlines()
+src_exts = {".kt", ".swift", ".ts", ".tsx", ".js", ".jsx", ".py",
+            ".java", ".go", ".rs", ".rb", ".cs", ".cpp", ".c", ".h"}
+skip_dirs = {"node_modules", "vendor", "build", "dist", ".gradle", "Pods"}
+total_lines = 0
+for path in tracked:
+    ext = "." + path.rsplit(".", 1)[-1] if "." in path else ""
+    if ext not in src_exts: continue
+    if any(d in path for d in skip_dirs): continue
+    try:
+        with open(path, errors="ignore") as f:
+            total_lines += sum(1 for _ in f)
+    except: pass
+
+# ── Percentages ───────────────────────────────────────────────────────────────
+pct_insertions = round(claude_added / all_added * 100, 1) if all_added > 0 else 0
+pct_commits    = round(claude_commits / all_commits * 100, 1) if all_commits > 0 else 0
+
+print(json.dumps({
+    "claude_commits":    claude_commits,
+    "all_commits":       all_commits,
+    "pct_commits":       pct_commits,
+    "claude_added":      claude_added,
+    "claude_deleted":    claude_deleted,
+    "all_added":         all_added,
+    "pct_insertions":    pct_insertions,
+    "codebase_lines":    total_lines,
+    "detection_note":    "Based on commits containing claude.ai/code/ session URLs"
+}))
+PYEOF
+```
+
+Store this result as `git_contribution`.
+
+---
+
+## Step 3 — Format the report
+
+Using the parsed JSON from Steps 1 and 2, produce this exact output format:
 
 ```
 ══════════════════════════════════════════════════════════════
@@ -182,6 +262,13 @@ SESSION QUALITY
   Avg files/session:  <N>
   Avg commands/session: <N>
   Total files changed: <N>
+
+CODE CONTRIBUTION  (git history · all time)
+────────────────────────────────────────────────────────────
+  Claude-assisted commits:  <N> / <total>  (<pct>%)
+  Lines added with Claude:  <N> / <total insertions>  (<pct>%)
+  Current codebase:         <N> lines  (<src file types>)
+  Detection:                commits containing claude.ai/code/ session URL
 
 SECURITY IMPACT
 ────────────────────────────────────────────────────────────
@@ -209,7 +296,13 @@ WHAT THIS MEANS
 ══════════════════════════════════════════════════════════════
 ```
 
-If `total_sessions` is 0, show:
+**Code contribution insight rules** (add to WHAT THIS MEANS):
+- `pct_insertions >= 50` → `✓  Claude wrote the majority of new code (N%) — strong AI-assisted development`
+- `pct_insertions >= 20` → `✓  Claude contributed N% of code changes — meaningful AI assistance`
+- `pct_insertions < 5 and total_sessions > 5` → `⚠  Low code contribution (N%) despite active sessions — consider using /android-feature or /sdlc for full-feature workflows`
+- `claude_commits == 0` → `⚠  No Claude-attributed commits yet — use /commit-push-pr to tag commits with session URLs`
+
+**If `total_sessions` is 0 AND `claude_commits` is also 0**, show:
 ```
 ══════════════════════════════════════════════════════════════
 🤖 CLAUDE CREW — KPI REPORT
@@ -227,7 +320,7 @@ If `total_sessions` is 0, show:
 
 ---
 
-## Step 3 — Save to file (if requested)
+## Step 4 — Save to file (if requested)
 
 If `Save to file` is true, write the report to:
 `reports/claude-kpi-<YYYY-MM-DD>.md`
