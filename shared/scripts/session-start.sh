@@ -72,6 +72,42 @@ if [[ -f "$TEACH_MODE_FILE" ]] && grep -q "status: active" "$TEACH_MODE_FILE" 2>
   echo ""
 fi
 
+# ── Pending learning: queue LLM extraction of previous session transcript ─────
+# session-end.sh writes this file instead of doing fragile regex extraction.
+# We emit it here so Claude can spawn learning-agent (which has proper LLM
+# comprehension) before starting the new session's work.
+PENDING_LEARNING="$PROJECT_DIR/.claude/subconscious/pending-learning.json"
+if [[ -f "$PENDING_LEARNING" ]]; then
+  PREV_TRANSCRIPT=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('$PENDING_LEARNING'))
+    print(d.get('transcript_path', ''))
+except:
+    print('')
+" 2>/dev/null || echo "")
+  PREV_DATE=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('$PENDING_LEARNING'))
+    print(d.get('session_date', 'previous session'))
+except:
+    print('previous session')
+" 2>/dev/null || echo "previous session")
+  if [[ -n "$PREV_TRANSCRIPT" && -f "$PREV_TRANSCRIPT" ]]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo " PENDING LEARNING EXTRACTION (from $PREV_DATE)"
+    echo " Transcript: $PREV_TRANSCRIPT"
+    echo " Spawn learning-agent now (background) with this transcript path."
+    echo " Prompt: 'Extract project learnings from session transcript at"
+    echo "   $PREV_TRANSCRIPT — update .claude/memory/MEMORY.md'"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+  fi
+  rm -f "$PENDING_LEARNING" 2>/dev/null || true
+fi
+
 if [[ ! -f "$MEMORY_FILE" ]]; then
   exit 0  # No memory file yet — silent exit, don't inject anything
 fi

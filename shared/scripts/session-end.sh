@@ -102,119 +102,20 @@ PYEOF
   fi
 }
 
-# ── Extract learnings from transcript ─────────────────────────────────────────
+# ── Queue transcript for learning-agent extraction at next session start ──────
+# Instead of regex-parsing the transcript here (fragile), we write a pending
+# marker that session-start.sh injects into Claude's context. Claude then
+# spawns the learning-agent (an LLM) which understands natural language and
+# applies proper deduplication and confidence logic.
 if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
-
-  # Read transcript — handle both JSONL and plain text formats
-  TRANSCRIPT_TEXT=$(python3 - "$TRANSCRIPT_PATH" <<'PYEOF' 2>/dev/null
-import json, sys
-path = sys.argv[1]
-lines = []
-try:
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-                # Extract text content from various message formats
-                role = obj.get("role", obj.get("type", ""))
-                content = obj.get("content", obj.get("message", obj.get("text", "")))
-                if isinstance(content, list):
-                    for block in content:
-                        if isinstance(block, dict) and block.get("type") == "text":
-                            lines.append(f"{role}: {block['text']}")
-                elif isinstance(content, str) and content:
-                    lines.append(f"{role}: {content}")
-            except json.JSONDecodeError:
-                lines.append(line)
-except Exception as e:
-    pass
-print("\n".join(lines[:2000]))  # cap at ~2000 lines
+  PENDING_FILE="$PROJECT_DIR/.claude/subconscious/pending-learning.json"
+  python3 - "$PENDING_FILE" "$TRANSCRIPT_PATH" "$TODAY" <<'PYEOF' 2>/dev/null || true
+import json, sys, os
+pending_file, transcript_path, date = sys.argv[1], sys.argv[2], sys.argv[3]
+os.makedirs(os.path.dirname(pending_file), exist_ok=True)
+with open(pending_file, "w") as f:
+    json.dump({"transcript_path": transcript_path, "session_date": date}, f)
 PYEOF
-)
-
-  # Fallback to raw file content if Python processing failed
-  if [[ -z "$TRANSCRIPT_TEXT" ]]; then
-    TRANSCRIPT_TEXT=$(cat "$TRANSCRIPT_PATH" 2>/dev/null || echo "")
-  fi
-
-  if [[ -n "$TRANSCRIPT_TEXT" ]]; then
-
-    # ── Pattern: explicit corrections ("actually", "we use X not Y") ──────────
-    CORRECTIONS=$(echo "$TRANSCRIPT_TEXT" | grep -iE \
-      "(actually[,.]|no[,.]? we (use|do|don'?t)|that'?s (wrong|not right|incorrect)|we prefer|we always|we never|don'?t use|stop using|use .+ not |instead of .+ use)" \
-      2>/dev/null | head -5 || true)
-
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      # Strip the role prefix and clean up
-      clean=$(echo "$line" | sed 's/^[^:]*: //' | sed 's/[[:space:]]\+/ /g' | cut -c1-200)
-      [[ -z "$clean" ]] && continue
-      append_learning "Team Preferences & Corrections" "low" "session-end" "$clean"
-    done <<< "$CORRECTIONS"
-
-    # ── Pattern: explicit architecture decisions ───────────────────────────────
-    ARCH=$(echo "$TRANSCRIPT_TEXT" | grep -iE \
-      "(we use .+ for (di|dependency|networking|database|state|navigation)|our architecture (is|uses)|we'?ve (chosen|decided|migrated to))" \
-      2>/dev/null | head -3 || true)
-
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      clean=$(echo "$line" | sed 's/^[^:]*: //' | sed 's/[[:space:]]\+/ /g' | cut -c1-200)
-      [[ -z "$clean" ]] && continue
-      append_learning "Architecture & Stack" "low" "session-end" "$clean"
-    done <<< "$ARCH"
-
-    # ── Pattern: antipatterns discovered ──────────────────────────────────────
-    ANTIPATTERNS=$(echo "$TRANSCRIPT_TEXT" | grep -iE \
-      "(caused (an )?anr|memory leak|crash(ed)? (in|on) (prod|production)|never (use|do|call)|don'?t (use|do|call).+(in production|in viewmodel|on main thread))" \
-      2>/dev/null | head -3 || true)
-
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      clean=$(echo "$line" | sed 's/^[^:]*: //' | sed 's/[[:space:]]\+/ /g' | cut -c1-200)
-      [[ -z "$clean" ]] && continue
-      append_learning "Antipatterns & Known Issues" "low" "session-end" "$clean"
-    done <<< "$ANTIPATTERNS"
-
-    # ── Pattern: build/test commands discovered ───────────────────────────────
-    BUILD_CMDS=$(echo "$TRANSCRIPT_TEXT" | grep -iE \
-      "(gradlew |xcodebuild |fastlane |swift (build|test))" \
-      2>/dev/null | grep -v "^#" | head -3 || true)
-
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      clean=$(echo "$line" | sed 's/^[^:]*: //' | sed 's/[[:space:]]\+/ /g' | cut -c1-200)
-      [[ -z "$clean" ]] && continue
-      append_learning "Build & CI" "low" "session-end" "$clean"
-    done <<< "$BUILD_CMDS"
-
-  fi
-fi
-
-# ── Extract learnings from git diff (what was actually built) ─────────────────
-if command -v git &>/dev/null && git -C "$PROJECT_DIR" rev-parse --git-dir &>/dev/null; then
-
-  # Check if any files were committed this session
-  RECENT_COMMITS=$(git -C "$PROJECT_DIR" log --oneline --since="30 minutes ago" 2>/dev/null | head -5 || true)
-
-  if [[ -n "$RECENT_COMMITS" ]]; then
-    # Detect patterns from committed files
-    CHANGED_FILES=$(git -C "$PROJECT_DIR" diff --name-only HEAD~1 HEAD 2>/dev/null | head -20 || true)
-
-    # Build command detection from gradle/xcode files
-    if echo "$CHANGED_FILES" | grep -q "\.gradle"; then
-      GRADLE_CMD=$(grep -r "applicationId\|versionName\|versionCode" \
-        "$PROJECT_DIR/app/build.gradle.kts" "$PROJECT_DIR/app/build.gradle" 2>/dev/null \
-        | head -1 || true)
-      if [[ -n "$GRADLE_CMD" ]]; then
-        append_learning "Build & CI" "medium" "session-end" \
-          "Android app module: app/build.gradle.kts (or .gradle)"
-      fi
-    fi
-  fi
 fi
 
 # ── Subconscious: promote high-signal whispers into MEMORY.md ─────────────────
