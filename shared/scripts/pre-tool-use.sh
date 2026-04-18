@@ -214,6 +214,21 @@ if [[ -n "$FILE_PATH" && -n "$CONTENT" ]]; then
     echo "   Proceeding, but review the content before committing." >&2
   fi
 
+  # ── Compact rule reminder for production source files ────────────────────
+  if echo "$FILE_PATH" | grep -qvE "(Test|Spec|\.md$|generated|build/|\.json$|RULES_DIGEST)" && \
+     echo "$FILE_PATH" | grep -qE "\.(kt|swift|ts|tsx|js|jsx|py|go|java|rb|rs|cs)$"; then
+    cat <<'REMINDER'
+
+┌─ Rules reminder ────────────────────────────────────────────┐
+│ 1. No hardcoded secrets — use env injection / Keychain       │
+│ 2. No SQL string concat — parameterised queries / ORM only   │
+│ 3. No !! / force-unwrap without // Safe: <reason> comment    │
+│ 4. No tokens/PII in plain SharedPreferences / UserDefaults   │
+│ 5. No business logic in View / Activity / Fragment / VC      │
+└─────────────────────────────────────────────────────────────┘
+REMINDER
+  fi
+
   audit "Write" "ALLOW" "$FILE_PATH"
   exit 0
 fi
@@ -239,6 +254,21 @@ if [[ -n "$FILE_PATH" && -n "$NEW_STRING" ]]; then
   if has_injection "$NEW_STRING"; then
     warn_audit "Edit" "$FILE_PATH" "Prompt injection pattern in new content"
     echo "⚠  WARNING: Prompt injection pattern detected in edit to $FILE_PATH" >&2
+  fi
+
+  # ── Compact rule reminder for production source files ────────────────────
+  if echo "$FILE_PATH" | grep -qvE "(Test|Spec|\.md$|generated|build/|\.json$|RULES_DIGEST)" && \
+     echo "$FILE_PATH" | grep -qE "\.(kt|swift|ts|tsx|js|jsx|py|go|java|rb|rs|cs)$"; then
+    cat <<'REMINDER'
+
+┌─ Rules reminder ────────────────────────────────────────────┐
+│ 1. No hardcoded secrets — use env injection / Keychain       │
+│ 2. No SQL string concat — parameterised queries / ORM only   │
+│ 3. No !! / force-unwrap without // Safe: <reason> comment    │
+│ 4. No tokens/PII in plain SharedPreferences / UserDefaults   │
+│ 5. No business logic in View / Activity / Fragment / VC      │
+└─────────────────────────────────────────────────────────────┘
+REMINDER
   fi
 
   audit "Edit" "ALLOW" "$FILE_PATH"

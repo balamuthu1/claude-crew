@@ -207,71 +207,39 @@ session and whispers relevant context to every agent you spawn.
 **Context passing:** Summarize prior stage output (first 3000 chars) and inject it
 into the next agent's prompt. Do not let context grow unbounded across stages.
 
+**Rules injection:** Before passing the prompt to any working agent, prepend the
+relevant sections from `shared/rules/RULES_DIGEST.md`:
+1. Always include the SHARED section.
+2. Include the profile section matching the agent's domain (see table below).
+3. Prepend under the heading `Active rules for this session (apply without exception):`.
+
+| Agent prefix | Digest section to inject |
+|---|---|
+| `android-*`, `ios-*`, `mobile-*` | SHARED + MOBILE PROFILE |
+| `api-*`, `backend-*`, `database-*`, `devops-*` | SHARED + BACKEND PROFILE |
+| `test-*`, `automation-*`, `qa-*`, `bug-*`, `performance-tester` | SHARED + QA PROFILE |
+| `frontend-*`, `ui-engineer`, `accessibility-auditor` | SHARED + FRONTEND PROFILE |
+| `prd-*`, `user-story-*`, `product-*`, `metrics-*`, `stakeholder-*` | SHARED + PRODUCT PROFILE |
+| `git-flow-advisor`, `jira-advisor`, `scrum-master`, `learning-agent` | SHARED only |
+| `subconscious-agent` | No injection |
+
 ---
 
 ## Language Quick Reference
 
-### Kotlin (Android)
-
-- Null safety: prefer `?.let {}` and `?: return` over `!!`
-- Coroutines: use `viewModelScope` / `lifecycleScope`, never `GlobalScope`
-- State: `StateFlow` + `UiState` sealed class in ViewModel
-- Compose: stateless composables, hoisted state, `remember` + `derivedStateOf`
-- DI: Hilt (preferred), Koin acceptable
-- Build: Gradle KTS, version catalogs (`libs.versions.toml`)
-
-### Swift (iOS)
-
-- Use `guard let` / `if let` over force unwrap
-- Concurrency: Swift Concurrency (`async/await`, `Task`, `Actor`) over GCD
-- SwiftUI: `@StateObject` for owned models, `@ObservedObject` for injected
-- Combine: use `sink` with `store(in: &cancellables)` — never ignore the cancellable
-- Memory: audit for retain cycles in closures (`[weak self]`)
-- Modules: Swift Package Manager preferred over CocoaPods for new dependencies
+See `shared/rules/language-quick-ref.md` for Kotlin and Swift idiom summaries.
 
 ---
 
 ## Project Structure Conventions
 
-### Android
-
-```
-app/
-  src/
-    main/
-      java/com.example.app/
-        data/          # repositories, data sources, models
-        domain/        # use cases, domain models, interfaces
-        presentation/  # ViewModels, UI state, Compose screens
-        di/            # Hilt modules
-    test/              # Unit tests (JUnit + MockK)
-    androidTest/       # Instrumented UI tests (Espresso / Compose UI Test)
-```
-
-### iOS
-
-```
-App/
-  Sources/
-    Domain/            # Models, use cases, repository protocols
-    Data/              # Repository implementations, network, persistence
-    Presentation/      # ViewModels, SwiftUI views, UIKit controllers
-    Core/              # DI, extensions, utilities
-  Tests/               # XCTest unit tests
-  UITests/             # XCUITest UI tests
-```
+See `shared/rules/project-structure.md` for Android and iOS directory layouts.
 
 ---
 
-## Code Review Checklist (always apply)
+## Code Review Checklist
 
-- [ ] No business logic in Views/Activities/Fragments/ViewControllers
-- [ ] No hardcoded strings that should be in resources
-- [ ] No API keys or secrets committed
-- [ ] Network calls wrapped in try/catch or Result type
-- [ ] Lifecycle-aware: no leaks, no crashes on config change
-- [ ] Accessibility: content descriptions, minimum touch target 48dp/44pt
-- [ ] Tests exist for new public APIs and business logic
+See `shared/rules/code-review-checklist.md` — apply to every code review.
 
 ---
 
@@ -317,145 +285,9 @@ Hooks are shell scripts in `shared/scripts/` invoked by Claude Code at lifecycle
 
 ## Teach Mode
 
-**At the very start of executing ANY workflow, slash command, or multi-phase task:**
-
-1. Use the Read tool to check if `.claude/TEACH_MODE.md` exists and contains `status: active`.
-2. If teach mode is **active**, apply the Teach Mode Protocol below to every phase/step before executing it.
-3. If teach mode is **inactive or absent**, proceed normally — no change in behaviour.
-
-### Teach Mode Protocol
-
-Apply this wrapper around **each distinct phase or step** of any workflow:
-
-#### Before the phase executes — TEACH
-
-Display a teaching block:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎓 TEACH MODE  ·  Phase <N>: <Phase Name>
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📖 What this phase does:
-<2–3 sentences explaining the purpose of this phase in the workflow>
-
-💡 Why it matters:
-<1–2 sentences on the business or technical value>
-
-🔍 What's about to happen:
-<Concrete description of what Claude will do in this specific invocation — mention actual file names, feature names, or context from the user's request>
-```
-
-#### Quiz — 2–3 contextual questions
-
-Generate 2–3 questions **specific to this phase and the current context**. Mix types:
-- At least one conceptual question ("Why does...?", "What is the purpose of...?")
-- At least one practical question ("In this project, where would you...?", "What's wrong with...?")
-- Optionally one multiple-choice for precision
-
-Format:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 Quick Quiz — Phase <N>
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Q1: <question>
-
-Q2: <question>
-  a) ...
-  b) ...
-  c) ...
-  d) ...
-
-Q3: <question>
-
-Answer all three — take your time. Type "skip" to skip this quiz, "hint" for a clue.
-```
-
-**Wait for the user's reply before proceeding.**
-
-#### After the user answers — SCORE
-
-Evaluate each answer. Award: **1pt** correct, **0.5pt** partial, **0pt** incorrect.
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Phase <N> Results
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Q1 → ✓ Correct   / ✗ Incorrect / ◐ Partial
-     <One sentence: what was right, what was missing, correct answer if wrong>
-
-Q2 → ✓ / ✗ / ◐
-     <feedback>
-
-Q3 → ✓ / ✗ / ◐
-     <feedback>
-
-Phase score: <X> / 3   Running total: <X> / <Y>
-```
-
-If the user typed "hint": give a clue but cap that question at 0.5pt max.
-If the user typed "skip": record phase as skipped (not penalised), proceed immediately.
-
-Then **execute the phase** and proceed to the next one.
-
-#### After all phases — FINAL REPORT
-
-```
-══════════════════════════════════════════════════════
-🎓 TEACH MODE — SESSION REPORT
-   Workflow: <workflow name>   Date: <today>
-══════════════════════════════════════════════════════
-
-OVERALL SCORE: <X> / <total> (<pct>%)
-
-  ≥ 90%  🏆 Excellent — strong mastery of this workflow
-  75–89% 👍 Good — a few gaps worth revisiting
-  60–74% 📚 Fair — review weak phases before using in production
-  < 60%  🔄 Needs work — go through the weak phases again
-
-──────────────────────────────────────────────────────
-PHASE BREAKDOWN
-──────────────────────────────────────────────────────
-  <phase name> ............ <X>/3  (<pct>%)  [Strong / Review / Redo / Skipped]
-  ...
-
-──────────────────────────────────────────────────────
-TOPICS TO REVISIT
-──────────────────────────────────────────────────────
-<List only phases scored < 70%. For each:>
-  ▸ <Phase> — <one-sentence summary of the gap>
-    Tip: <specific reading or follow-up command>
-
-<If all phases ≥ 70%:>
-  🎉 No weak spots. You're ready to use this workflow confidently.
-
-──────────────────────────────────────────────────────
-NEXT STEPS
-──────────────────────────────────────────────────────
-  1. Try it for real: <suggest a concrete next command>
-  2. <Targeted tip based on lowest-scoring phase>
-  3. Run another workflow in teach mode: /teach-mode status
-
-══════════════════════════════════════════════════════
-```
-
-Then append a row to `.claude/TEACH_MODE.md`'s Session Log table:
-```
-| <timestamp> | <workflow> | all phases | <X>/<total> | <pct>% |
-```
-
-### Teach mode edge cases
-
-| Situation | Behaviour |
-|---|---|
-| User types "skip" | Skip the quiz for this phase — not penalised |
-| User types "hint" | Give a hint, cap that question at 0.5pt |
-| User types "explain more" after wrong answer | Deeper explanation, offer to re-ask for full credit |
-| User types "stop teach mode" | Immediately disable: overwrite `.claude/TEACH_MODE.md` with `status: inactive` |
-| Single-step command (no distinct phases) | Treat the whole command as one phase |
-| Sub-agent spawned by workflow | The sub-agent does NOT run teach mode — only the orchestrating conversation does |
+Check `.claude/TEACH_MODE.md` at the start of every workflow. If `status: active`,
+apply the full protocol in `shared/rules/teach-mode-protocol.md` to every phase.
+If inactive or absent, proceed normally.
 
 ---
 
