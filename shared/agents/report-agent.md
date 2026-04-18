@@ -176,19 +176,26 @@ def run(cmd):
     except:
         return ""
 
-# ── Claude-assisted commits ───────────────────────────────────────────────────
-# Insertions from commits that contain a Claude session URL
-claude_numstat = run(["git", "log", "--grep=claude.ai/code/",
-                      "--pretty=tformat:", "--numstat"])
-claude_added = claude_deleted = claude_commits = 0
-for line in claude_numstat.splitlines():
-    parts = line.split("\t")
-    if len(parts) == 3:
-        try: claude_added += int(parts[0]); claude_deleted += int(parts[1])
-        except: pass
-claude_commits = len([l for l in run(
-    ["git", "log", "--grep=claude.ai/code/", "--oneline"]
-).splitlines() if l.strip()])
+# ── Claude-assisted commits — two detection methods, unioned ─────────────────
+# Method 1: /commit-push-pr injects a claude.ai/code/ session URL in the body
+# Method 2: git-commit-msg hook appends "Claude-Session: true" when
+#            CLAUDE_PROJECT_DIR is set — catches all direct git commits too
+hashes_url     = set(run(["git", "log", "--grep=claude.ai/code/",
+                           "--pretty=%H"]).splitlines()) - {""}
+hashes_trailer = set(run(["git", "log", "--grep=Claude-Session: true",
+                           "--pretty=%H"]).splitlines()) - {""}
+claude_hashes  = hashes_url | hashes_trailer
+claude_commits = len(claude_hashes)
+
+# Sum insertions/deletions for each unique Claude commit
+claude_added = claude_deleted = 0
+for h in claude_hashes:
+    numstat = run(["git", "diff-tree", "--no-commit-id", "-r", "--numstat", h])
+    for line in numstat.splitlines():
+        parts = line.split("\t")
+        if len(parts) == 3:
+            try: claude_added += int(parts[0]); claude_deleted += int(parts[1])
+            except: pass
 
 # ── All commits ───────────────────────────────────────────────────────────────
 all_numstat = run(["git", "log", "--pretty=tformat:", "--numstat"])
@@ -230,7 +237,7 @@ print(json.dumps({
     "all_added":         all_added,
     "pct_insertions":    pct_insertions,
     "codebase_lines":    total_lines,
-    "detection_note":    "Based on commits containing claude.ai/code/ session URLs"
+    "detection_note":    f"session URL in body: {len(hashes_url)} commits · Claude-Session trailer: {len(hashes_trailer)} commits · overlap: {len(hashes_url & hashes_trailer)}"
 }))
 PYEOF
 ```
@@ -268,7 +275,8 @@ CODE CONTRIBUTION  (git history · all time)
   Claude-assisted commits:  <N> / <total>  (<pct>%)
   Lines added with Claude:  <N> / <total insertions>  (<pct>%)
   Current codebase:         <N> lines  (<src file types>)
-  Detection:                commits containing claude.ai/code/ session URL
+  Detection:                <detection_note>
+                            (session URL via /commit-push-pr OR Claude-Session trailer via git hook)
 
 SECURITY IMPACT
 ────────────────────────────────────────────────────────────

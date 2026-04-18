@@ -343,6 +343,31 @@ if ! $DRY_RUN && [[ -d "$TARGET_CLAUDE/hooks" ]]; then
   success "Hooks marked executable"
 fi
 
+# Git commit-msg hook — tags every commit made inside a Claude Code session
+# with "Claude-Session: true" so /report can count Claude-assisted commits
+# even when /commit-push-pr is not used.
+if ! $GLOBAL && git -C "$PROJECT_DIR" rev-parse --git-dir &>/dev/null 2>&1; then
+  GIT_HOOKS_DIR="$(git -C "$PROJECT_DIR" rev-parse --git-dir)/hooks"
+  COMMIT_MSG_HOOK="$GIT_HOOKS_DIR/commit-msg"
+  if $DRY_RUN; then
+    info "[dry-run] Would install git commit-msg hook → $COMMIT_MSG_HOOK"
+  elif [[ ! -f "$COMMIT_MSG_HOOK" ]]; then
+    mkdir -p "$GIT_HOOKS_DIR"
+    cp "$SRC_BASE/shared/scripts/git-commit-msg.sh" "$COMMIT_MSG_HOOK"
+    chmod +x "$COMMIT_MSG_HOOK"
+    success "Installed git commit-msg hook (auto-tags Claude-assisted commits)"
+  elif ! grep -q "CLAUDE_PROJECT_DIR" "$COMMIT_MSG_HOOK" 2>/dev/null; then
+    # Existing hook present — append our logic safely
+    printf '\n# Claude Crew: tag commits made inside Claude Code sessions\n' >> "$COMMIT_MSG_HOOK"
+    printf 'if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then\n' >> "$COMMIT_MSG_HOOK"
+    printf '  grep -qE "^Claude-Session:" "$1" 2>/dev/null || printf "\\nClaude-Session: true\\n" >> "$1"\n' >> "$COMMIT_MSG_HOOK"
+    printf 'fi\n' >> "$COMMIT_MSG_HOOK"
+    success "Appended Claude session tagging to existing commit-msg hook"
+  else
+    info "Git commit-msg hook already contains Claude tagging — skipping"
+  fi
+fi
+
 # settings.json — for global install, patch hook paths to use $HOME/.claude/hooks/
 # (project install uses $CLAUDE_PROJECT_DIR/.claude/hooks/ which is correct)
 if $GLOBAL && ! $DRY_RUN; then
@@ -477,7 +502,8 @@ echo "    /sprint-health                           Sprint burndown and risk"
 echo "    /teach-mode [on|off|status]              Interactive teach mode"
 echo "    /learn \"<fact>\"                          Teach Claude a project rule"
 echo "    /memory-review                           Curate project memory"
-echo "    /evolve                                  Promote high-confidence memory to skills"
+echo "    /evolve                                  Promote high-confidence memory to skills
+    /report [N]                              Adoption & KPI report (last N days)"
 echo ""
 
 # Profile-specific command hints
