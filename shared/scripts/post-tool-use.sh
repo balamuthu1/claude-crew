@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 # ============================================================
-# Claude Crew — PostToolUse Security Hook  (v2)
+# Claude Crew — PostToolUse Security Hook  (v3)
 #
-# Runs after Write and Edit tool calls.
-# Scans written files for secrets, injection patterns, and
-# mobile-specific security issues. Reminds about lint/tests.
+# Runs after Write, Edit, and Bash tool calls.
+# - Bash: logs dev commands (build/test) to subconscious event log
+# - Write/Edit: scans for secrets, injection, mobile security issues
+#
+# Self-observation guard: files inside .claude/ are skipped to prevent
+# internal agents (subconscious-agent, learning-agent, skill-extractor)
+# from polluting the session observation log with their own tool calls.
 # ============================================================
 
 set -uo pipefail
 
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+
 # ── Audit log ────────────────────────────────────────────────────────────────
-AUDIT_LOG="${CLAUDE_PROJECT_DIR:-$(pwd)}/.claude/audit.log"
+AUDIT_LOG="$PROJECT_DIR/.claude/audit.log"
 mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
 
 audit_warn() {
@@ -20,8 +26,32 @@ audit_warn() {
     >> "$AUDIT_LOG" 2>/dev/null || true
 }
 
+# ── Subconscious event log paths ─────────────────────────────────────────────
+SC_DIR="$PROJECT_DIR/.claude/subconscious"
+SC_LOG="$SC_DIR/session.jsonl"
+SC_COUNTER="$SC_DIR/event_count"
+
+_sc_log_event() {
+  local json="$1"
+  mkdir -p "$SC_DIR" 2>/dev/null || true
+  echo "$json" >> "$SC_LOG" 2>/dev/null || true
+  local count=0
+  [[ -f "$SC_COUNTER" ]] && count=$(cat "$SC_COUNTER" 2>/dev/null || echo "0")
+  echo $((count + 1)) > "$SC_COUNTER" 2>/dev/null || true
+}
+
 # ── Parse input ──────────────────────────────────────────────────────────────
 INPUT=$(cat)
+
+TOOL_NAME=$(echo "$INPUT" | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    print(d.get('tool_name', d.get('tool', '')))
+except:
+    print('')
+" 2>/dev/null || echo "")
+
 FILE_PATH=$(echo "$INPUT" | python3 -c "
 import json, sys
 try:
@@ -30,6 +60,36 @@ try:
 except:
     print('')
 " 2>/dev/null || echo "")
+
+COMMAND=$(echo "$INPUT" | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    print(d.get('command', '') or d.get('tool_input', {}).get('command', '') or '')
+except:
+    print('')
+" 2>/dev/null || echo "")
+
+# ── Bash event handler: log dev commands to subconscious ─────────────────────
+# Only log meaningful build/test invocations — naturally excludes internal
+# agent utility calls (date, cat, wc, grep, etc.)
+if [[ -n "$COMMAND" && "$TOOL_NAME" == "Bash" ]]; then
+  if echo "$COMMAND" | grep -qE \
+    "(gradlew|xcodebuild|swift (build|test|run)|npm (run|test|build)|yarn (run|test|build)|pnpm (run|test|build)|pytest|jest|rspec|go (build|test)|mvn|make (all|test|build)|cargo (build|test))"; then
+    TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
+    CMD_SHORT=$(echo "$COMMAND" | head -c 120 | tr '"\\' "' ")
+    _sc_log_event "{\"ts\":\"$TS\",\"type\":\"cmd\",\"cmd\":\"$CMD_SHORT\"}"
+  fi
+  exit 0
+fi
+
+# ── Self-observation guard ────────────────────────────────────────────────────
+# Skip files inside .claude/ — these are written by internal agents
+# (subconscious-agent, learning-agent, skill-extractor) and must not
+# pollute the session log or trigger security scans on internal state.
+if echo "$FILE_PATH" | grep -qE "/\.claude/|/\.claude$"; then
+  exit 0
+fi
 
 if [[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]]; then
   exit 0
@@ -189,28 +249,14 @@ if [[ $FOUND_ISSUES -gt 0 ]]; then
   echo "   Review .claude/rules/security-guardrails-detail.md for remediation guidance." >&2
 fi
 
-# ── Subconscious — event logging + hot-file micro-whisper ────────────────────
-# stdout is injected into Claude's context — we use it for real-time signals.
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-SC_DIR="$PROJECT_DIR/.claude/subconscious"
-mkdir -p "$SC_DIR" 2>/dev/null || true
-
-SC_LOG="$SC_DIR/session.jsonl"
-SC_COUNTER="$SC_DIR/event_count"
-
-# Log this file-write event
+# ── Subconscious — file-write event logging + hot-file micro-whisper ─────────
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
 EXT="${FILE_PATH##*.}"
-echo "{\"ts\":\"$TS\",\"file\":\"$FILE_PATH\",\"ext\":\".$EXT\"}" >> "$SC_LOG" 2>/dev/null || true
-
-# Increment event counter
-COUNT=0
-[[ -f "$SC_COUNTER" ]] && COUNT=$(cat "$SC_COUNTER" 2>/dev/null || echo "0")
-COUNT=$((COUNT + 1))
-echo "$COUNT" > "$SC_COUNTER" 2>/dev/null || true
+_sc_log_event "{\"ts\":\"$TS\",\"type\":\"file\",\"file\":\"$FILE_PATH\",\"ext\":\".$EXT\"}"
 
 # Micro-whisper: same file edited for the 3rd time — genuinely useful signal
-if [[ -n "$FILE_PATH" && -f "$SC_LOG" ]]; then
+# stdout is injected into Claude's context
+if [[ -f "$SC_LOG" ]]; then
   FILE_EDIT_COUNT=$(grep -cF "\"file\":\"$FILE_PATH\"" "$SC_LOG" 2>/dev/null || echo "0")
   if [[ "$FILE_EDIT_COUNT" -eq 3 ]]; then
     BASENAME=$(basename "$FILE_PATH")

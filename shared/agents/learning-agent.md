@@ -109,11 +109,43 @@ Each entry in `.claude/memory/MEMORY.md` follows this format:
 
 ---
 
+## Confidence evolution (automatic)
+
+Confidence levels rise automatically as knowledge is confirmed across sessions:
+
+| Occurrence | Confidence |
+|---|---|
+| First capture | `low` — auto-extracted, needs human review |
+| Second match | `medium` — promoted automatically by session-end hook |
+| Third+ match | `high` — treated as hard project rule |
+
+**When writing a new entry:** always check for an existing similar entry first.
+- If found at `confidence:low` → update to `confidence:medium` instead of adding a duplicate
+- If found at `confidence:medium` → update to `confidence:high`
+- If found at `confidence:high` → skip (already fully validated)
+
+Explicit `/learn` calls always write `confidence:high` directly, bypassing the ladder.
+
+---
+
+## Skill extraction (triggered by /evolve)
+
+When 3 or more `confidence:high` entries exist in a section, they are eligible to become
+a reusable skill file at `.claude/skills/<domain>-learned/SKILL.md`. The `skill-extractor`
+agent handles this when the user runs `/evolve`.
+
+As learning-agent, you should hint the user when this threshold is crossed:
+```
+💡 3+ high-confidence entries in [Section] — run /evolve to promote them into a reusable skill.
+```
+
+---
+
 ## Deduplication rules
 
 Before writing any entry:
 1. Search `.claude/memory/MEMORY.md` for similar content
-2. If an identical or near-identical entry exists, skip
+2. If an identical or near-identical entry exists, promote its confidence (see above)
 3. If a contradicting entry exists, replace it (keeping the newer one) and note the replacement:
    ```
    [superseded by entry above on {date}]

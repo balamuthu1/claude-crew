@@ -477,6 +477,7 @@ echo "    /sprint-health                           Sprint burndown and risk"
 echo "    /teach-mode [on|off|status]              Interactive teach mode"
 echo "    /learn \"<fact>\"                          Teach Claude a project rule"
 echo "    /memory-review                           Curate project memory"
+echo "    /evolve                                  Promote high-confidence memory to skills"
 echo ""
 
 # Profile-specific command hints

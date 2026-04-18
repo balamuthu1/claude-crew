@@ -55,22 +55,46 @@ append_learning() {
   local source="$3"
   local content="$4"
 
-  # Deduplicate: skip if a very similar entry already exists
+  # Auto-promotion: if this content already exists, promote its confidence level
+  # rather than adding a duplicate. low→medium on 2nd occurrence, medium→high on 3rd.
   if grep -qF "$content" "$MEMORY_FILE" 2>/dev/null; then
+    python3 - "$MEMORY_FILE" "$content" "$TODAY" "$source" <<'PYEOF'
+import sys, re
+path, content, date, src = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+with open(path) as f:
+    lines = f.readlines()
+
+promoted = False
+for i, line in enumerate(lines):
+    if content[:60] in line:
+        # Look back up to 3 lines for the confidence tag
+        for j in range(max(0, i - 3), i + 1):
+            if 'confidence:low' in lines[j]:
+                lines[j] = lines[j].replace('confidence:low', 'confidence:medium')
+                promoted = True
+                break
+            elif 'confidence:medium' in lines[j]:
+                lines[j] = lines[j].replace('confidence:medium', 'confidence:high')
+                promoted = True
+                break
+        if promoted:
+            break
+
+with open(path, 'w') as f:
+    f.writelines(lines)
+PYEOF
     return
   fi
 
-  # Find the section and append after it
+  # New entry — find the section and append after it
   local marker="## $section"
   if grep -q "^$marker" "$MEMORY_FILE" 2>/dev/null; then
-    # Insert after the section header using python for reliability
     python3 - "$MEMORY_FILE" "$marker" "$TODAY" "$confidence" "$source" "$content" <<'PYEOF'
-import sys, re
+import sys
 path, marker, date, conf, src, content = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
 with open(path) as f:
     text = f.read()
 entry = f"\n[{date} | confidence:{conf} | source:{src}]\n  {content}\n"
-# Insert after the section header line
 text = text.replace(marker + "\n", marker + "\n" + entry, 1)
 with open(path, "w") as f:
     f.write(text)
