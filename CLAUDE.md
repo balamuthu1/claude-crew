@@ -1,4 +1,89 @@
-# Claude Crew — Multi-Team Agent Harness
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository Overview
+
+Claude Crew is a Claude Code plugin/harness that installs specialist agents, slash commands, workflow skills, security guardrails, and coding rules into engineering projects. It supports five team profiles: `mobile`, `backend`, `frontend`, `qa`, and `product`. All profiles share a common layer (shared agents, memory, teach mode, KPI tracking, Jira/Scrum).
+
+## Development Commands
+
+There is no build step or compiled output — this is a documentation-driven plugin system. Verification is done via dry-run preview and manual install into a test project.
+
+```bash
+# Preview what would be installed without making changes
+bash install.sh --dry-run
+
+# Install to current project (default: mobile)
+bash install.sh
+bash install.sh --profile backend,qa
+bash install.sh --profile all
+
+# List all profiles with descriptions
+bash install.sh --list-profiles
+
+# Upgrade an existing installation in-place
+bash install.sh --upgrade
+
+# Global install (~/.claude, available in every project)
+bash install.sh --profile mobile --global
+
+# Uninstall
+bash uninstall.sh
+bash uninstall.sh --global
+```
+
+## Repository Architecture
+
+```
+claude-crew/
+├── shared/                  ← Installed for ALL profiles
+│   ├── agents/              ← 7 cross-functional agents (git-flow-advisor, jira-advisor,
+│   │                           scrum-master, learning-agent, subconscious-agent,
+│   │                           skill-extractor, report-agent)
+│   ├── commands/            ← 14 slash commands (commit-push-pr, learn, memory-review,
+│   │                           evolve, teach-mode, report, profile, standup, retro,
+│   │                           sprint-*, detect-*)
+│   ├── rules/               ← security-guardrails-detail.md, agent-dispatch.md,
+│   │                           prompt-clarity.md, RULES_DIGEST.md, plus path-scoped
+│   │                           rules (mobile/backend/frontend/qa/product)
+│   ├── skills/              ← git-flow/, jira-flow/, scrum/
+│   └── scripts/             ← 6 lifecycle hook scripts copied to .claude/hooks/:
+│                               session-start.sh, session-end.sh, pre-tool-use.sh,
+│                               post-tool-use.sh, user-prompt-submit.sh, git-commit-msg.sh
+│
+├── profiles/                ← Each is self-contained
+│   ├── mobile/              ← profile.json + agents/ + commands/ + skills/ + rules/
+│   ├── backend/
+│   ├── frontend/
+│   ├── qa/
+│   └── product/
+│
+├── install.sh               ← Main installer (bash, set -euo pipefail)
+├── uninstall.sh
+├── CLAUDE.md                ← Kept <200 lines using @imports for detail
+├── settings.json            ← Hook wiring + permissions allow/deny lists
+└── .claude-plugin/
+    ├── plugin.json          ← Current version (2.0.5), author, marketplace metadata
+    └── marketplace.json     ← Plugin registry listing
+```
+
+### Key Structural Conventions
+
+- **CLAUDE.md stays under 200 lines** — use `@.claude/rules/filename.md` imports for lengthy detail.
+- **Each profile** must have `profile.json` declaring its agents, commands, skills, rules, and permissions.
+- **Path-scoped rules** in `.claude/rules/` auto-load only for matching file types (e.g., `mobile-rules.md` for `.kt`/`.swift`, `backend-rules.md` for `.py`/`.go`/`.java`/`.sql`).
+- **Memory** accumulates at `.claude/memory/MEMORY.md` (committed to git). Three confidence levels: `high` (hard constraint from explicit `/learn`), `medium` (reviewer-observed pattern), `low` (auto-captured, needs validation).
+- **KPI events** written per-developer to `.claude/kpi/events-<username>.jsonl` (JSONL, committed for team `/report`).
+- **Hook scripts** live in `shared/scripts/` in this repo; `install.sh` copies them to `.claude/hooks/` in target projects.
+
+## CI/CD
+
+`.github/workflows/version-bump.yml` auto-bumps the patch version in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` on every push to `main`, commits the change, and tags the release (e.g., `v2.0.6`). No manual release step is needed.
+
+---
+
+## Runtime Orchestration (when Claude Crew is installed in a project)
 
 You are operating inside a Claude Code agent harness supporting multiple engineering disciplines.
 Active team profiles are declared in `.claude/ACTIVE_PROFILES`. Read it before every dispatch.
