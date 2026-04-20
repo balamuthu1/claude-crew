@@ -28,7 +28,7 @@ Before passing the prompt to any working agent, prepend the relevant sections fr
 |---|---|
 | `android-*`, `ios-*`, `mobile-*` | SHARED + MOBILE PROFILE |
 | `api-*`, `backend-*`, `database-*`, `devops-*` | SHARED + BACKEND PROFILE |
-| `test-*`, `automation-*`, `qa-*`, `bug-*`, `performance-tester` | SHARED + QA PROFILE |
+| `test-*`, `automation-*`, `qa-*`, `bug-*`, `performance-tester`, `freshservice-*`, `support-intake-*` | SHARED + QA PROFILE |
 | `frontend-*`, `ui-engineer`, `accessibility-auditor` | SHARED + FRONTEND PROFILE |
 | `prd-*`, `user-story-*`, `product-*`, `metrics-*`, `stakeholder-*` | SHARED + PRODUCT PROFILE |
 | `git-flow-advisor`, `jira-advisor`, `scrum-master`, `learning-agent` | SHARED only |
@@ -79,6 +79,8 @@ Before passing the prompt to any working agent, prepend the relevant sections fr
 | load test / performance test / SLOs | `performance-tester` | target + expected load |
 | triage bug / bug report / root cause | `bug-triager` | bug description + context |
 | release sign-off / QA metrics / quality report | `qa-lead` | release version or feature |
+| snap triage / freshservice / daily triage / incident tickets / morning triage | `freshservice-analyst` | freshservice.config.md context |
+| support ticket / intake / support jira / escalated ticket from support | `support-intake-specialist` | Jira ticket ID + workflow.config.md |
 
 ## Product Profile Agents
 
