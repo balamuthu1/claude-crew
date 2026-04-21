@@ -464,18 +464,17 @@ for profile in "${SELECTED_PROFILES[@]}"; do
       if [[ -n "$CONFIG_TEMPLATE" && ! -f "$PROJECT_DIR/$CONFIG_TEMPLATE" && -f "$SRC_BASE/$CONFIG_TEMPLATE" ]]; then
         copy_file "$SRC_BASE/$CONFIG_TEMPLATE" "$PROJECT_DIR/$CONFIG_TEMPLATE" "$CONFIG_TEMPLATE template"
       fi
-      # Additional config templates declared in profile.json
-      mapfile -t EXTRA_TEMPLATES < <(python3 -c "
+      # Additional config templates declared in profile.json (bash 3.2 compatible)
+      while IFS= read -r extra_cfg; do
+        if [[ -n "$extra_cfg" && ! -f "$PROJECT_DIR/$extra_cfg" && -f "$SRC_BASE/$extra_cfg" ]]; then
+          copy_file "$SRC_BASE/$extra_cfg" "$PROJECT_DIR/$extra_cfg" "$extra_cfg template"
+        fi
+      done < <(python3 -c "
 import json, sys
 d = json.load(open(sys.argv[1]))
 for t in d.get('additionalConfigTemplates', []):
     print(t)
 " "$PROFILE_JSON" 2>/dev/null || true)
-      for extra_cfg in "${EXTRA_TEMPLATES[@]}"; do
-        if [[ -n "$extra_cfg" && ! -f "$PROJECT_DIR/$extra_cfg" && -f "$SRC_BASE/$extra_cfg" ]]; then
-          copy_file "$SRC_BASE/$extra_cfg" "$PROJECT_DIR/$extra_cfg" "$extra_cfg template"
-        fi
-      done
     fi
   fi
 
