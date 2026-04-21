@@ -1,6 +1,6 @@
 {
   "name": "claude-crew",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "Multi-team agent harness for engineering teams. Install profiles for mobile, backend, QA, product, or frontend \u2014 each with specialist agents, SDLC workflows, code review, security guardrails, and a shared memory system. Product profile includes jira-integration skill for direct JIRA ticket creation via jira-cli.",
   "author": {
     "name": "balamuthu1",
