@@ -456,7 +456,7 @@ for profile in "${SELECTED_PROFILES[@]}"; do
   # Merge profile permissions into settings.json
   merge_profile_permissions "$SRC_PROFILE/profile.json" "$TARGET_CLAUDE/settings.json"
 
-  # Profile-specific config template
+  # Profile-specific config templates (primary + additional)
   if ! $GLOBAL; then
     PROFILE_JSON="$SRC_PROFILE/profile.json"
     if [[ -f "$PROFILE_JSON" ]]; then
@@ -464,6 +464,18 @@ for profile in "${SELECTED_PROFILES[@]}"; do
       if [[ -n "$CONFIG_TEMPLATE" && ! -f "$PROJECT_DIR/$CONFIG_TEMPLATE" && -f "$SRC_BASE/$CONFIG_TEMPLATE" ]]; then
         copy_file "$SRC_BASE/$CONFIG_TEMPLATE" "$PROJECT_DIR/$CONFIG_TEMPLATE" "$CONFIG_TEMPLATE template"
       fi
+      # Additional config templates declared in profile.json
+      mapfile -t EXTRA_TEMPLATES < <(python3 -c "
+import json, sys
+d = json.load(open(sys.argv[1]))
+for t in d.get('additionalConfigTemplates', []):
+    print(t)
+" "$PROFILE_JSON" 2>/dev/null || true)
+      for extra_cfg in "${EXTRA_TEMPLATES[@]}"; do
+        if [[ -n "$extra_cfg" && ! -f "$PROJECT_DIR/$extra_cfg" && -f "$SRC_BASE/$extra_cfg" ]]; then
+          copy_file "$SRC_BASE/$extra_cfg" "$PROJECT_DIR/$extra_cfg" "$extra_cfg template"
+        fi
+      done
     fi
   fi
 
@@ -548,11 +560,15 @@ for profile in "${SELECTED_PROFILES[@]}"; do
       echo "" ;;
     qa)
       echo -e "  ${BOLD}QA commands:${RESET}"
-      echo "    /test-plan <feature>   Risk-based test plan"
-      echo "    /bug-report            Triage and structured bug report"
-      echo "    /regression-suite      Automated regression tests"
-      echo "    /performance-test      Load test script + SLOs"
-      echo "    /qa-review             Release sign-off checklist"
+      echo "    /test-plan <feature>          Risk-based test plan"
+      echo "    /bug-report                   Triage and structured bug report"
+      echo "    /regression-suite             Automated regression tests"
+      echo "    /performance-test             Load test script + SLOs"
+      echo "    /qa-review                    Release sign-off checklist"
+      echo "    /snap-triage                  Daily Freshservice incident triage"
+      echo "    /support-intake <JIRA-ID>     Full QA intake for a support ticket"
+      echo ""
+      echo "  Fill in freshservice.config.md before running /snap-triage."
       echo "" ;;
     product)
       echo -e "  ${BOLD}Product commands:${RESET}"

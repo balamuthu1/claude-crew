@@ -32,6 +32,9 @@
     "qa-security-guardrails.md"
   ],
   "configTemplate": "qa.config.md",
+  "additionalConfigTemplates": [
+    "freshservice.config.md"
+  ],
   "detectCommand": null,
   "permissions": {
     "allow": [
