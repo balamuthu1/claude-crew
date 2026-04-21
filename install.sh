@@ -488,7 +488,10 @@ if ! $DRY_RUN; then
   # INSTALLED_PROFILES: merge with existing (for upgrade support)
   INSTALLED_FILE="$TARGET_CLAUDE/INSTALLED_PROFILES"
   if [[ -f "$INSTALLED_FILE" ]]; then
-    mapfile -t existing_installed < "$INSTALLED_FILE"
+    existing_installed=()
+    while IFS= read -r line; do
+      [[ -n "$line" ]] && existing_installed+=("$line")
+    done < "$INSTALLED_FILE"
     combined=("${existing_installed[@]}" "${SELECTED_PROFILES[@]}")
     printf '%s\n' "${combined[@]}" | sort -u > "$INSTALLED_FILE"
   else
