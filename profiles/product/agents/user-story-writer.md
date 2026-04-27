@@ -2,6 +2,7 @@
 name: user-story-writer
 description: User story writer. Use for breaking epics into stories, writing acceptance criteria, story point estimation guidance, and sprint backlog refinement. Creates JIRA tickets directly using the jira-integration skill when ticket_system is jira.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: sonnet
 skills: jira-integration
 ---
 
