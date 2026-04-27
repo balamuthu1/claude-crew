@@ -2,6 +2,7 @@
 name: metrics-analyst
 description: Product metrics analyst. Use for defining KPIs, writing analytics event schemas, interpreting funnel data, A/B test design, and product health dashboards. Creates instrumentation tickets in JIRA via the jira-integration skill when ticket_system is jira.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: sonnet
 skills: jira-integration
 ---
 

@@ -86,6 +86,11 @@ PYEOF
     return
   fi
 
+  # Guard: reject raw JSON or metadata — must be a human-readable sentence
+  if echo "$content" | grep -qE '^\{|parentUuid|isSidechain|tool_use_id|promptId'; then
+    return
+  fi
+
   # New entry — find the section and append after it
   local marker="## $section"
   if grep -q "^$marker" "$MEMORY_FILE" 2>/dev/null; then

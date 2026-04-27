@@ -2,6 +2,7 @@
 name: prd-author
 description: Product Requirements Document author. Use for writing PRDs, feature specifications, and technical requirement documents. Creates the JIRA epic and links child stories via the jira-integration skill when ticket_system is jira.
 tools: Read, Write, Edit, Glob, Grep, Bash
+model: opus
 skills: jira-integration
 ---
 
